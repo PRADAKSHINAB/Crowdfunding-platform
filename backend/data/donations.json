@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "campaignId": 6,
+    "amount": 25,
+    "donorName": "Ragav",
+    "donorEmail": "r@gmail.com",
+    "createdAt": "2025-08-20T16:38:36.561Z",
+    "status": "completed"
+  },
+  {
+    "id": 2,
+    "campaignId": 6,
+    "amount": 133,
+    "donorName": "ME",
+    "donorEmail": "me@gmail.com",
+    "createdAt": "2025-08-20T17:11:48.604Z",
+    "status": "completed"
+  }
+]

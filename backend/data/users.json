@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "firstName": "Ragavi",
+    "lastName": "R",
+    "email": "ragavir.23cse@kongu.edu",
+    "phone": "8248032506",
+    "password": "RagaviR03@",
+    "createdAt": "2025-08-20T15:44:29.244Z"
+  },
+  {
+    "id": 2,
+    "firstName": "PRAD",
+    "lastName": "B",
+    "email": "prad@gmail.com",
+    "phone": "987654322",
+    "password": "Prad@123",
+    "createdAt": "2025-08-20T15:58:55.755Z"
+  },
+  {
+    "id": 3,
+    "firstName": "23CSR159",
+    "lastName": "PRADAKSHINA B",
+    "email": "pradakshinab.23cse@kongu.edu",
+    "phone": "07539997480",
+    "password": "MIRU@2005",
+    "createdAt": "2025-08-20T17:01:02.186Z"
+  }
+]
