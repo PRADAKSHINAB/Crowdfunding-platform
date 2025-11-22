@@ -1,0 +1,754 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenFund - Crowdfunding Platform</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="api.js"></script>
+    <script src="script.js"></script>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-leaf"></i>
+                <span>GreenFund</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="campaigns.html">Campaigns</a></li>
+                <li><a href="start-campaign.html">Start Campaign</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="login.html">Login</a></li>
+                <li><a href="admin-login.html">Admin</a></li>
+                <li class="profile-dropdown">
+                    <div class="profile-logo" onclick="toggleProfileDropdown()">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Profile</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="profile-menu" id="profileMenu">
+                        <a href="my-account.html"><i class="fas fa-user"></i> My Account</a>
+                        <a href="kyc-verification.html"><i class="fas fa-shield-alt"></i> Aadhaar KYC</a>
+                        <a href="my-account.html#campaigns"><i class="fas fa-leaf"></i> My Campaigns</a>
+                        <a href="my-account.html#donations"><i class="fas fa-heart"></i> My Donations</a>
+                        <a href="my-account.html#settings"><i class="fas fa-cog"></i> Settings</a>
+                        <a href="#logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1>Empower Dreams with <span class="highlight">Green</span> Funding</h1>
+                <p>Join thousands of creators and innovators bringing their ideas to life through community-powered crowdfunding.</p>
+                <div class="hero-buttons">
+                    <a href="start-campaign.html" class="btn-primary">Start a Campaign</a>
+                    <a href="campaigns.html" class="btn-secondary">Browse Campaigns</a>
+                </div>
+            </div>
+            <div class="hero-stats" id="hero-stats">
+                <div class="stat">
+                    <h3 id="total-raised">&#x20B9;0</h3>
+                    <p>Raised</p>
+                </div>
+                <div class="stat">
+                    <h3 id="total-campaigns">0</h3>
+                    <p>Campaigns</p>
+                </div>
+                <div class="stat">
+                    <h3 id="total-backers">0</h3>
+                    <p>Backers</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose GreenFund -->
+    <section class="why-choose">
+        <div class="container">
+            <h2>Why Choose GreenFund?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <h3>100% Green Focus</h3>
+                    <p>Every project on our platform is dedicated to environmental sustainability and positive ecological impact.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Secure & Transparent</h3>
+                    <p>Your donations are protected with bank-level security and complete transparency in fund allocation.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <h3>Global Impact</h3>
+                    <p>Join a worldwide community of environmental advocates making real change across the planet.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Proven Results</h3>
+                    <p>Track the real impact of your contributions with detailed progress reports and success metrics.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Success Stories -->
+    <section class="success-stories">
+        <div class="container">
+            <h2>Success Stories</h2>
+            <div class="stories-grid">
+                <div class="story-card">
+                    <img src="images/success-story.png" alt="Community Garden Success">
+                    <div class="story-content">
+                        <h3>Community Garden Project</h3>
+                        <p class="story-stats">₹2,07,500 raised • 450+ backers • 100% funded</p>
+                        <p class="story-description">A local community transformed an abandoned lot into a thriving urban garden, providing fresh produce and education for over 200 families.</p>
+                        <div class="story-impact">
+                            <span><i class="fas fa-seedling"></i> 500+ plants grown</span>
+                            <span><i class="fas fa-users"></i> 200+ families served</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="story-card">
+                    <img src="images/success-story.png" alt="Solar Power Success">
+                    <div class="story-content">
+                        <h3>Solar Power for Schools</h3>
+                        <p class="story-stats">₹1,49,31,000 raised • 1,200+ backers • 120% funded</p>
+                        <p class="story-description">Installed solar panels in 15 rural schools, providing clean energy and reducing carbon emissions by 45 tons annually.</p>
+                        <div class="story-impact">
+                            <span><i class="fas fa-solar-panel"></i> 15 schools powered</span>
+                            <span><i class="fas fa-leaf"></i> 45 tons CO2 saved</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="story-card">
+                    <img src="images/success-story.png" alt="Water Conservation Success">
+                    <div class="story-content">
+                        <h3>Clean Water Initiative</h3>
+                        <p class="story-stats">₹6,22,500 raised • 800+ backers • 150% funded</p>
+                        <p class="story-description">Built water purification systems in 10 villages, providing clean drinking water to over 5,000 people.</p>
+                        <div class="story-impact">
+                            <span><i class="fas fa-tint"></i> 5,000+ people served</span>
+                            <span><i class="fas fa-home"></i> 10 villages impacted</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Impact Statistics -->
+    <section class="impact-stats">
+        <div class="container">
+            <h2>Our Global Impact</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">₹2.5M+</div>
+                    <div class="stat-label">Total Funds Raised</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">1,200+</div>
+                    <div class="stat-label">Projects Funded</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">50K+</div>
+                    <div class="stat-label">Active Backers</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">85%</div>
+                    <div class="stat-label">Success Rate</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Make a Difference?</h2>
+                <p>Join thousands of environmental advocates and start funding the future today.</p>
+                <div class="cta-buttons">
+                    <a href="start-campaign.html" class="btn-primary">Start Your Campaign</a>
+                    <a href="campaigns.html" class="btn-secondary">Explore Projects</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Campaigns -->
+    <section id="campaigns" class="campaigns">
+        <div class="container">
+            <h2>Featured Campaigns</h2>
+            <div class="campaigns-grid" id="featuredCampaignsGrid">
+                <!-- Campaigns will be dynamically loaded -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Campaign Modal -->
+    <div id="campaignModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <img id="modalImage" src="" alt="">
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <h2 id="modalTitle" class="modal-title"></h2>
+                <p id="modalDescription" class="modal-description"></p>
+                <div class="modal-details">
+                    <div class="detail-item">
+                        <h4>Goal</h4>
+                        <p id="modalGoal"></p>
+                    </div>
+                    <div class="detail-item">
+                        <h4>Raised</h4>
+                        <p id="modalRaised"></p>
+                    </div>
+                    <div class="detail-item">
+                        <h4>Backers</h4>
+                        <p id="modalBackers"></p>
+                    </div>
+                    <div class="detail-item">
+                        <h4>Days Left</h4>
+                        <p id="modalDays"></p>
+                    </div>
+                </div>
+                <div class="campaign-progress">
+                    <div class="progress-bar">
+                        <div id="modalProgress" class="progress-fill"></div>
+                    </div>
+                    <div class="progress-stats">
+                        <span id="modalProgressText"></span>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-primary donate-btn" onclick="openDonationModal(currentCampaignId)">
+                        <i class="fas fa-heart"></i> Donate Now
+                    </button>
+                    <button class="btn-secondary">
+                        <i class="fas fa-share"></i> Share Campaign
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Donation Modal -->
+    <div id="donationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" style="height: auto; padding: 20px;">
+                <h3>Support: <span id="donationCampaignTitle"></span></h3>
+                <button class="modal-close" onclick="closeDonationModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="donationForm">
+                    <div style="margin-bottom: 25px;">
+                        <label style="display: block; margin-bottom: 10px; font-weight: 600;">Select Amount</label>
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px;">
+                            <button type="button" class="amount-btn" onclick="selectAmount(2000)">₹2000</button>
+                            <button type="button" class="amount-btn" onclick="selectAmount(5000)">₹5000</button>
+                            <button type="button" class="amount-btn" onclick="selectAmount(10000)">₹10000</button>
+                            <button type="button" class="amount-btn" onclick="selectAmount(25000)">₹25000</button>
+                        </div>
+                        <input type="number" id="customAmount" placeholder="Enter custom amount" min="1" style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-light); color: var(--text-white);">
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 10px; font-weight: 600;">Your Information</label>
+                        <input type="text" id="donorName" placeholder="Full Name" required style="width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-light); color: var(--text-white);">
+                        <input type="email" id="donorEmail" placeholder="Email Address" required style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-light); color: var(--text-white);">
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 10px; font-weight: 600;">Payment Information</label>
+                        <input type="text" placeholder="Card Number" required style="width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-light); color: var(--text-white);">
+                        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px;">
+                            <input type="text" placeholder="MM/YY" required style="padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-light); color: var(--text-white);">
+                            <input type="text" placeholder="CVV" required style="padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-light); color: var(--text-white);">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary" style="width: 100%; padding: 15px; font-size: 16px;">
+                        Complete Donation
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works -->
+    <section class="how-it-works">
+        <div class="container">
+            <h2>How It Works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <h3>Share Your Idea</h3>
+                    <p>Create your campaign and tell your story to the world.</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                    <h3>Spread the Word</h3>
+                    <p>Share your campaign with friends, family, and social networks.</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <h3>Launch & Grow</h3>
+                    <p>Watch your project come to life with community support.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>GreenFund</h3>
+                    <p>Empowering sustainable innovation through community crowdfunding.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Explore</h4>
+                    <ul>
+                        <li><a href="#campaigns">Campaigns</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="#">Success Stories</a></li>
+                        <li><a href="#">Categories</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Guidelines</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Newsletter</h4>
+                    <p>Stay updated with the latest campaigns and news.</p>
+                    <form class="newsletter">
+                        <input type="email" placeholder="Enter your email">
+                        <button type="submit">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 GreenFund. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const API_BASE = 'http://localhost:4000/api';
+        let featuredCampaigns = [];
+
+        // Fetch and update statistics from API
+        async function updateStatistics() {
+            try {
+                const res = await fetch(`${API_BASE}/statistics`);
+                const stats = await res.json();
+
+                // Update hero section stats
+                const heroStats = document.querySelectorAll('.hero-stats .stat h3');
+                if (heroStats.length >= 3) {
+                    heroStats[0].textContent = `₹${formatNumber(stats.totalRaised)}+`;
+                    heroStats[1].textContent = `${formatNumber(stats.totalCampaigns)}+`;
+                    heroStats[2].textContent = `${formatNumber(stats.totalBackers)}+`;
+                }
+
+                // Update impact statistics section
+                const impactStats = document.querySelectorAll('.impact-stats .stat-number');
+                if (impactStats.length >= 4) {
+                    impactStats[0].textContent = `₹${formatNumber(stats.totalRaised)}+`;
+                    impactStats[1].textContent = `${formatNumber(stats.totalCampaigns)}+`;
+                    impactStats[2].textContent = `${formatNumber(stats.totalBackers)}+`;
+                    impactStats[3].textContent = `${stats.successRate}%`;
+                }
+            } catch (e) {
+                console.error('Failed to fetch statistics:', e);
+                // Keep default values if API fails
+            }
+        }
+
+        // Helper function to format numbers with commas
+        function formatNumber(num) {
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(0) + 'K';
+            }
+            return num.toLocaleString();
+        }
+
+        // Create campaign card
+        function createCampaignCard(campaign) {
+            const progress = (campaign.raised / campaign.goal) * 100;
+            return `
+                <div class="campaign-card" onclick="openModal(${campaign.id})">
+                    <div class="campaign-image">
+                        <img src="${campaign.image}" alt="${campaign.title}">
+                        <div class="campaign-badge">${campaign.badge}</div>
+                    </div>
+                    <div class="campaign-content">
+                        <h3>${campaign.title}</h3>
+                        <p>${campaign.description}</p>
+                        <div class="campaign-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progress}%"></div>
+                            </div>
+                            <div class="progress-stats">
+                                <span>₹${campaign.raised.toLocaleString()} raised</span>
+                                <span>${Math.round(progress)}% of ₹${campaign.goal.toLocaleString()}</span>
+                            </div>
+                        </div>
+                        <div class="campaign-meta">
+                            <span><i class="fas fa-clock"></i> ${campaign.daysLeft} days left</span>
+                            <span><i class="fas fa-users"></i> ${campaign.backers} backers</span>
+                        </div>
+                        <button class="btn-primary donate-btn" onclick="event.stopPropagation(); openDonationModal(${campaign.id})">
+                            <i class="fas fa-heart"></i> Donate Now
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize featured campaigns
+        async function initializeFeaturedCampaigns() {
+            const grid = document.getElementById('featuredCampaignsGrid');
+            try {
+                const res = await fetch(`${API_BASE}/campaigns`);
+                const all = await res.json();
+                // Pick first 3 approved campaigns for the homepage
+                featuredCampaigns = all.filter(c => c.status === 'approved').slice(0, 3);
+                grid.innerHTML = featuredCampaigns.map(campaign => createCampaignCard(campaign)).join('');
+            } catch (e) {
+                grid.innerHTML = '';
+            }
+        }
+
+        // Open modal with campaign details
+        function openModal(campaignId) {
+            const campaign = featuredCampaigns.find(c => c.id === campaignId);
+            if (!campaign) return;
+
+            document.getElementById('modalImage').src = campaign.image;
+            document.getElementById('modalTitle').textContent = campaign.title;
+            document.getElementById('modalDescription').textContent = campaign.description;
+            document.getElementById('modalRaised').textContent = `₹${campaign.raised.toLocaleString()}`;
+            document.getElementById('modalGoal').textContent = `₹${campaign.goal.toLocaleString()}`;
+            document.getElementById('modalBackers').textContent = campaign.backers.toLocaleString();
+            document.getElementById('modalDays').textContent = campaign.daysLeft;
+            
+            const progress = (campaign.raised / campaign.goal) * 100;
+            document.getElementById('modalProgress').style.width = `${progress}%`;
+            document.getElementById('modalProgressText').textContent = `${Math.round(progress)}% funded`;
+
+            currentCampaignId = campaignId;
+            document.getElementById('campaignModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('campaignModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Open donation modal
+        function openDonationModal(campaignId) {
+            const campaign = featuredCampaigns.find(c => c.id === campaignId);
+            if (!campaign) {
+                showNotification('Campaign not found. Please try again.', 'error');
+                return;
+            }
+            
+            currentCampaignId = campaignId;
+            document.getElementById('donationCampaignTitle').textContent = campaign.title;
+            document.getElementById('donationModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            
+            // Reset form and amount buttons
+            document.getElementById('donationForm').reset();
+            document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('selected'));
+        }
+
+        // Close donation modal
+        function closeDonationModal() {
+            document.getElementById('donationModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            document.getElementById('donationForm').reset();
+            document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('selected'));
+        }
+
+        // Select donation amount
+        function selectAmount(amount) {
+            document.getElementById('customAmount').value = amount;
+            document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+        }
+
+        // Show notification function
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => notification.classList.add('show'), 100);
+            
+            // Remove notification after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
+        }
+
+        // Handle donation form submission
+        document.getElementById('donationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const amount = document.getElementById('customAmount').value;
+            const donorName = document.getElementById('donorName').value;
+            const donorEmail = document.getElementById('donorEmail').value;
+            if (!amount || amount <= 0) { showNotification('Please enter a valid donation amount.', 'error'); return; }
+            if (!donorName.trim()) { showNotification('Please enter your full name.', 'error'); return; }
+            if (!donorEmail.trim()) { showNotification('Please enter your email address.', 'error'); return; }
+
+            try {
+                const res = await fetch(`${API_BASE}/campaigns/${currentCampaignId}/donations`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount, donorName, donorEmail })
+                });
+                if (!res.ok) throw new Error('Donation failed');
+                await res.json();
+                showNotification(`Thank you ${donorName}! Your donation of ₹${amount} has been received.`, 'success');
+                await initializeFeaturedCampaigns();
+                closeDonationModal();
+                closeModal();
+            } catch (err) {
+                showNotification('Donation failed. Please try again.', 'error');
+            }
+        });
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const campaignModal = document.getElementById('campaignModal');
+            const donationModal = document.getElementById('donationModal');
+            if (event.target === campaignModal) {
+                closeModal();
+            }
+            if (event.target === donationModal) {
+                closeDonationModal();
+            }
+        }
+
+        // Close modals with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+                closeDonationModal();
+            }
+        });
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeFeaturedCampaigns();
+            updateStatistics(); // Fetch and update statistics
+            
+            // Mobile menu toggle
+            const hamburger = document.querySelector('.hamburger');
+            const navMenu = document.querySelector('.nav-menu');
+            
+            hamburger.addEventListener('click', () => {
+                navMenu.classList.toggle('active');
+            });
+
+            // Close mobile menu when clicking a link
+            document.querySelectorAll('.nav-menu a').forEach(link => {
+                link.addEventListener('click', () => {
+                    hamburger.classList.remove('active');
+                    navMenu.classList.remove('active');
+                });
+            });
+        });
+        
+        // Profile dropdown toggle
+        function toggleProfileDropdown() {
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            profileDropdown.classList.toggle('active');
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            if (!profileDropdown.contains(e.target)) {
+                profileDropdown.classList.remove('active');
+            }
+        });
+    </script>
+    <script>
+        // Load statistics for homepage
+        async function loadStatistics() {
+            try {
+                const stats = await CampaignAPI.getStatistics();
+                
+                // Update hero stats
+                document.getElementById('total-raised').textContent = '₹' + formatNumber(stats.totalRaised);
+                document.getElementById('total-campaigns').textContent = formatNumber(stats.totalCampaigns);
+                document.getElementById('total-backers').textContent = formatNumber(stats.totalBackers);
+                
+                // Update impact stats section
+                const impactStatsSection = document.querySelector('.impact-stats');
+                if (impactStatsSection) {
+                    const statItems = impactStatsSection.querySelectorAll('.stat-item');
+                    if (statItems.length >= 4) {
+                        statItems[0].querySelector('.stat-number').textContent = '₹' + formatNumber(stats.totalRaised);
+                        statItems[1].querySelector('.stat-number').textContent = formatNumber(stats.totalCampaigns);
+                        statItems[2].querySelector('.stat-number').textContent = formatNumber(stats.totalBackers);
+                        statItems[3].querySelector('.stat-number').textContent = stats.successRate + '%';
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load statistics:', error);
+            }
+        }
+
+        // Load featured campaigns
+        async function loadFeaturedCampaigns() {
+            try {
+                const campaigns = await CampaignAPI.getAllCampaigns();
+                
+                // Get featured campaigns section
+                const storiesGrid = document.querySelector('.stories-grid');
+                if (!storiesGrid || !campaigns.length) return;
+                
+                // Clear existing content
+                storiesGrid.innerHTML = '';
+                
+                // Display up to 3 campaigns
+                const featuredCampaigns = campaigns.slice(0, 3);
+                
+                featuredCampaigns.forEach(campaign => {
+                    const percentFunded = Math.min(Math.round((campaign.raised / campaign.goal) * 100), 100);
+                    const formattedRaised = formatNumber(campaign.raised);
+                    
+                    const storyCard = document.createElement('div');
+                    storyCard.className = 'story-card';
+                    storyCard.innerHTML = `
+                        <img src="${campaign.image}" alt="${campaign.title}">
+                        <div class="story-content">
+                            <h3>${campaign.title}</h3>
+                            <p class="story-stats">₹${formattedRaised} raised • ${campaign.backers}+ backers • ${percentFunded}% funded</p>
+                            <p class="story-description">${campaign.description.substring(0, 120)}...</p>
+                            <div class="story-impact">
+                                <span><i class="fas fa-leaf"></i> ${campaign.daysLeft} days left</span>
+                                <span><i class="fas fa-map-marker-alt"></i> ${campaign.location || 'India'}</span>
+                            </div>
+                            <a href="campaign-detail.html?id=${campaign.id}" class="btn-secondary">View Campaign</a>
+                        </div>
+                    `;
+                    
+                    storiesGrid.appendChild(storyCard);
+                });
+            } catch (error) {
+                console.error('Failed to load featured campaigns:', error);
+            }
+        }
+
+        // Helper function to format numbers
+        function formatNumber(num) {
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K';
+            }
+            return num.toString();
+        }
+
+        // Check if user is logged in
+        function checkLoginStatus() {
+            const token = localStorage.getItem('token');
+            const userName = localStorage.getItem('userName');
+            
+            if (token) {
+                // User is logged in
+                document.querySelector('.nav-menu li a[href="login.html"]').style.display = 'none';
+                
+                // Show profile name if available
+                const profileLogo = document.querySelector('.profile-logo');
+                if (profileLogo && userName) {
+                    const nameSpan = profileLogo.querySelector('span');
+                    if (nameSpan) {
+                        nameSpan.textContent = userName;
+                    }
+                }
+            } else {
+                // User is not logged in
+                document.querySelector('.profile-dropdown').style.display = 'none';
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStatistics();
+            loadFeaturedCampaigns();
+            checkLoginStatus();
+            
+            // Handle logout
+            document.querySelector('a[href="#logout"]')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                localStorage.removeItem('token');
+                localStorage.removeItem('userName');
+                window.location.href = 'index.html';
+            });
+        });
+    </script>
+</body>
+</html>

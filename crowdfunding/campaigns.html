@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Campaigns - GreenFund</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="api.js"></script>
+    <style>
+        .campaigns-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            padding: 20px 0;
+        }
+        
+        .campaign-card {
+            background: var(--bg-darker);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+        }
+        
+        .campaign-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 255, 65, 0.2);
+        }
+        
+        .campaign-image {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+        }
+        
+        .campaign-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .campaign-card:hover .campaign-image img {
+            transform: scale(1.05);
+        }
+        
+        .campaign-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--primary-green);
+            color: var(--bg-black);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .campaign-content {
+            padding: 25px;
+        }
+        
+        .campaign-content h3 {
+            color: var(--text-white);
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+        
+        .campaign-content p {
+            color: var(--text-light);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .campaign-progress {
+            margin-bottom: 15px;
+        }
+        
+        .progress-bar {
+            background: var(--bg-light);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .progress-fill {
+            background: var(--primary-green);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: var(--text-light);
+        }
+        
+        .campaign-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: var(--text-light);
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        
+        .modal-content {
+            background: var(--bg-darker);
+            margin: 50px auto;
+            padding: 0;
+            border-radius: 15px;
+            max-width: 800px;
+            width: 90%;
+            position: relative;
+            animation: modalSlideIn 0.3s ease;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-header {
+            position: relative;
+            height: 300px;
+            overflow: hidden;
+            border-radius: 15px 15px 0 0;
+        }
+        
+        .modal-header img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background 0.3s ease;
+        }
+        
+        .modal-close:hover {
+            background: rgba(0, 0, 0, 0.9);
+        }
+        
+        .modal-body {
+            padding: 40px;
+        }
+        
+        .modal-title {
+            font-size: 2em;
+            color: var(--text-white);
+            margin-bottom: 10px;
+        }
+        
+        .modal-description {
+            color: var(--text-light);
+            line-height: 1.8;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .modal-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .detail-item {
+            background: var(--bg-light);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .detail-item h4 {
+            color: var(--primary-green);
+            margin-bottom: 5px;
+            font-size: 1.5em;
+        }
+        
+        .detail-item p {
+            color: var(--text-light);
+            font-size: 0.9em;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .btn-large {
+            padding: 15px 40px;
+            font-size: 1.1em;
+        }
+
+        .donate-btn {
+            width: 100%;
+            margin-top: 15px;
+            padding: 12px 20px;
+            font-size: 1em;
+            font-weight: 600;
+        }
+
+        .amount-btn {
+            padding: 12px 20px;
+            background: var(--bg-light);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-white);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .amount-btn:hover {
+            background: var(--bg-darker);
+            border-color: var(--accent-green);
+        }
+
+        .amount-btn.selected {
+            background: var(--primary-green);
+            color: var(--bg-black);
+            border-color: var(--primary-green);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-green);
+        }
+        
+        @media (max-width: 768px) {
+            .modal-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .campaigns-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-leaf"></i>
+                <span>GreenFund</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="campaigns.html" class="active">Campaigns</a></li>
+                <li><a href="start-campaign.html">Start Campaign</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="login.html">Login</a></li>
+                <li><a href="admin-login.html">Admin</a></li>
+                <li class="profile-dropdown">
+                    <div class="profile-logo" onclick="toggleProfileDropdown()">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Profile</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="profile-menu" id="profileMenu">
+                        <a href="my-account.html"><i class="fas fa-user"></i> My Account</a>
+                        <a href="kyc-verification.html"><i class="fas fa-shield-alt"></i> Aadhaar KYC</a>
+                        <a href="my-account.html#campaigns"><i class="fas fa-leaf"></i> My Campaigns</a>
+                        <a href="my-account.html#donations"><i class="fas fa-heart"></i> My Donations</a>
+                        <a href="my-account.html#settings"><i class="fas fa-cog"></i> Settings</a>
+                        <a href="#logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Campaigns Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1>All Campaigns</h1>
+            <p>Discover amazing projects and support the ones you believe in</p>
+        </div>
+    </section>
+
+    <!-- Search and Filter Section -->
+    <section class="search-section">
+        <div class="container">
+            <div class="search-container">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search campaigns..." oninput="filterCampaigns()">
+                </div>
+                <div class="filter-options">
+                    <select id="categoryFilter" onchange="filterCampaigns()">
+                        <option value="">All Categories</option>
+                        <option value="trending">Trending</option>
+                        <option value="new">New</option>
+                        <option value="popular">Popular</option>
+                        <option value="urgent">Urgent</option>
+                        <option value="fashion">Fashion</option>
+                        <option value="innovation">Innovation</option>
+                    </select>
+                    <select id="statusFilter" onchange="filterCampaigns()">
+                        <option value="">All Status</option>
+                        <option value="ending">Ending Soon</option>
+                        <option value="funded">Almost Funded</option>
+                        <option value="new">Recently Added</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Campaigns Grid -->
+    <section class="campaigns">
+        <div class="container">
+            <div class="campaigns-grid" id="campaignsGrid">
+                <!-- Campaign cards will be dynamically generated -->
+            </div>
+            <div id="noResults" class="no-results" style="display: none;">
+                <i class="fas fa-search"></i>
+                <h3>No campaigns found</h3>
+                <p>Try adjusting your search or filter criteria</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Campaign Modal -->
+    <div class="modal" id="campaignModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <img id="modalImage" src="" alt="Campaign Image">
+                <button class="modal-close" onclick="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h2 class="modal-title" id="modalTitle"></h2>
+                <p class="modal-description" id="modalDescription"></p>
+                
+                <div class="modal-details">
+                    <div class="detail-item">
+                        <h4 id="modalRaised">₹0</h4>
+                        <p>Raised</p>
+                    </div>
+                    <div class="detail-item">
+                        <h4 id="modalGoal">₹0</h4>
+                        <p>Goal</p>
+                    </div>
+                    <div class="detail-item">
+                        <h4 id="modalBackers">0</h4>
+                        <p>Backers</p>
+                    </div>
+                    <div class="detail-item">
+                        <h4 id="modalDays">0</h4>
+                        <p>Days Left</p>
+                    </div>
+                </div>
+                
+                <div class="modal-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="modalProgress"></div>
+                    </div>
+                    <div class="progress-stats">
+                        <span id="modalProgressText">0% funded</span>
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button class="btn-primary btn-large" onclick="openDonationModal(currentCampaignId || getCurrentModalCampaignId())">
+                        <i class="fas fa-heart"></i> Donate Now
+                    </button>
+                    <button class="btn-secondary btn-large">
+                        <i class="fas fa-share"></i> Share Campaign
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Donation Modal -->
+    <div class="modal" id="donationModal">
+        <div class="modal-content">
+            <div class="modal-header" style="height: auto; padding: 20px; background: var(--bg-light);">
+                <h2 style="color: var(--text-white); margin: 0;">Support This Campaign</h2>
+                <button class="modal-close" onclick="closeDonationModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="donationCampaignInfo" style="text-align: center; margin-bottom: 30px;">
+                    <h3 id="donationCampaignTitle" style="color: var(--text-white); margin-bottom: 10px;"></h3>
+                    <p style="color: var(--text-light);">Help us reach our goal and make this project a reality!</p>
+                </div>
+                
+                <form id="donationForm">
+                    <div style="margin-bottom: 25px;">
+                        <label style="display: block; margin-bottom: 10px; color: var(--text-white); font-weight: 600;">Choose Donation Amount</label>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-bottom: 20px;">
+                            <button type="button" class="amount-btn" onclick="selectAmount(250)">₹250</button>
+                            <button type="button" class="amount-btn" onclick="selectAmount(500)">₹500</button>
+                            <button type="button" class="amount-btn" onclick="selectAmount(1000)">₹1,000</button>
+                            <button type="button" class="amount-btn" onclick="selectAmount(2500)">₹2,500</button>
+                        </div>
+                        <div style="position: relative;">
+                            <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-light);">₹</span>
+                            <input type="number" id="customAmount" placeholder="Enter custom amount" min="1" style="width: 100%; padding: 12px 15px 12px 30px; background: var(--bg-light); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-white); font-size: 16px;">
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 25px;">
+                        <label style="display: block; margin-bottom: 10px; color: var(--text-white); font-weight: 600;">Your Information</label>
+                        <input type="text" id="donorName" placeholder="Full Name" required style="width: 100%; margin-bottom: 15px; padding: 12px 15px; background: var(--bg-light); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-white); font-size: 16px;">
+                        <input type="email" id="donorEmail" placeholder="Email Address" required style="width: 100%; padding: 12px 15px; background: var(--bg-light); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-white); font-size: 16px;">
+                    </div>
+                    
+                    <div style="margin-bottom: 30px;">
+                        <label style="display: block; margin-bottom: 10px; color: var(--text-white); font-weight: 600;">Payment Information</label>
+                        <input type="text" id="cardNumber" placeholder="Card Number" required style="width: 100%; margin-bottom: 15px; padding: 12px 15px; background: var(--bg-light); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-white); font-size: 16px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <input type="text" id="expiryDate" placeholder="MM/YY" required style="padding: 12px 15px; background: var(--bg-light); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-white); font-size: 16px;">
+                            <input type="text" id="cvv" placeholder="CVV" required style="padding: 12px 15px; background: var(--bg-light); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-white); font-size: 16px;">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary btn-large" style="width: 100%;">
+                        <i class="fas fa-heart"></i> Complete Donation
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API base
+        const API_BASE = 'http://localhost:4000/api';
+
+        // Campaign data (loaded from backend)
+        let campaigns = [];
+
+        // Create campaign cards
+        function createCampaignCard(campaign) {
+            const progress = (campaign.raised / campaign.goal) * 100;
+            return `
+                <div class="campaign-card" onclick="window.location.href='campaign-detail.html?id=${campaign.id}'">
+                    <div class="campaign-image">
+                        <img src="${campaign.image}" alt="${campaign.title}">
+                        <div class="campaign-badge">${campaign.badge}</div>
+                    </div>
+                    <div class="campaign-content">
+                        <h3>${campaign.title}</h3>
+                        <p>${campaign.description.substring(0, 100)}...</p>
+                        <div class="campaign-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progress}%"></div>
+                            </div>
+                            <div class="progress-stats">
+                                <span>₹${campaign.raised.toLocaleString('en-IN')} raised</span>
+                                <span>${Math.round(progress)}% of ₹${campaign.goal.toLocaleString('en-IN')}</span>
+                            </div>
+                        </div>
+                        <div class="campaign-meta">
+                            <span><i class="fas fa-clock"></i> ${campaign.daysLeft} days left</span>
+                            <span><i class="fas fa-users"></i> ${campaign.backers} backers</span>
+                        </div>
+                        <button class="btn-primary donate-btn" onclick="event.stopPropagation(); window.location.href='campaign-detail.html?id=${campaign.id}'">
+                            <i class="fas fa-heart"></i> Donate Now
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize campaigns grid
+        async function initializeCampaigns() {
+            const grid = document.getElementById('campaignsGrid');
+            try {
+                const res = await fetch(`${API_BASE}/campaigns`);
+                campaigns = await res.json();
+                filteredCampaigns = [...campaigns];
+                grid.innerHTML = filteredCampaigns.map(campaign => createCampaignCard(campaign)).join('');
+            } catch (e) {
+                grid.innerHTML = '';
+                document.getElementById('noResults').style.display = 'block';
+            }
+        }
+
+        // Open modal with campaign details
+        function openModal(campaignId) {
+            const campaign = campaigns.find(c => c.id === campaignId);
+            if (!campaign) return;
+
+            // Set current campaign ID for donation modal
+            currentCampaignId = campaignId;
+
+            document.getElementById('modalImage').src = campaign.image;
+            document.getElementById('modalTitle').textContent = campaign.title;
+            document.getElementById('modalDescription').textContent = campaign.description;
+            document.getElementById('modalRaised').textContent = `₹${campaign.raised.toLocaleString('en-IN')}`;
+            document.getElementById('modalGoal').textContent = `₹${campaign.goal.toLocaleString('en-IN')}`;
+            document.getElementById('modalBackers').textContent = campaign.backers.toLocaleString();
+            document.getElementById('modalDays').textContent = campaign.daysLeft;
+            
+            const progress = (campaign.raised / campaign.goal) * 100;
+            document.getElementById('modalProgress').style.width = `${progress}%`;
+            document.getElementById('modalProgressText').textContent = `${Math.round(progress)}% funded`;
+
+            document.getElementById('campaignModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('campaignModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Helper function to get current modal campaign ID
+        function getCurrentModalCampaignId() {
+            const modalTitle = document.getElementById('modalTitle').textContent;
+            const campaign = campaigns.find(c => c.title === modalTitle);
+            return campaign ? campaign.id : null;
+        }
+
+
+
+        let currentCampaignId = null;
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+                closeDonationModal();
+            }
+        });
+
+        // Open donation modal
+        function openDonationModal(campaignId) {
+            const campaign = campaigns.find(c => c.id === campaignId);
+            if (!campaign) {
+                showNotification('Campaign not found. Please try again.', 'error');
+                return;
+            }
+            
+            currentCampaignId = campaignId;
+            document.getElementById('donationCampaignTitle').textContent = campaign.title;
+            document.getElementById('donationModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            
+            // Reset form and amount buttons
+            document.getElementById('donationForm').reset();
+            document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('selected'));
+        }
+
+        // Close donation modal
+        function closeDonationModal() {
+            document.getElementById('donationModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            document.getElementById('donationForm').reset();
+            document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('selected'));
+            currentCampaignId = null;
+        }
+
+        // Close donation modal when clicking outside
+        window.onclick = function(event) {
+            const campaignModal = document.getElementById('campaignModal');
+            const donationModal = document.getElementById('donationModal');
+            
+            if (event.target === campaignModal) {
+                closeModal();
+            }
+            if (event.target === donationModal) {
+                closeDonationModal();
+            }
+        }
+
+        // Select donation amount
+        function selectAmount(amount) {
+            document.getElementById('customAmount').value = amount;
+            document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+        }
+
+        // Show notification function
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => notification.classList.add('show'), 100);
+            
+            // Remove notification after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
+        }
+
+        // Handle donation form submission
+        document.getElementById('donationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const amount = document.getElementById('customAmount').value;
+            const donorName = document.getElementById('donorName').value;
+            const donorEmail = document.getElementById('donorEmail').value;
+            if (!amount || amount <= 0) { showNotification('Please enter a valid donation amount.', 'error'); return; }
+            if (!donorName.trim()) { showNotification('Please enter your full name.', 'error'); return; }
+            if (!donorEmail.trim()) { showNotification('Please enter your email address.', 'error'); return; }
+
+            try {
+                const res = await fetch(`${API_BASE}/campaigns/${currentCampaignId}/donations`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount, donorName, donorEmail })
+                });
+                if (!res.ok) throw new Error('Donation failed');
+                await res.json();
+                showNotification(`Thank you ${donorName}! Your donation of ₹${Number(amount).toLocaleString('en-IN')} has been received.`, 'success');
+                await initializeCampaigns();
+                closeDonationModal();
+                closeModal();
+            } catch (err) {
+                showNotification('Donation failed. Please try again.', 'error');
+            }
+        });
+
+        // Search and filter functionality
+        let filteredCampaigns = [...campaigns];
+
+        function filterCampaigns() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+
+            filteredCampaigns = campaigns.filter(campaign => {
+                // Search filter
+                const matchesSearch = campaign.title.toLowerCase().includes(searchTerm) || 
+                                    campaign.description.toLowerCase().includes(searchTerm);
+
+                // Category filter
+                const matchesCategory = !categoryFilter || campaign.badge.toLowerCase() === categoryFilter;
+
+                // Status filter
+                let matchesStatus = true;
+                if (statusFilter === 'ending') {
+                    matchesStatus = campaign.daysLeft <= 7;
+                } else if (statusFilter === 'funded') {
+                    const progress = (campaign.raised / campaign.goal) * 100;
+                    matchesStatus = progress >= 75;
+                } else if (statusFilter === 'new') {
+                    matchesStatus = campaign.daysLeft >= 20;
+                }
+
+                return matchesSearch && matchesCategory && matchesStatus;
+            });
+
+            // Update display
+            const grid = document.getElementById('campaignsGrid');
+            const noResults = document.getElementById('noResults');
+
+            if (filteredCampaigns.length === 0) {
+                grid.innerHTML = '';
+                noResults.style.display = 'block';
+            } else {
+                grid.innerHTML = filteredCampaigns.map(campaign => createCampaignCard(campaign)).join('');
+                noResults.style.display = 'none';
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeCampaigns();
+            
+            // Mobile menu toggle
+            const hamburger = document.querySelector('.hamburger');
+            const navMenu = document.querySelector('.nav-menu');
+            
+            hamburger.addEventListener('click', () => {
+                hamburger.classList.toggle('active');
+                navMenu.classList.toggle('active');
+            });
+            
+            // Close mobile menu when clicking a link
+            document.querySelectorAll('.nav-menu a').forEach(link => {
+                link.addEventListener('click', () => {
+                    hamburger.classList.remove('active');
+                    navMenu.classList.remove('active');
+                });
+            });
+            
+            // Profile dropdown toggle
+            function toggleProfileDropdown() {
+                const profileDropdown = document.querySelector('.profile-dropdown');
+                profileDropdown.classList.toggle('active');
+            }
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                const profileDropdown = document.querySelector('.profile-dropdown');
+                if (!profileDropdown.contains(e.target)) {
+                    profileDropdown.classList.remove('active');
+                }
+            });
+        });
+    </script>
+    <script>
+        // Load all campaigns from API
+        async function loadCampaigns() {
+            try {
+                const campaigns = await CampaignAPI.getAllCampaigns();
+                displayCampaigns(campaigns);
+            } catch (error) {
+                console.error('Failed to load campaigns:', error);
+                document.querySelector('.campaigns-grid').innerHTML = `
+                    <div class="error-message">
+                        <p>Failed to load campaigns. Please try again later.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Display campaigns in the grid
+        function displayCampaigns(campaigns) {
+            const campaignsGrid = document.querySelector('.campaigns-grid');
+            campaignsGrid.innerHTML = '';
+
+            if (campaigns.length === 0) {
+                campaignsGrid.innerHTML = `
+                    <div class="no-results">
+                        <p>No campaigns found. Check back later or try different filters.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            campaigns.forEach(campaign => {
+                const percentFunded = Math.min(Math.round((campaign.raised / campaign.goal) * 100), 100);
+                
+                const campaignCard = document.createElement('div');
+                campaignCard.className = 'campaign-card';
+                campaignCard.innerHTML = `
+                    <div class="campaign-image">
+                        <img src="${campaign.image}" alt="${campaign.title}">
+                        ${campaign.badge ? `<div class="campaign-badge">${campaign.badge}</div>` : ''}
+                    </div>
+                    <div class="campaign-content">
+                        <h3>${campaign.title}</h3>
+                        <p>${campaign.description.substring(0, 100)}...</p>
+                        <div class="campaign-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${percentFunded}%"></div>
+                            </div>
+                            <div class="progress-stats">
+                                <span>₹${formatNumber(campaign.raised)} raised</span>
+                                <span>${percentFunded}%</span>
+                            </div>
+                        </div>
+                        <div class="campaign-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-user-friends"></i>
+                                <span>${campaign.backers} backers</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                <span>${campaign.daysLeft} days left</span>
+                            </div>
+                        </div>
+                        <a href="campaign-detail.html?id=${campaign.id}" class="btn-primary">View Campaign</a>
+                    </div>
+                `;
+                
+                campaignsGrid.appendChild(campaignCard);
+                
+                // Add click event to navigate to campaign detail
+                campaignCard.addEventListener('click', (e) => {
+                    // Only navigate if the click wasn't on the button
+                    if (!e.target.closest('.btn-primary')) {
+                        window.location.href = `campaign-detail.html?id=${campaign.id}`;
+                    }
+                });
+            });
+        }
+
+        // Filter campaigns by category
+        function filterCampaigns(category) {
+            const categoryButtons = document.querySelectorAll('.category-filter button');
+            categoryButtons.forEach(button => {
+                button.classList.remove('active');
+                if (button.getAttribute('data-category') === category) {
+                    button.classList.add('active');
+                }
+            });
+
+            // Implement actual filtering logic here
+            loadCampaigns().then(() => {
+                // After loading, we could filter the displayed campaigns
+                // For now, we'll just reload all campaigns
+            });
+        }
+
+        // Helper function to format numbers
+        function formatNumber(num) {
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K';
+            }
+            return num.toString();
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCampaigns();
+            
+            // Set up category filter buttons
+            const categoryButtons = document.querySelectorAll('.category-filter button');
+            categoryButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const category = button.getAttribute('data-category');
+                    filterCampaigns(category);
+                });
+            });
+            
+            // Check login status
+            const token = localStorage.getItem('token');
+            if (token) {
+                document.querySelector('.nav-menu li a[href="login.html"]').style.display = 'none';
+            } else {
+                document.querySelector('.profile-dropdown').style.display = 'none';
+            }
+            
+            // Handle logout
+            document.querySelector('a[href="#logout"]')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                localStorage.removeItem('token');
+                localStorage.removeItem('userName');
+                window.location.href = 'index.html';
+            });
+        });
+    </script>
+</body>
+</html>

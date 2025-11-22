@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Start a Campaign - EcoFund</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user) {
+                window.location.href = 'login.html?redirect=start-campaign.html';
+                return;
+            }
+
+        async function renderKycBadge() {
+            try {
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                if (!user.id) return;
+                const res = await fetch(`http://localhost:4000/api/kyc/status?userId=${encodeURIComponent(user.id)}`);
+                if (!res.ok) return;
+                const data = await res.json();
+                const status = (data.status || 'none').toLowerCase();
+                const navMenu = document.querySelector('.nav-menu');
+                if (!navMenu) return;
+                let badge = document.querySelector('.kyc-badge');
+                if (!badge) {
+                    badge = document.createElement('span');
+                    navMenu.appendChild(badge);
+                }
+                badge.className = `kyc-badge ${status}`;
+                const isVerified = status === 'verified' || status === 'approved';
+                const icon = isVerified ? 'fa-check-circle' : status === 'rejected' ? 'fa-times-circle' : 'fa-clock';
+                const label = isVerified ? 'KYC Verified' : status === 'rejected' ? 'KYC Rejected' : 'KYC Pending';
+                badge.innerHTML = `<i class="fas ${icon}"></i>${label}`;
+            } catch (_) {}
+        }
+            
+            // Update navigation based on login status
+            checkLoginStatus();
+
+            // Render KYC badge in navbar
+            renderKycBadge();
+        });
+        
+        function checkLoginStatus() {
+            const user = JSON.parse(localStorage.getItem('user'));
+            const navMenu = document.querySelector('.nav-menu');
+            
+            if (user) {
+                // Replace login link with profile dropdown
+                const loginLink = navMenu.querySelector('a[href="login.html"]').parentNode;
+                loginLink.innerHTML = `
+                    <div class="profile-dropdown">
+                        <a href="my-account.html" class="profile-link">
+                            <i class="fas fa-user-circle"></i> ${user.name}
+                        </a>
+                        <div class="dropdown-content">
+                            <a href="my-account.html">My Account</a>
+                            <a href="#" id="logoutBtn">Logout</a>
+                        </div>
+                    </div>
+                `;
+                
+                // Add logout handler
+                document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    localStorage.removeItem('user');
+                    window.location.reload();
+                });
+            }
+        }
+    </script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-leaf"></i>
+                <span>GreenFund</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="campaigns.html">Campaigns</a></li>
+                <li><a href="start-campaign.html" class="active">Start Campaign</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="login.html">Login</a></li>
+                <li><a href="admin-login.html">Admin</a></li>
+                <li class="profile-dropdown">
+                    <div class="profile-logo" onclick="toggleProfileDropdown()">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Profile</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="profile-menu" id="profileMenu">
+                        <a href="my-account.html"><i class="fas fa-user"></i> My Account</a>
+                        <a href="kyc-verification.html"><i class="fas fa-shield-alt"></i> Aadhaar KYC</a>
+                        <a href="my-account.html#campaigns"><i class="fas fa-leaf"></i> My Campaigns</a>
+                        <a href="my-account.html#donations"><i class="fas fa-heart"></i> My Donations</a>
+                        <a href="my-account.html#settings"><i class="fas fa-cog"></i> Settings</a>
+                        <a href="#logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Campaign Header -->
+    <section class="campaign-header">
+        <div class="container">
+            <h1>Start Your Campaign</h1>
+            <p>Turn your environmental ideas into reality with community support</p>
+        </div>
+    </section>
+
+    <!-- Campaign Form -->
+    <section class="campaign-form-section">
+        <div class="container">
+            <div class="form-container">
+                <div class="form-header">
+                    <h2>Campaign Details</h2>
+                    <p>Fill out the form below to create your environmental campaign</p>
+                </div>
+
+                <form id="campaignForm" class="campaign-form">
+                    <!-- Basic Information -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-info-circle"></i> Basic Information</h3>
+                        
+                        <div class="form-group">
+                            <label for="campaignTitle">Campaign Title *</label>
+                            <input type="text" id="campaignTitle" name="campaignTitle" required maxlength="100" placeholder="e.g., Clean Water for Rural Communities">
+                            <small>Maximum 100 characters</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="campaignCategory">Category *</label>
+                            <select id="campaignCategory" name="campaignCategory" required>
+                                <option value="">Select a category</option>
+                                <option value="water">Water Conservation</option>
+                                <option value="energy">Renewable Energy</option>
+                                <option value="waste">Waste Management</option>
+                                <option value="reforestation">Reforestation</option>
+                                <option value="wildlife">Wildlife Protection</option>
+                                <option value="sustainable-farming">Sustainable Farming</option>
+                                <option value="education">Environmental Education</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="campaignDescription">Campaign Description *</label>
+                            <textarea id="campaignDescription" name="campaignDescription" required rows="6" maxlength="2000" placeholder="Describe your campaign, its goals, and impact..."></textarea>
+                            <small>Maximum 2000 characters</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="shortDescription">Short Description *</label>
+                            <textarea id="shortDescription" name="shortDescription" required rows="2" maxlength="200" placeholder="A brief summary for campaign cards..."></textarea>
+                            <small>Maximum 200 characters - This will appear in campaign previews</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="category">Category *</label>
+                            <select id="category" name="category" required>
+                                <option value="">Select a category</option>
+                                <option value="Renewable Energy">Renewable Energy</option>
+                                <option value="Water Conservation">Water Conservation</option>
+                                <option value="Waste Management">Waste Management</option>
+                                <option value="Education">Education</option>
+                                <option value="Community Gardens">Community Gardens</option>
+                                <option value="Wildlife Conservation">Wildlife Conservation</option>
+                                <option value="Clean Technology">Clean Technology</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Funding Goals -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-indian-rupee-sign"></i> Funding Goals</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="fundingGoal">Funding Goal (INR) *</label>
+                                <input type="number" id="fundingGoal" name="fundingGoal" required min="100" step="1" placeholder="1000">
+                                <small>Minimum ₹100</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="campaignDuration">Campaign Duration *</label>
+                                <select id="campaignDuration" name="campaignDuration" required>
+                                    <option value="">Select duration</option>
+                                    <option value="30">30 days</option>
+                                    <option value="45">45 days</option>
+                                    <option value="60">60 days</option>
+                                    <option value="90">90 days</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="fundingUsage">How will funds be used? *</label>
+                            <textarea id="fundingUsage" name="fundingUsage" required rows="4" maxlength="1000" placeholder="Breakdown of how the funds will be allocated..."></textarea>
+                            <small>Provide a clear breakdown of fund usage</small>
+                        </div>
+                    </div>
+
+                    <!-- Location &amp; Impact -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-map-marker-alt"></i> Location &amp; Impact</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="location">Location *</label>
+                                <input type="text" id="location" name="location" required placeholder="City, State, Country">
+                                <small>Where will this campaign have impact?</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="impactArea">Impact Area</label>
+                                <input type="text" id="impactArea" name="impactArea" placeholder="e.g., 5,000 people, 100 acres, 50 households">
+                                <small>Who or what will benefit from this campaign?</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="environmentalImpact">Environmental Impact *</label>
+                            <textarea id="environmentalImpact" name="environmentalImpact" required rows="4" maxlength="1000" placeholder="Describe the positive environmental impact of your campaign..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Images &amp; Media -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-image"></i> Images &amp; Media</h3>
+                        
+                        <div class="upload-section">
+                            <div class="upload-group">
+                                <label>Campaign Image *</label>
+                                <div class="upload-area" id="campaignImageUpload">
+                                    <i class="fas fa-upload"></i>
+                                    <p>Upload a high-quality campaign image<br><small>Recommended: 1200x800px, JPG or PNG</small></p>
+                                    <input type="file" id="campaignImage" name="campaignImage" accept="image/*" required>
+                                </div>
+                                <div class="image-preview" id="campaignImagePreview"></div>
+                            </div>
+
+                            <div class="upload-group">
+                                <label>Additional Images (Optional)</label>
+                                <div class="upload-area" id="additionalImagesUpload">
+                                    <i class="fas fa-upload"></i>
+                                    <p>Upload up to 5 additional images<br><small>Show your project, team, or progress</small></p>
+                                    <input type="file" id="additionalImages" name="additionalImages" accept="image/*" multiple>
+                                </div>
+                                <div class="image-preview-grid" id="additionalImagesPreview"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Team &amp; Contact -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-users"></i> Team &amp; Contact</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="organizerName">Organizer Name *</label>
+                                <input type="text" id="organizerName" name="organizerName" required placeholder="Your full name">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="organizerEmail">Contact Email *</label>
+                                <input type="email" id="organizerEmail" name="organizerEmail" required placeholder="your.email@example.com">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="teamDescription">About the Team</label>
+                            <textarea id="teamDescription" name="teamDescription" rows="3" maxlength="500" placeholder="Tell supporters about your team and experience..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="website">Website/Social Media (Optional)</label>
+                            <input type="url" id="website" name="website" placeholder="https://your-website.com">
+                        </div>
+                    </div>
+
+                    <!-- Terms & Submit -->
+                    <div class="form-section">
+                        <div class="form-check">
+                            <input type="checkbox" id="terms" name="terms" required>
+                            <label for="terms">
+                                I agree to the <a href="#" target="_blank">Terms of Service</a> and <a href="#" target="_blank">Campaign Guidelines</a>
+                            </label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input type="checkbox" id="accuracy" name="accuracy" required>
+                            <label for="accuracy">
+                                I confirm that all information provided is accurate and truthful
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary btn-large">
+                        <i class="fas fa-rocket"></i>
+                        Launch Campaign
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>EcoFund</h3>
+                    <p>Empowering communities to create positive environmental change through crowdfunding.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="campaigns.html">Browse Campaigns</a></li>
+                        <li><a href="start-campaign.html">Start Campaign</a></li>
+                        <li><a href="my-account.html">My Account</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Support</h3>
+                    <ul>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Campaign Guidelines</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 EcoFund. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        // Profile dropdown toggle
+        function toggleProfileDropdown() {
+            const menu = document.getElementById('profileMenu');
+            menu.classList.toggle('show');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            const menu = document.getElementById('profileMenu');
+            if (!profileDropdown.contains(e.target)) {
+                menu.classList.remove('show');
+            }
+        });
+
+        // Image upload and preview (click + drag-and-drop + remove + validation)
+        const MAX_FILE_SIZE_MB = 5;
+        const MAX_ADDITIONAL_FILES = 5;
+        const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
+        const selectedFilesState = {
+            campaignImage: null,
+            additionalImages: []
+        };
+
+        function bytesToMB(bytes) {
+            return (bytes / (1024 * 1024)).toFixed(2);
+        }
+        function createPreviewElement(src, isSingle, onRemove) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'preview-wrapper';
+            const img = document.createElement('img');
+            img.src = src;
+            img.className = isSingle ? 'preview-image single' : 'preview-image';
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'remove-image';
+            removeBtn.setAttribute('aria-label', 'Remove image');
+            removeBtn.innerHTML = '&times;';
+            removeBtn.addEventListener('click', onRemove);
+            wrapper.appendChild(img);
+            wrapper.appendChild(removeBtn);
+            return wrapper;
+        }
+
+        function applyFilesToInput(input, filesArray) {
+            const dataTransfer = new DataTransfer();
+            filesArray.forEach(f => dataTransfer.items.add(f));
+            input.files = dataTransfer.files;
+        }
+
+        function validateFile(file) {
+            if (!ALLOWED_TYPES.includes(file.type)) {
+                showNotification(`File type not supported. Please upload JPG, PNG, or WEBP images only.`, 'error');
+                return false;
+            }
+            const sizeMB = file.size / (1024 * 1024);
+            if (sizeMB > MAX_FILE_SIZE_MB) {
+                showNotification(`File "${file.name}" is too large (${bytesToMB(file.size)}MB). Maximum allowed size is ${MAX_FILE_SIZE_MB}MB.`, 'error');
+                return false;
+            }
+            return true;
+        }
+
+        function setupUploadArea(areaId, inputId, previewId, { multiple = false, maxFiles = 1 } = {}) {
+            const area = document.getElementById(areaId);
+            const input = document.getElementById(inputId);
+            const preview = document.getElementById(previewId);
+
+            function setDragState(on) {
+                if (on) area.classList.add('dragover'); else area.classList.remove('dragover');
+            }
+
+            function handleSelectedFiles(fileList) {
+                const files = Array.from(fileList).filter(validateFile);
+                if (!files.length) return;
+
+                if (!multiple) {
+                    // Single image
+                    selectedFilesState.campaignImage = files[0];
+                    preview.innerHTML = '';
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        const el = createPreviewElement(e.target.result, true, () => {
+                            selectedFilesState.campaignImage = null;
+                            preview.innerHTML = '';
+                            applyFilesToInput(input, []);
+                        });
+                        preview.appendChild(el);
+                    };
+                    reader.readAsDataURL(files[0]);
+                    applyFilesToInput(input, [files[0]]);
+                } else {
+                    // Multiple additional images
+                    const availableSlots = maxFiles - selectedFilesState.additionalImages.length;
+                    if (files.length > availableSlots) {
+                        showNotification(`You can upload up to ${maxFiles} images. You can add ${availableSlots} more.`, 'error');
+                    }
+                    const toAdd = files.slice(0, Math.max(0, availableSlots));
+                    selectedFilesState.additionalImages = selectedFilesState.additionalImages.concat(toAdd);
+                    renderAdditionalPreviews();
+                    applyFilesToInput(input, selectedFilesState.additionalImages);
+                }
+            }
+
+            function renderAdditionalPreviews() {
+                preview.innerHTML = '';
+                selectedFilesState.additionalImages.forEach((file, index) => {
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        const el = createPreviewElement(e.target.result, false, () => {
+                            selectedFilesState.additionalImages.splice(index, 1);
+                            renderAdditionalPreviews();
+                            applyFilesToInput(input, selectedFilesState.additionalImages);
+                        });
+                        preview.appendChild(el);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            // Click to trigger file dialog
+            area.addEventListener('click', () => input.click());
+
+            // When input changes
+            input.addEventListener('change', e => handleSelectedFiles(e.target.files));
+
+            // Drag-and-drop
+            ;['dragenter', 'dragover'].forEach(evt => area.addEventListener(evt, (e) => { e.preventDefault(); e.stopPropagation(); setDragState(true); }));
+            ;['dragleave', 'dragend', 'drop'].forEach(evt => area.addEventListener(evt, (e) => { e.preventDefault(); e.stopPropagation(); setDragState(false); }));
+            area.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                if (!dt || !dt.files) return;
+                handleSelectedFiles(dt.files);
+            });
+        }
+
+        // Initialize enhanced upload areas
+        setupUploadArea('campaignImageUpload', 'campaignImage', 'campaignImagePreview', { multiple: false, maxFiles: 1 });
+        setupUploadArea('additionalImagesUpload', 'additionalImages', 'additionalImagesPreview', { multiple: true, maxFiles: MAX_ADDITIONAL_FILES });
+
+        // Form validation and submission
+        document.getElementById('campaignForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Campaign...';
+            submitBtn.disabled = true;
+            
+            try {
+                const formData = new FormData(this);
+                // Attach logged-in user id for backend to map -> creatorId
+                try {
+                    const u = JSON.parse(localStorage.getItem('user'));
+                    if (u && u.id) {
+                        formData.append('userId', u.id);
+                    }
+                } catch (_) {}
+                
+                // Attach JWT for authenticated campaign creation
+                let token = '';
+                try {
+                    const u = JSON.parse(localStorage.getItem('user') || '{}');
+                    token = u && u.token ? u.token : (sessionStorage.getItem('userToken') || '');
+                } catch (_) {}
+
+                const response = await fetch('http://localhost:4000/api/campaigns', {
+                    method: 'POST',
+                    headers: token ? { 'Authorization': `Bearer ${token}` } : undefined,
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to create campaign');
+                }
+                
+                const result = await response.json();
+
+                // Determine whether to skip KYC based on user's current KYC status
+                let userKycStatus = 'none';
+                try {
+                    const u = JSON.parse(localStorage.getItem('user') || '{}');
+                    if (u && u.id) {
+                        const kycResp = await fetch(`http://localhost:4000/api/kyc/status?userId=${encodeURIComponent(u.id)}`);
+                        if (kycResp.ok) {
+                            const ks = await kycResp.json();
+                            userKycStatus = String(ks.status || 'none').toLowerCase();
+                        }
+                    }
+                } catch (_) {}
+
+                // Reset form previews (keep minimal state before redirect)
+                document.querySelectorAll('.image-preview').forEach(preview => preview.innerHTML = '');
+
+                if (userKycStatus === 'verified' || userKycStatus === 'approved') {
+                    showNotification('Campaign submitted! Your KYC is verified, so it’s sent for admin review.', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'my-account.html';
+                    }, 1200);
+                } else {
+                    showNotification('Campaign created successfully! Redirecting to Aadhaar KYC verification...', 'success');
+                    setTimeout(() => {
+                        window.location.href = `kyc-verification.html?campaignId=${encodeURIComponent(result.id)}`;
+                    }, 1200);
+                }
+                
+            } catch (error) {
+                console.error('Error creating campaign:', error);
+                showNotification('Unable to create campaign. Please check your information and try again.', 'error');
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Mobile menu toggle
+        const hamburger = document.querySelector('.hamburger');
+        const navMenu = document.querySelector('.nav-menu');
+        
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            navMenu.classList.toggle('active');
+        });
+
+        // Close mobile menu when clicking a link
+        document.querySelectorAll('.nav-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                navMenu.classList.remove('active');
+            });
+        });
+
+        // Form field animations
+        const formInputs = document.querySelectorAll('.form-group input, .form-group select, .form-group textarea');
+        formInputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('focused');
+            });
+            input.addEventListener('blur', function() {
+                if (!this.value) {
+                    this.parentElement.classList.remove('focused');
+                }
+            });
+        });
+    </script>
+
+    <style>
+        /* Additional styles for start campaign page */
+        .campaign-header {
+            background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .campaign-header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .campaign-header p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+        }
+
+        .campaign-form-section {
+            padding: 80px 0;
+            background: var(--bg-light);
+        }
+
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--bg-dark);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .form-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .form-header h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .form-header p {
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .campaign-form {
+            padding: 40px;
+        }
+
+        .form-section {
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .form-section h3 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .form-section h3 i {
+            margin-right: 10px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-white);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-dark);
+            color: var(--text-white);
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.2);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 5px;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .upload-section {
+            display: grid;
+            gap: 20px;
+        }
+
+        .upload-group {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .upload-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--text-white);
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background: rgba(52, 211, 153, 0.05);
+        }
+
+        .upload-area i {
+            font-size: 48px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .upload-area p {
+            margin: 0;
+            color: var(--text-light);
+        }
+
+        .upload-area input[type="file"] {
+            display: none;
+        }
+
+        .image-preview,
+        .image-preview-grid {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .preview-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .preview-image.single {
+            width: 200px;
+            height: 150px;
+        }
+
+        .preview-wrapper { position: relative; display: inline-block; }
+        .remove-image {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            line-height: 24px;
+            text-align: center;
+            cursor: pointer;
+        }
+        .remove-image:hover { background: rgba(0,0,0,0.9); }
+        .upload-area.dragover {
+            border-color: var(--primary-color);
+            background: rgba(52, 211, 153, 0.08);
+        }
+
+        .form-check {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .form-check input[type="checkbox"] {
+            width: auto;
+            margin-top: 5px;
+        }
+
+        .form-check label {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .form-check a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .form-check a:hover {
+            text-decoration: underline;
+        }
+
+        .btn-large {
+            width: 100%;
+            padding: 16px 32px;
+            font-size: 1.1rem;
+            margin-top: 20px;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .campaign-form {
+                padding: 20px;
+            }
+            
+            .form-header {
+                padding: 30px 20px;
+            }
+            
+            .campaign-header h1 {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .campaign-form-section {
+                padding: 40px 20px;
+            }
+            
+            .form-container {
+                margin: 0 -20px;
+                border-radius: 0;
+            }
+        }
+    </style>
+</body>
+</html>

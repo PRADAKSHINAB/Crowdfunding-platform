@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Settings - GreenFund</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-leaf"></i>
+                <span>GreenFund Admin</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" target="_blank">View Site</a></li>
+                <li><a href="admin-dashboard.html">Dashboard</a></li>
+                <li><a href="admin-profile.html">Profile</a></li>
+                <li><a href="admin-settings.html" class="active">Settings</a></li>
+                <li><a href="admin-dashboard.html#reports">Reports</a></li>
+                <li class="profile-dropdown">
+                    <div class="profile-logo" onclick="toggleProfileDropdown()">
+                        <i class="fas fa-user-shield"></i>
+                        <span>Admin</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="profile-menu" id="profileMenu">
+                        <a href="admin-profile.html"><i class="fas fa-user"></i> Profile</a>
+                        <a href="admin-settings.html"><i class="fas fa-cog"></i> Settings</a>
+                        <a href="#logs"><i class="fas fa-list"></i> Activity Logs</a>
+                        <a href="#logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Admin Header -->
+    <section class="admin-header">
+        <div class="container">
+            <h1>Admin Settings</h1>
+            <p>Configure platform settings, notifications, and system preferences</p>
+        </div>
+    </section>
+
+    <!-- Settings Content -->
+    <section class="settings-content">
+        <div class="container">
+            <div class="settings-grid">
+                <!-- Platform Settings -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-cog"></i> Platform Settings</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="setting-group">
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Auto-approval Threshold</h4>
+                                    <p>Automatically approve campaigns with funding goals below this amount</p>
+                                </div>
+                                <div class="setting-control">
+                                    <input type="number" id="autoApprovalThreshold" value="5000" min="0" max="50000">
+                                    <span class="unit">INR</span>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Campaign Review Time</h4>
+                                    <p>Maximum time (in hours) to review submitted campaigns</p>
+                                </div>
+                                <div class="setting-control">
+                                    <input type="number" id="reviewTime" value="48" min="1" max="168">
+                                    <span class="unit">hours</span>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Minimum Campaign Duration</h4>
+                                    <p>Minimum number of days for campaign funding period</p>
+                                </div>
+                                <div class="setting-control">
+                                    <input type="number" id="minDuration" value="7" min="1" max="365">
+                                    <span class="unit">days</span>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Maximum Campaign Duration</h4>
+                                    <p>Maximum number of days for campaign funding period</p>
+                                </div>
+                                <div class="setting-control">
+                                    <input type="number" id="maxDuration" value="60" min="1" max="365">
+                                    <span class="unit">days</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notification Settings -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-bell"></i> Notification Settings</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="setting-group">
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>New Campaign Alerts</h4>
+                                    <p>Receive notifications when new campaigns are submitted</p>
+                                </div>
+                                <div class="setting-control">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="newCampaignAlerts" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Campaign Updates</h4>
+                                    <p>Get notified about campaign status changes and updates</p>
+                                </div>
+                                <div class="setting-control">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="campaignUpdates" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>System Alerts</h4>
+                                    <p>Receive important system notifications and maintenance alerts</p>
+                                </div>
+                                <div class="setting-control">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="systemAlerts" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Email Notifications</h4>
+                                    <p>Send notifications via email</p>
+                                </div>
+                                <div class="setting-control">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="emailNotifications" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Push Notifications</h4>
+                                    <p>Send browser push notifications</p>
+                                </div>
+                                <div class="setting-control">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="pushNotifications">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Settings -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-shield-alt"></i> Security Settings</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="setting-group">
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Session Timeout</h4>
+                                    <p>Automatically log out after inactivity</p>
+                                </div>
+                                <div class="setting-control">
+                                    <select id="sessionTimeout">
+                                        <option value="15">15 minutes</option>
+                                        <option value="30" selected>30 minutes</option>
+                                        <option value="60">1 hour</option>
+                                        <option value="120">2 hours</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Login Attempts</h4>
+                                    <p>Maximum failed login attempts before lockout</p>
+                                </div>
+                                <div class="setting-control">
+                                    <input type="number" id="maxLoginAttempts" value="5" min="3" max="10">
+                                    <span class="unit">attempts</span>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Password Policy</h4>
+                                    <p>Minimum password strength requirements</p>
+                                </div>
+                                <div class="setting-control">
+                                    <select id="passwordPolicy">
+                                        <option value="low">Low (6+ characters)</option>
+                                        <option value="medium" selected>Medium (8+ characters, mixed case)</option>
+                                        <option value="high">High (10+ characters, symbols, numbers)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>IP Whitelist</h4>
+                                    <p>Restrict admin access to specific IP addresses</p>
+                                </div>
+                                <div class="setting-control">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="ipWhitelist">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Display Settings -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-desktop"></i> Display Settings</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="setting-group">
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Theme</h4>
+                                    <p>Choose your preferred color theme</p>
+                                </div>
+                                <div class="setting-control">
+                                    <select id="theme">
+                                        <option value="light" selected>Light</option>
+                                        <option value="dark">Dark</option>
+                                        <option value="auto">Auto (System)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Language</h4>
+                                    <p>Select your preferred language</p>
+                                </div>
+                                <div class="setting-control">
+                                    <select id="language">
+                                        <option value="en" selected>English</option>
+                                        <option value="es">Español</option>
+                                        <option value="fr">Français</option>
+                                        <option value="de">Deutsch</option>
+                                        <option value="hi">हिंदी</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Time Zone</h4>
+                                    <p>Set your local time zone</p>
+                                </div>
+                                <div class="setting-control">
+                                    <select id="timezone">
+                                        <option value="UTC">UTC</option>
+                                        <option value="EST">Eastern Time</option>
+                                        <option value="PST">Pacific Time</option>
+                                        <option value="IST" selected>India Standard Time</option>
+                                        <option value="GMT">Greenwich Mean Time</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Date Format</h4>
+                                    <p>Choose your preferred date format</p>
+                                </div>
+                                <div class="setting-control">
+                                    <select id="dateFormat">
+                                        <option value="MM/DD/YYYY" selected>MM/DD/YYYY</option>
+                                        <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                                        <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data & Privacy -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-database"></i> Data & Privacy</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="setting-group">
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Data Retention</h4>
+                                    <p>How long to keep user data and logs</p>
+                                </div>
+                                <div class="setting-control">
+                                    <select id="dataRetention">
+                                        <option value="30">30 days</option>
+                                        <option value="90" selected>90 days</option>
+                                        <option value="365">1 year</option>
+                                        <option value="forever">Forever</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Analytics Tracking</h4>
+                                    <p>Enable analytics and usage tracking</p>
+                                </div>
+                                <div class="setting-control">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="analyticsTracking" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Error Reporting</h4>
+                                    <p>Send error reports for debugging</p>
+                                </div>
+                                <div class="setting-control">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="errorReporting" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Save Settings Button -->
+            <div class="settings-actions">
+                <button type="button" class="btn-save" onclick="saveSettings()">
+                    <i class="fas fa-save"></i> Save All Settings
+                </button>
+                <button type="button" class="btn-reset" onclick="resetSettings()">
+                    <i class="fas fa-undo"></i> Reset to Defaults
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Show notification function
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => notification.classList.add('show'), 100);
+            
+            // Remove notification after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
+        }
+
+        // Admin Access Control
+        function checkAdminAccess() {
+            const isAdmin = sessionStorage.getItem('isAdmin') === 'true';
+            const adminToken = sessionStorage.getItem('adminToken');
+            
+            if (!isAdmin || !adminToken) {
+                window.location.href = 'admin-login.html';
+                return false;
+            }
+            return true;
+        }
+
+        // Initialize settings page
+        function initializeSettings() {
+            loadSettings();
+            setupEventListeners();
+        }
+
+        // Load current settings
+        function loadSettings() {
+            // In a real app, this would load from server/localStorage
+            // For demo, we'll use default values
+            // Loading settings...
+        }
+
+        // Save settings
+        function saveSettings() {
+            const settings = {
+                autoApprovalThreshold: document.getElementById('autoApprovalThreshold').value,
+                reviewTime: document.getElementById('reviewTime').value,
+                minDuration: document.getElementById('minDuration').value,
+                maxDuration: document.getElementById('maxDuration').value,
+                newCampaignAlerts: document.getElementById('newCampaignAlerts').checked,
+                campaignUpdates: document.getElementById('campaignUpdates').checked,
+                systemAlerts: document.getElementById('systemAlerts').checked,
+                emailNotifications: document.getElementById('emailNotifications').checked,
+                pushNotifications: document.getElementById('pushNotifications').checked,
+                sessionTimeout: document.getElementById('sessionTimeout').value,
+                maxLoginAttempts: document.getElementById('maxLoginAttempts').value,
+                passwordPolicy: document.getElementById('passwordPolicy').value,
+                ipWhitelist: document.getElementById('ipWhitelist').checked,
+                theme: document.getElementById('theme').value,
+                language: document.getElementById('language').value,
+                timezone: document.getElementById('timezone').value,
+                dateFormat: document.getElementById('dateFormat').value,
+                dataRetention: document.getElementById('dataRetention').value,
+                analyticsTracking: document.getElementById('analyticsTracking').checked,
+                errorReporting: document.getElementById('errorReporting').checked
+            };
+
+            // In a real app, this would save to server
+            localStorage.setItem('adminSettings', JSON.stringify(settings));
+            showNotification('Settings saved successfully!', 'success');
+        }
+
+        // Reset settings to defaults
+        function resetSettings() {
+            if (confirm('Are you sure you want to reset all settings to defaults? This action cannot be undone.')) {
+                // Reset all form elements to default values
+                document.getElementById('autoApprovalThreshold').value = 5000;
+                document.getElementById('reviewTime').value = 48;
+                document.getElementById('minDuration').value = 7;
+                document.getElementById('maxDuration').value = 60;
+                document.getElementById('newCampaignAlerts').checked = true;
+                document.getElementById('campaignUpdates').checked = true;
+                document.getElementById('systemAlerts').checked = true;
+                document.getElementById('emailNotifications').checked = true;
+                document.getElementById('pushNotifications').checked = false;
+                document.getElementById('sessionTimeout').value = '30';
+                document.getElementById('maxLoginAttempts').value = 5;
+                document.getElementById('passwordPolicy').value = 'medium';
+                document.getElementById('ipWhitelist').checked = false;
+                document.getElementById('theme').value = 'light';
+                document.getElementById('language').value = 'en';
+                document.getElementById('timezone').value = 'IST';
+                document.getElementById('dateFormat').value = 'MM/DD/YYYY';
+                document.getElementById('dataRetention').value = '90';
+                document.getElementById('analyticsTracking').checked = true;
+                document.getElementById('errorReporting').checked = true;
+
+                showNotification('Settings reset to defaults!', 'info');
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Theme change
+            document.getElementById('theme').addEventListener('change', function() {
+                const theme = this.value;
+                if (theme === 'dark') {
+                    document.body.classList.add('dark-theme');
+                } else {
+                    document.body.classList.remove('dark-theme');
+                }
+            });
+
+            // Language change
+            document.getElementById('language').addEventListener('change', function() {
+                showNotification(`Language changed to ${this.options[this.selectedIndex].text}`, 'info');
+            });
+
+            // Timezone change
+            document.getElementById('timezone').addEventListener('change', function() {
+                showNotification(`Timezone changed to ${this.options[this.selectedIndex].text}`, 'info');
+            });
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Profile dropdown toggle
+        function toggleProfileDropdown() {
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            profileDropdown.classList.toggle('active');
+        }
+
+        // Logout function
+        function logout() {
+            sessionStorage.removeItem('isAdmin');
+            sessionStorage.removeItem('adminToken');
+            sessionStorage.removeItem('adminUsername');
+            window.location.href = 'index.html';
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!checkAdminAccess()) {
+                return;
+            }
+            
+            initializeSettings();
+            
+            // Mobile menu toggle
+            const hamburger = document.querySelector('.hamburger');
+            const navMenu = document.querySelector('.nav-menu');
+            
+            hamburger.addEventListener('click', () => {
+                hamburger.classList.toggle('active');
+                navMenu.classList.toggle('active');
+            });
+
+            // Close mobile menu when clicking a link
+            document.querySelectorAll('.nav-menu a').forEach(link => {
+                link.addEventListener('click', () => {
+                    hamburger.classList.remove('active');
+                    navMenu.classList.remove('active');
+                });
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                const profileDropdown = document.querySelector('.profile-dropdown');
+                if (!profileDropdown.contains(e.target)) {
+                    profileDropdown.classList.remove('active');
+                }
+            });
+
+            // Add logout event listener
+            const logoutLink = document.querySelector('a[href="#logout"]');
+            if (logoutLink) {
+                logoutLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    logout();
+                });
+            }
+        });
+    </script>
+</body>
+</html>

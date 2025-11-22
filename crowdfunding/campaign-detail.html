@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campaign Details - GreenFund</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="api.js"></script>
+    <style>
+        .campaign-detail-container {
+            max-width: 1200px;
+            margin: 100px auto 50px;
+            padding: 0 20px;
+        }
+
+        .campaign-detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 40px;
+            margin-top: 30px;
+        }
+
+        .campaign-main {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .campaign-main-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+        }
+
+        .campaign-main-content {
+            padding: 30px;
+        }
+
+        .campaign-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            background: var(--primary-green);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .campaign-title {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .campaign-description {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        .campaign-sidebar {
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+
+        .donation-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .raised-amount {
+            font-size: 2rem;
+            color: var(--primary-green);
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .goal-amount {
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-green), var(--secondary-blue));
+            transition: width 1s ease;
+        }
+
+        .campaign-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            color: white;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+
+        .donate-form {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-green);
+        }
+
+        .quick-amounts {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .quick-amount-btn {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quick-amount-btn:hover,
+        .quick-amount-btn.active {
+            background: var(--primary-green);
+            border-color: var(--primary-green);
+        }
+
+        .donate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary-green), var(--secondary-blue));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .donate-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .donate-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .secure-badge {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+            margin-top: 15px;
+        }
+
+        .secure-badge i {
+            color: var(--primary-green);
+            margin-right: 5px;
+        }
+
+        @media (max-width: 968px) {
+            .campaign-detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .campaign-sidebar {
+                position: static;
+            }
+        }
+    </style>
+    
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-leaf"></i>
+                <span>GreenFund</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="campaigns.html">Campaigns</a></li>
+                <li><a href="start-campaign.html">Start Campaign</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="login.html">Login</a></li>
+                <li><a href="admin-login.html">Admin</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Campaign Detail Section -->
+    <section class="campaign-detail-container">
+        <a href="campaigns.html" style="color: var(--primary-green); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px;">
+            <i class="fas fa-arrow-left"></i> Back to Campaigns
+        </a>
+
+        <div class="campaign-detail-grid">
+            <!-- Main Content -->
+            <div class="campaign-main">
+                <img id="campaignImage" class="campaign-main-image" src="" alt="Campaign">
+                <div class="campaign-main-content">
+                    <span id="campaignBadge" class="campaign-badge">Loading...</span>
+                    <h1 id="campaignTitle" class="campaign-title">Loading Campaign...</h1>
+                    <p id="campaignDescription" class="campaign-description">Loading description...</p>
+                </div>
+            </div>
+
+            <!-- Donation Sidebar -->
+            <div class="campaign-sidebar">
+                <div class="donation-card">
+                    <div class="raised-amount">₹<span id="raisedAmount">0</span></div>
+                    <div class="goal-amount">raised of ₹<span id="goalAmount">0</span> goal</div>
+                    
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+                    </div>
+
+                    <div class="campaign-stats">
+                        <div class="stat-item">
+                            <div class="stat-value"><span id="backersCount">0</span></div>
+                            <div class="stat-label">Backers</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value"><span id="daysLeft">0</span></div>
+                            <div class="stat-label">Days Left</div>
+                        </div>
+                    </div>
+
+                    <!-- Donation Form -->
+                    <form id="donateForm" class="donate-form">
+                        <div class="form-group">
+                            <label>Select Amount</label>
+                            <div class="quick-amounts">
+                                <button type="button" class="quick-amount-btn" data-amount="500">₹500</button>
+                                <button type="button" class="quick-amount-btn" data-amount="1000">₹1000</button>
+                                <button type="button" class="quick-amount-btn" data-amount="2000">₹2000</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="customAmount">Or Enter Custom Amount</label>
+                            <input type="number" id="customAmount" name="amount" placeholder="Enter amount in ₹" min="1" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="donorName">Your Name (Optional)</label>
+                            <input type="text" id="donorName" name="donorName" placeholder="Anonymous">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="donorEmail">Email (Optional)</label>
+                            <input type="email" id="donorEmail" name="donorEmail" placeholder="your@email.com">
+                        </div>
+
+                        <button type="submit" class="donate-btn">
+                            <i class="fas fa-heart"></i> Donate Now
+                        </button>
+
+                        <div class="secure-badge">
+                            <i class="fas fa-lock"></i>
+                            Secure payment powered by Razorpay
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Razorpay Checkout Script -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    
+    <script>
+        let currentCampaign = null;
+
+        // Get campaign ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const campaignId = urlParams.get('id');
+
+        if (!campaignId) {
+            alert('No campaign specified');
+            window.location.href = 'campaigns.html';
+        }
+
+        // Load campaign details
+        async function loadCampaign() {
+            try {
+                const response = await fetch(`${API_URL}/campaigns/${campaignId}`);
+                if (!response.ok) throw new Error('Campaign not found');
+                
+                currentCampaign = await response.json();
+                displayCampaign(currentCampaign);
+            } catch (error) {
+                console.error('Error loading campaign:', error);
+                alert('Failed to load campaign');
+                window.location.href = 'campaigns.html';
+            }
+        }
+
+        function displayCampaign(campaign) {
+            document.getElementById('campaignImage').src = campaign.image;
+            document.getElementById('campaignBadge').textContent = campaign.badge || 'Campaign';
+            document.getElementById('campaignTitle').textContent = campaign.title;
+            document.getElementById('campaignDescription').textContent = campaign.description;
+            document.getElementById('raisedAmount').textContent = campaign.raised.toLocaleString('en-IN');
+            document.getElementById('goalAmount').textContent = campaign.goal.toLocaleString('en-IN');
+            document.getElementById('backersCount').textContent = campaign.backers;
+            document.getElementById('daysLeft').textContent = campaign.daysLeft;
+
+            const progress = Math.min((campaign.raised / campaign.goal) * 100, 100);
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        // Quick amount buttons
+        document.querySelectorAll('.quick-amount-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.quick-amount-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('customAmount').value = this.dataset.amount;
+            });
+        });
+
+        // Handle donation form submission
+        document.getElementById('donateForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const amount = parseInt(document.getElementById('customAmount').value);
+            const donorName = document.getElementById('donorName').value || 'Anonymous';
+            const donorEmail = document.getElementById('donorEmail').value || '';
+
+            if (!amount || amount < 1) {
+                alert('Please enter a valid amount');
+                return;
+            }
+
+            try {
+                // Step 1: Create Razorpay order
+                const orderResponse = await fetch(`${API_URL}/campaigns/${campaignId}/create-order`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount, donorName, donorEmail })
+                });
+
+                if (!orderResponse.ok) {
+                    throw new Error('Failed to create payment order');
+                }
+
+                const orderData = await orderResponse.json();
+
+                // Step 2: Open Razorpay checkout
+                const options = {
+                    key: orderData.keyId,
+                    amount: orderData.amount,
+                    currency: orderData.currency,
+                    name: 'GreenFund',
+                    description: orderData.campaignTitle,
+                    order_id: orderData.orderId,
+                    prefill: {
+                        name: donorName,
+                        email: donorEmail
+                    },
+                    theme: {
+                        color: '#00d4aa'
+                    },
+                    handler: async function(response) {
+                        // Step 3: Verify payment
+                        await verifyPayment(response, amount, donorName, donorEmail);
+                    },
+                    modal: {
+                        ondismiss: function() {
+                            console.log('Payment cancelled by user');
+                        }
+                    }
+                };
+
+                const rzp = new Razorpay(options);
+                rzp.open();
+
+            } catch (error) {
+                console.error('Error initiating payment:', error);
+                alert('Failed to initiate payment. Please try again.');
+            }
+        });
+
+        async function verifyPayment(razorpayResponse, amount, donorName, donorEmail) {
+            try {
+                const response = await fetch(`${API_URL}/campaigns/${campaignId}/verify-payment`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        razorpay_order_id: razorpayResponse.razorpay_order_id,
+                        razorpay_payment_id: razorpayResponse.razorpay_payment_id,
+                        razorpay_signature: razorpayResponse.razorpay_signature,
+                        amount: amount * 100, // Convert to paise
+                        donorName,
+                        donorEmail
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    alert('🎉 Thank you for your donation! Payment successful.');
+                    // Reload campaign to show updated amounts
+                    loadCampaign();
+                    // Reset form
+                    document.getElementById('donateForm').reset();
+                    document.querySelectorAll('.quick-amount-btn').forEach(b => b.classList.remove('active'));
+                } else {
+                    throw new Error(result.message || 'Payment verification failed');
+                }
+            } catch (error) {
+                console.error('Error verifying payment:', error);
+                alert('Payment verification failed. Please contact support with your payment ID: ' + razorpayResponse.razorpay_payment_id);
+            }
+        }
+
+        // Load campaign on page load
+        loadCampaign();
+
+        // Mobile navigation
+        document.addEventListener('DOMContentLoaded', () => {
+            const hamburger = document.querySelector('.hamburger');
+            const navMenu = document.querySelector('.nav-menu');
+
+            if (hamburger && navMenu) {
+                hamburger.addEventListener('click', () => {
+                    hamburger.classList.toggle('active');
+                    navMenu.classList.toggle('active');
+                });
+
+                // Close mobile menu when clicking a link
+                document.querySelectorAll('.nav-menu a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        hamburger.classList.remove('active');
+                        navMenu.classList.remove('active');
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>
