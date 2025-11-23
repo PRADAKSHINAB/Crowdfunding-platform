@@ -436,76 +436,14 @@ app.get('/api/admin/users-count', async (req, res) => {
 
 app.get('/api/campaigns/:id', (req, res) => {
     const campaigns = readJson('campaigns.json', []);
-            }
-
-            const campaignData = {
-                title,
-                description,
-                image: imageBase64,
-                goal,
-                raised: 0,
-                backers: 0,
-                daysLeft: days,
-                badge: 'New',
-                status: 'pending',
-                createdAt: new Date(),
-                location,
-                category,
-                creatorId: userId,
-                creatorName: organizerName
-            };
-
-            let campaign;
-            if (useMongoDb) {
-                // Create campaign in MongoDB
-                const created = await mongoDb.createCampaign(campaignData);
-                campaign = created?.toObject ? created.toObject() : created;
-                if (campaign && campaign._id && !campaign.id) {
-                    campaign.id = campaign._id.toString();
-                }
-
-                // Mirror into file-based store so admin endpoints (which read files) can see it
-                const campaigns = readJson('campaigns.json', []);
-                const mirror = {
-                    id: campaign.id,
-                    title: campaign.title,
-                    description: campaign.description,
-                    image: campaign.image,
-                    goal: campaign.goal || 0,
-                    raised: 0,
-                    backers: 0,
-                    daysLeft: campaign.daysLeft || 30,
-                    badge: 'New',
-                    status: campaign.status || 'pending',
-                    createdAt: new Date().toISOString(),
-                    location: campaign.location || '',
-                    category: campaign.category || 'General',
-                    creatorName: campaign.creatorName || '',
-                    creatorId: campaign.creatorId || ''
-                };
-                campaigns.push(mirror);
-                writeJson('campaigns.json', campaigns);
-            } else {
-                // Fallback to file system
-                const campaigns = readJson('campaigns.json', []);
-                const newId = campaigns.length ? Math.max(...campaigns.map(c => Number(c.id) || 0)) + 1 : 1;
-                campaign = {
-                    id: newId,
-                    ...campaignData,
-                    createdAt: new Date().toISOString()
-                };
-                campaigns.push(campaign);
-                writeJson('campaigns.json', campaigns);
-            }
-            res.status(201).json(campaign);
-        });
-    } catch (error) {
-        console.error('Campaign creation error:', error);
-        res.status(500).json({ message: 'Server error during campaign creation' });
-    }
+    const campaign = campaigns.find(c => String(c.id) === String(req.params.id));
+    if (!campaign) return res.status(404).json({ message: 'Campaign not found' });
+    res.json(campaign);
 });
 
-// ...
+// Statistics endpoint
+app.get('/api/statistics', (req, res) => {
+    const campaigns = readJson('campaigns.json', []);
     // Only count approved campaigns for public statistics
     const approvedCampaigns = campaigns.filter(c => c.status === 'approved');
 
@@ -761,80 +699,6 @@ app.post('/api/auth/login', async (req, res) => {
     }
 });
 
-app.post('/api/auth/login', async (req, res) => {
-    const { email, password } = req.body || {};
-    if (!email || !password) return res.status(400).json({ message: 'Email and password required' });
-    
-    try {
-        if (useMongoDb) {
-            // Find user in MongoDB
-            const user = await mongoDb.getUserByEmail(email);
-            if (!user) {
-                return res.status(401).json({ message: 'Invalid credentials' });
-            }
-            
-            // For MongoDB users, check if username is used instead of email
-            if (user.username === email && user.password === password) {
-                res.json({ 
-                    token: `user_${Date.now()}`, 
-                    name: user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
-                    email: user.email,
-                    username: user.username,
-                    id: user._id
-                });
-                return;
-            }
-            
-            // Check password directly without case sensitivity
-            if (user.password.toLowerCase() === password.toLowerCase()) {
-                res.json({ 
-                    token: `user_${Date.now()}`, 
-                    name: user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
-                    email: user.email,
-                    username: user.username,
-                    id: user._id
-                });
-                return;
-            }
-            
-            return res.status(401).json({ message: 'Invalid credentials' });
-        } else {
-            // Fallback to file system
-            const users = readJson('users.json', []);
-            
-            // First try exact match
-            let user = users.find(u => u.email === email && u.password === password);
-            
-            // If not found, try username match
-            if (!user) {
-                user = users.find(u => u.username === email && u.password === password);
-            }
-            
-            // If still not found, try case-insensitive match
-            if (!user) {
-                user = users.find(u => 
-                    (u.email.toLowerCase() === email.toLowerCase() || 
-                     u.username?.toLowerCase() === email.toLowerCase()) && 
-                    u.password.toLowerCase() === password.toLowerCase()
-                );
-            }
-            
-            if (!user) return res.status(401).json({ message: 'Invalid credentials' });
-            
-            res.json({ 
-                token: `user_${Date.now()}`, 
-                name: user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
-                email: user.email,
-                username: user.username || email.split('@')[0],
-                id: user.id
-            });
-        }
-    } catch (error) {
-        console.error('Login error:', error);
-        res.status(500).json({ message: 'Server error during login' });
-    }
-});
-
 // Admin login
 app.post('/api/admin/login', (req, res) => {
     const admins = readJson('admins.json', []);
@@ -842,6 +706,107 @@ app.post('/api/admin/login', (req, res) => {
     const ok = admins.find(a => a.username === username && a.password === password && a.code === code);
     if (!ok) return res.status(401).json({ message: 'Invalid credentials' });
     res.json({ token: `admin_${Date.now()}` });
+});
+
+// Create campaign with Base64 image support
+app.post('/api/campaigns', requireAuth, async (req, res) => {
+    try {
+        const form = new formidable.IncomingForm({ multiples: false });
+        form.parse(req, async (err, fields, files) => {
+            if (err) {
+                console.error('Form parse error:', err);
+                return res.status(500).json({ error: 'Failed to parse form data' });
+            }
+
+            // Helper to get the first value of a field
+            const getFirst = (arr) => (Array.isArray(arr) ? arr[0] : arr);
+            const title = getFirst(fields.campaignTitle) || 'Untitled Campaign';
+            const description = getFirst(fields.campaignDescription) || getFirst(fields.shortDescription) || '';
+            const goal = parseInt(getFirst(fields.fundingGoal) || '0', 10) || 0;
+            const days = parseInt(getFirst(fields.campaignDuration) || '30', 10) || 30;
+            const location = getFirst(fields.location) || '';
+            const category = getFirst(fields.category) || 'General';
+            const organizerName = getFirst(fields.organizerName) || '';
+            const userId = getFirst(fields.userId) || '';
+
+            // Convert uploaded image to Base64, if present
+            let imageBase64 = null;
+            const imageFile = files.campaignImage?.[0];
+            if (imageFile && imageFile.filepath) {
+                try {
+                    const imageBytes = fs.readFileSync(imageFile.filepath);
+                    const mimeType = imageFile.mimetype || 'image/jpeg';
+                    imageBase64 = `data:${mimeType};base64,${imageBytes.toString('base64')}`;
+                } catch (readErr) {
+                    console.error('Failed to read uploaded image:', readErr);
+                }
+            }
+
+            const campaignData = {
+                title,
+                description,
+                image: imageBase64,
+                goal,
+                raised: 0,
+                backers: 0,
+                daysLeft: days,
+                badge: 'New',
+                status: 'pending',
+                createdAt: new Date(),
+                location,
+                category,
+                creatorId: userId,
+                creatorName: organizerName
+            };
+
+            let campaign;
+            if (useMongoDb) {
+                // Create campaign in MongoDB
+                const created = await mongoDb.createCampaign(campaignData);
+                campaign = created?.toObject ? created.toObject() : created;
+                if (campaign && campaign._id && !campaign.id) {
+                    campaign.id = campaign._id.toString();
+                }
+
+                // Mirror into file-based store so admin endpoints (which read files) can see it
+                const campaigns = readJson('campaigns.json', []);
+                const mirror = {
+                    id: campaign.id,
+                    title: campaign.title,
+                    description: campaign.description,
+                    image: campaign.image,
+                    goal: campaign.goal || 0,
+                    raised: 0,
+                    backers: 0,
+                    daysLeft: campaign.daysLeft || 30,
+                    badge: 'New',
+                    status: campaign.status || 'pending',
+                    createdAt: new Date().toISOString(),
+                    location: campaign.location || '',
+                    category: campaign.category || 'General',
+                    creatorName: campaign.creatorName || '',
+                    creatorId: campaign.creatorId || ''
+                };
+                campaigns.push(mirror);
+                writeJson('campaigns.json', campaigns);
+            } else {
+                // Fallback to file system
+                const campaigns = readJson('campaigns.json', []);
+                const newId = campaigns.length ? Math.max(...campaigns.map(c => Number(c.id) || 0)) + 1 : 1;
+                campaign = {
+                    id: newId,
+                    ...campaignData,
+                    createdAt: new Date().toISOString()
+                };
+                campaigns.push(campaign);
+                writeJson('campaigns.json', campaigns);
+            }
+            res.status(201).json(campaign);
+        });
+    } catch (error) {
+        console.error('Campaign creation error:', error);
+        res.status(500).json({ message: 'Server error during campaign creation' });
+    }
 });
 
 // KYC submission (stores minimal info and uploaded files)
@@ -1193,8 +1158,14 @@ app.post('/api/contact', (req, res) => {
     res.status(201).json({ success: true });
 });
 
-// Serve uploaded files
+// Serve static files from uploads directory
 app.use('/uploads', express.static(UPLOADS_DIR));
+
+// Fallback for missing uploads: return placeholder image
+app.use('/uploads/*', (req, res) => {
+    // If the file doesn't exist, return a placeholder SVG or 404
+    res.status(404).send('Image not found');
+});
 
 // Serve frontend statically so visiting http://localhost:4000/ loads the site
 if (fs.existsSync(FRONTEND_DIR)) {
