@@ -436,73 +436,9 @@ app.get('/api/admin/users-count', async (req, res) => {
 
 app.get('/api/campaigns/:id', (req, res) => {
     const campaigns = readJson('campaigns.json', []);
-            }
-
-            const campaignData = {
-                title,
-                description,
-                image: imageBase64,
-                goal,
-                raised: 0,
-                backers: 0,
-                daysLeft: days,
-                badge: 'New',
-                status: 'pending',
-                createdAt: new Date(),
-                location,
-                category,
-                creatorId: userId,
-                creatorName: organizerName
-            };
-
-            let campaign;
-            if (useMongoDb) {
-                // Create campaign in MongoDB
-                const created = await mongoDb.createCampaign(campaignData);
-                campaign = created?.toObject ? created.toObject() : created;
-                if (campaign && campaign._id && !campaign.id) {
-                    campaign.id = campaign._id.toString();
-                }
-
-                // Mirror into file-based store so admin endpoints (which read files) can see it
-                const campaigns = readJson('campaigns.json', []);
-                const mirror = {
-                    id: campaign.id,
-                    title: campaign.title,
-                    description: campaign.description,
-                    image: campaign.image,
-                    goal: campaign.goal || 0,
-                    raised: 0,
-                    backers: 0,
-                    daysLeft: campaign.daysLeft || 30,
-                    badge: 'New',
-                    status: campaign.status || 'pending',
-                    createdAt: new Date().toISOString(),
-                    location: campaign.location || '',
-                    category: campaign.category || 'General',
-                    creatorName: campaign.creatorName || '',
-                    creatorId: campaign.creatorId || ''
-                };
-                campaigns.push(mirror);
-                writeJson('campaigns.json', campaigns);
-            } else {
-                // Fallback to file system
-                const campaigns = readJson('campaigns.json', []);
-                const newId = campaigns.length ? Math.max(...campaigns.map(c => Number(c.id) || 0)) + 1 : 1;
-                campaign = {
-                    id: newId,
-                    ...campaignData,
-                    createdAt: new Date().toISOString()
-                };
-                campaigns.push(campaign);
-                writeJson('campaigns.json', campaigns);
-            }
-            res.status(201).json(campaign);
-        });
-    } catch (error) {
-        console.error('Campaign creation error:', error);
-        res.status(500).json({ message: 'Server error during campaign creation' });
-    }
+    const campaign = campaigns.find(c => String(c.id) === String(req.params.id));
+    if (!campaign) return res.status(404).json({ message: 'Campaign not found' });
+    res.json(campaign);
 });
 
 // ...
