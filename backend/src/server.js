@@ -1193,8 +1193,14 @@ app.post('/api/contact', (req, res) => {
     res.status(201).json({ success: true });
 });
 
-// Serve uploaded files
+// Serve static files from uploads directory
 app.use('/uploads', express.static(UPLOADS_DIR));
+
+// Fallback for missing uploads: return placeholder image
+app.use('/uploads/*', (req, res) => {
+    // If the file doesn't exist, return a placeholder SVG or 404
+    res.status(404).send('Image not found');
+});
 
 // Serve frontend statically so visiting http://localhost:4000/ loads the site
 if (fs.existsSync(FRONTEND_DIR)) {
