@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="150" height="150" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="75" cy="75" r="70" fill="#1a1a1a" stroke="#00ff41" stroke-width="2"/>
+  <text x="75" y="85" font-family="Arial" font-size="20" fill="#00ff41" text-anchor="middle">Avatar</text>
+</svg>
