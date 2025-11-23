@@ -4,6 +4,7 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const multer = require('multer');
+const formidable = require('formidable');
 const crypto = require('crypto');
 const Razorpay = require('razorpay');
 const mongoose = require('mongoose');
@@ -435,112 +436,76 @@ app.get('/api/admin/users-count', async (req, res) => {
 
 app.get('/api/campaigns/:id', (req, res) => {
     const campaigns = readJson('campaigns.json', []);
-    const campaign = campaigns.find(c => String(c.id) === String(req.params.id));
-    if (!campaign) return res.status(404).json({ message: 'Not found' });
-    res.json(campaign);
-});
-
-app.post('/api/campaigns', requireAuth, upload.fields([
-    { name: 'campaignImage', maxCount: 1 },
-    { name: 'additionalImages', maxCount: 5 }
-]), async (req, res) => {
-    try {
-        const body = req.body || {};
-        const imageFile = req.files && req.files.campaignImage && req.files.campaignImage[0];
-        const imageUrl = imageFile ? `/uploads/${imageFile.filename}` : body.image || '';
-        const days = parseInt(body.campaignDuration || '30', 10) || 30;
-
-        const campaignData = {
-            title: body.campaignTitle || 'Untitled Campaign',
-            description: body.campaignDescription || body.shortDescription || '',
-            image: imageUrl,
-            goal: parseInt(body.fundingGoal || '0', 10) || 0,
-            raised: 0,
-            backers: 0,
-            daysLeft: days,
-            badge: 'New',
-            status: 'pending',
-            createdAt: new Date(),
-            location: body.location || '',
-            category: body.category || 'General'
-        };
-
-        // Ensure creator info is present for MongoDB model validation
-        // Map frontend userId -> creatorId and pass organizerName
-        if (useMongoDb) {
-            const incomingUserId = body.userId;
-            if (incomingUserId && mongoose.Types.ObjectId.isValid(incomingUserId)) {
-                campaignData.creatorId = incomingUserId;
-            } else {
-                // Fallback to a generated ObjectId so the document can be stored
-                campaignData.creatorId = new mongoose.Types.ObjectId().toString();
-            }
-            if (body.organizerName) {
-                campaignData.creatorName = body.organizerName;
-            }
-        }
-
-        let campaign;
-        
-        if (useMongoDb) {
-            // Create campaign in MongoDB
-            const created = await mongoDb.createCampaign(campaignData);
-            // Normalize response to include `id` like file-based storage
-            campaign = created?.toObject ? created.toObject() : created;
-            if (campaign && campaign._id && !campaign.id) {
-                campaign.id = campaign._id.toString();
             }
 
-            // Mirror into file-based store so admin endpoints (which read files) can see it
-            const campaigns = readJson('campaigns.json', []);
-            const mirror = {
-                id: campaign.id,
-                title: campaign.title,
-                description: campaign.description,
-                image: campaign.image,
-                goal: campaign.goal || 0,
+            const campaignData = {
+                title,
+                description,
+                image: imageBase64,
+                goal,
                 raised: 0,
                 backers: 0,
-                daysLeft: campaign.daysLeft || 30,
+                daysLeft: days,
                 badge: 'New',
-                status: campaign.status || 'pending',
-                createdAt: new Date().toISOString(),
-                location: campaign.location || '',
-                category: campaign.category || 'General',
-                // Add creatorName so admin dashboard shows proper name
-                creatorName: campaign.creatorName || campaign.organizerName || '',
-                // Include creatorId to correlate with user KYC
-                creatorId: campaign.creatorId || ''
+                status: 'pending',
+                createdAt: new Date(),
+                location,
+                category,
+                creatorId: userId,
+                creatorName: organizerName
             };
-            campaigns.push(mirror);
-            writeJson('campaigns.json', campaigns);
-        } else {
-            // Fallback to file system
-            const campaigns = readJson('campaigns.json', []);
-            const newId = campaigns.length ? Math.max(...campaigns.map(c => Number(c.id) || 0)) + 1 : 1;
-            
-            campaign = {
-                id: newId,
-                ...campaignData,
-                // Include creatorName if provided so admin UI can display it
-                creatorName: body.organizerName || campaignData.creatorName || '',
-                // Include creatorId for user-level KYC correlation
-                creatorId: campaignData.creatorId || body.userId || '',
-                createdAt: new Date().toISOString()
-            };          
-            campaigns.push(campaign);
-            writeJson('campaigns.json', campaigns);
-        }  
-        res.status(201).json(campaign);
+
+            let campaign;
+            if (useMongoDb) {
+                // Create campaign in MongoDB
+                const created = await mongoDb.createCampaign(campaignData);
+                campaign = created?.toObject ? created.toObject() : created;
+                if (campaign && campaign._id && !campaign.id) {
+                    campaign.id = campaign._id.toString();
+                }
+
+                // Mirror into file-based store so admin endpoints (which read files) can see it
+                const campaigns = readJson('campaigns.json', []);
+                const mirror = {
+                    id: campaign.id,
+                    title: campaign.title,
+                    description: campaign.description,
+                    image: campaign.image,
+                    goal: campaign.goal || 0,
+                    raised: 0,
+                    backers: 0,
+                    daysLeft: campaign.daysLeft || 30,
+                    badge: 'New',
+                    status: campaign.status || 'pending',
+                    createdAt: new Date().toISOString(),
+                    location: campaign.location || '',
+                    category: campaign.category || 'General',
+                    creatorName: campaign.creatorName || '',
+                    creatorId: campaign.creatorId || ''
+                };
+                campaigns.push(mirror);
+                writeJson('campaigns.json', campaigns);
+            } else {
+                // Fallback to file system
+                const campaigns = readJson('campaigns.json', []);
+                const newId = campaigns.length ? Math.max(...campaigns.map(c => Number(c.id) || 0)) + 1 : 1;
+                campaign = {
+                    id: newId,
+                    ...campaignData,
+                    createdAt: new Date().toISOString()
+                };
+                campaigns.push(campaign);
+                writeJson('campaigns.json', campaigns);
+            }
+            res.status(201).json(campaign);
+        });
     } catch (error) {
         console.error('Campaign creation error:', error);
         res.status(500).json({ message: 'Server error during campaign creation' });
     }
 });
 
-// Get overall statistics for homepage
-app.get('/api/statistics', (req, res) => {
-    const campaigns = readJson('campaigns.json', []);
+// ...
     // Only count approved campaigns for public statistics
     const approvedCampaigns = campaigns.filter(c => c.status === 'approved');
 
