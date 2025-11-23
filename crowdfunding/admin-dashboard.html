@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - GreenFund</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="api.js"></script>
+    <style>
+        .kyc-card { border: 1px solid var(--primary-green); border-radius: 12px; padding: 20px; margin-bottom: 20px; background: rgba(255,255,255,0.04); }
+        .kyc-card.pending { border-color: #f57c00; }
+        .kyc-card.rejected { border-color: #c62828; }
+        .kyc-card.verified { border-color: var(--primary-green); }
+        .kyc-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .kyc-title { font-size: 1.2rem; font-weight: 700; color: var(--text-white); }
+        .kyc-meta { color: var(--text-light); font-size: 0.9rem; margin-bottom: 16px; display: flex; gap: 20px; flex-wrap: wrap; }
+        .kyc-grid { display: grid; grid-template-columns: repeat(2, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
+        .kyc-item { background: rgba(255,255,255,0.05); border-radius: 10px; padding: 16px; }
+        .kyc-item label { display: block; color: var(--primary-green); font-weight: 600; margin-bottom: 8px; }
+        .documents-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 10px; }
+        .doc-card { background: rgba(255,255,255,0.05); border-radius: 10px; padding: 16px; border: 1px solid rgba(0,255,65,0.2); }
+        .doc-title { color: var(--text-light); margin-bottom: 10px; }
+        .doc-view-btn { background: var(--primary-green); color: #000; border: none; padding: 8px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+        .kyc-actions { display: flex; gap: 10px; align-items: center; margin-top: 16px; }
+        .btn-approve { background: #28a745; color: #fff; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 700; }
+        .btn-reject { background: #dc3545; color: #fff; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 700; }
+        .btn-view { background: transparent; color: var(--primary-green); border: 2px solid var(--primary-green); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: 700; }
+        @media (max-width: 968px) { .documents-grid { grid-template-columns: repeat(2,1fr); } .kyc-grid { grid-template-columns: 1fr; } }
+        #kycDetailsModal .modal-header { height: auto; padding: 16px 24px; border-radius: 15px 15px 0 0; }
+        #kycDetailsModal .modal-body { padding: 24px; }
+        #kycDetailsContainer { max-width: 900px; margin: 0 auto; }
+        .kyc-card { margin-left: auto; margin-right: auto; }
+        .kyc-submissions #kycSubmissions { max-width: 1100px; margin: 0 auto; }
+        /* Center Campaign Review modal title and position close button */
+        #campaignReviewModal .modal-content { margin: 24px auto; }
+        #campaignReviewModal .modal-header { display: flex; align-items: center; justify-content: center; position: relative; height: auto !important; min-height: 56px; overflow: visible; padding: 12px 20px; }
+        #campaignReviewModal .modal-header h2 { margin: 0; text-align: center; }
+        #campaignReviewModal .modal-header .modal-close { position: absolute; right: 16px; top: 12px; }
+        #campaignReviewModal .modal-body { padding: 20px; }
+        /* Add spacing under hero image */
+        #campaignReviewModal #imagePreview { margin-bottom: 12px; }
+        #campaignReviewModal .campaign-image h4 { margin: 6px 0 8px; }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-leaf"></i>
+                <span>GreenFund Admin</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" target="_blank">View Site</a></li>
+                <li><a href="admin-dashboard.html" class="active">Dashboard</a></li>
+                <li><a href="admin-profile.html">Profile</a></li>
+                <li><a href="admin-settings.html">Settings</a></li>
+                <li><a href="admin-dashboard.html#reports">Reports</a></li>
+                <li class="profile-dropdown">
+                    <div class="profile-logo" onclick="toggleProfileDropdown()">
+                        <i class="fas fa-user-shield"></i>
+                        <span>Admin</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="profile-menu" id="profileMenu">
+                        <a href="admin-profile.html"><i class="fas fa-user"></i> Profile</a>
+                        <a href="admin-settings.html"><i class="fas fa-cog"></i> Settings</a>
+                        <a href="admin-dashboard.html#logs"><i class="fas fa-list"></i> Activity Logs</a>
+                        <a href="#logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Admin Header -->
+    <section class="admin-header">
+        <div class="container">
+            <h1>Admin Dashboard</h1>
+            <p>Manage campaigns, review documents, and oversee platform operations</p>
+        </div>
+    </section>
+
+    <!-- Dashboard Stats -->
+    <section class="dashboard-stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon pending">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="pendingCount">0</h3>
+                        <p>Pending Approvals</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon approved">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="approvedCount">0</h3>
+                        <p>Approved Campaigns</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon rejected">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="rejectedCount">0</h3>
+                        <p>Rejected Campaigns</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon total">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="totalUsers">0</h3>
+                        <p>Total Users</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Profile Section -->
+    <section id="profile" class="profile-section hidden">
+        <div class="container">
+            <div class="profile-grid">
+                <!-- Profile Card -->
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            <img src="images/avatar-placeholder.png" alt="Admin Avatar" id="adminAvatar">
+                            <div class="avatar-overlay">
+                                <i class="fas fa-camera"></i>
+                                <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+                            </div>
+                        </div>
+                        <div class="profile-info">
+                            <h2 id="adminName">John Admin</h2>
+                            <p class="admin-role">Senior Administrator</p>
+                            <p class="admin-email" id="adminEmail">admin@greenfund.com</p>
+                            <div class="admin-status">
+                                <span class="status-badge active">Active</span>
+                                <span class="last-login">Last login: <span id="lastLogin">2 hours ago</span></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <h3 id="campaignsReviewed">156</h3>
+                            <p>Campaigns Reviewed</p>
+                        </div>
+                        <div class="stat-item">
+                            <h3 id="approvalsGiven">142</h3>
+                            <p>Approvals Given</p>
+                        </div>
+                        <div class="stat-item">
+                            <h3 id="rejectionsGiven">14</h3>
+                            <p>Rejections Given</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Personal Information -->
+                <div class="info-card">
+                    <div class="card-header">
+                        <h3>Personal Information</h3>
+                        <button type="button" class="btn-edit" onclick="toggleEditMode('personal')">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                    </div>
+                    <div class="card-content">
+                        <form id="personalForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Full Name</label>
+                                    <input type="text" id="fullName" value="John Admin" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label>Email</label>
+                                    <input type="email" id="email" value="admin@greenfund.com" disabled>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Phone</label>
+                                    <input type="tel" id="phone" value="+1 (555) 123-4567" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label>Department</label>
+                                    <input type="text" id="department" value="Campaign Management" disabled>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Position</label>
+                                    <input type="text" id="position" value="Senior Administrator" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label>Employee ID</label>
+                                    <input type="text" id="employeeId" value="ADM-001" disabled>
+                                </div>
+                            </div>
+                            <div class="form-actions" id="personalActions" style="display: none;">
+                                <button type="button" class="btn-save" onclick="savePersonalInfo()">Save Changes</button>
+                                <button type="button" class="btn-cancel" onclick="cancelEdit('personal')">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Security Information -->
+                <div class="info-card">
+                    <div class="card-header">
+                        <h3>Security Information</h3>
+                        <button type="button" class="btn-edit" onclick="toggleEditMode('security')">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                    </div>
+                    <div class="card-content">
+                        <div class="security-info">
+                            <div class="security-item">
+                                <div class="security-label">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <span>Two-Factor Authentication</span>
+                                </div>
+                                <div class="security-status">
+                                    <span class="status-badge enabled">Enabled</span>
+                                    <button type="button" class="btn-toggle" onclick="toggle2FA()">Disable</button>
+                                </div>
+                            </div>
+                            <div class="security-item">
+                                <div class="security-label">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Session Timeout</span>
+                                </div>
+                                <div class="security-status">
+                                    <span>30 minutes</span>
+                                    <button class="btn-toggle" onclick="changeSessionTimeout()">Change</button>
+                                </div>
+                            </div>
+                            <div class="security-item">
+                                <div class="security-label">
+                                    <i class="fas fa-key"></i>
+                                    <span>Last Password Change</span>
+                                </div>
+                                <div class="security-status">
+                                    <span>15 days ago</span>
+                                    <button class="btn-toggle" onclick="changePassword()">Change</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="activity-card">
+                    <div class="card-header">
+                        <h3>Recent Activity</h3>
+                        <a href="#viewAll" class="btn-view-all">View All</a>
+                    </div>
+                    <div class="card-content">
+                        <div class="activity-list" id="activityList">
+                            <!-- Activity items will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Campaign Approval Section -->
+    <section id="campaigns" class="campaign-approval">
+        <div class="container">
+            <div class="section-header">
+                <h2>Campaign Approval Requests</h2>
+                <div class="filter-controls">
+                    <select id="statusFilter" onchange="filterCampaigns()">
+                        <option value="all">All Status</option>
+                        <option value="pending" selected>Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                    <select id="categoryFilter" onchange="filterCampaigns()">
+                        <option value="all">All Categories</option>
+                        <option value="energy">Renewable Energy</option>
+                        <option value="water">Water Conservation</option>
+                        <option value="waste">Waste Management</option>
+                        <option value="education">Education</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="campaign-requests" id="campaignRequests">
+                <!-- Campaign requests will be dynamically loaded -->
+            </div>
+        </div>
+    </section>
+
+    <!-- KYC Submissions Section -->
+    <section id="kyc" class="kyc-submissions">
+        <div class="container">
+            <div class="section-header">
+                <h2>KYC Submissions</h2>
+            </div>
+            <div id="kycSubmissions"></div>
+        </div>
+    </section>
+
+    <!-- Campaign Review Modal -->
+    <div id="campaignReviewModal" class="modal">
+        <div class="modal-content large-modal">
+            <div class="modal-header">
+                <h2>Campaign Review</h2>
+                <button class="modal-close" onclick="closeReviewModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="review-content">
+                    <div class="campaign-details">
+                        <div class="campaign-image">
+                            <h4>Campaign Image</h4>
+                            <div id="imagePreview" class="image-preview">
+                                <!-- Campaign image will be displayed here -->
+                            </div>
+                        </div>
+                        <h3 id="reviewTitle"></h3>
+                        <div class="campaign-meta">
+                            <span><i class="fas fa-user"></i> <span id="reviewCreator"></span></span>
+                            <span><i class="fas fa-calendar"></i> <span id="reviewDate"></span></span>
+                            <span><i class="fas fa-tag"></i> <span id="reviewCategory"></span></span>
+                        </div>
+                        <div class="campaign-description">
+                            <h4>Description</h4>
+                            <p id="reviewDescription"></p>
+                        </div>
+                        <div class="funding-details">
+                            <h4>Funding Details</h4>
+                            <div class="funding-grid">
+                                <div class="funding-item">
+                                    <label>Goal Amount:</label>
+                                    <span id="reviewGoal"></span>
+                                </div>
+                                <div class="funding-item">
+                                    <label>Campaign Duration:</label>
+                                    <span id="reviewDuration"></span>
+                                </div>
+                                <div class="funding-item">
+                                    <label>Location:</label>
+                                    <span id="reviewLocation"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="documents-section">
+                        <h4>Submitted Documents</h4>
+                        <div class="documents-grid" id="documentsGrid">
+                            <!-- Documents will be loaded here -->
+                        </div>
+                    </div>
+
+                    <div class="review-actions">
+                        <h4>Review Decision</h4>
+                        <div class="action-buttons">
+                            <button class="btn-approve" onclick="approveCampaign()">
+                                <i class="fas fa-check"></i> Approve Campaign
+                            </button>
+                            <button class="btn-reject" onclick="rejectCampaign()">
+                                <i class="fas fa-times"></i> Reject Campaign
+                            </button>
+                            <button class="btn-request" onclick="requestChanges()">
+                                <i class="fas fa-edit"></i> Request Changes
+                            </button>
+                        </div>
+                        <div class="review-notes">
+                            <label for="reviewNotes">Review Notes (Optional):</label>
+                            <textarea id="reviewNotes" placeholder="Add notes about your decision..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="kycDetailsModal" class="modal">
+        <div class="modal-content large-modal">
+            <div class="modal-header">
+                <h2>KYC Details</h2>
+                <button class="modal-close" onclick="closeKycDetails()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="kycDetailsContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Management Section -->
+    <section id="users" class="user-management">
+        <div class="container">
+            <h2>User Management</h2>
+            <div class="user-stats">
+                <div class="user-stat">
+                    <h3>Active Users</h3>
+                    <p>2,847</p>
+                </div>
+                <div class="user-stat">
+                    <h3>Campaign Creators</h3>
+                    <p>156</p>
+                </div>
+                <div class="user-stat">
+                    <h3>Verified Users</h3>
+                    <p>1,234</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reports Section -->
+    <section id="reports" class="reports-section">
+        <div class="container">
+            <h2>Platform Reports</h2>
+            <div class="reports-grid">
+                <div class="report-card">
+                    <h3>Category Performance</h3>
+                    <div class="category-stats">
+                        <div class="category-item">
+                            <span>Renewable Energy</span>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 75%"></div>
+                            </div>
+                            <span>75%</span>
+                        </div>
+                        <div class="category-item">
+                            <span>Water Conservation</span>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 60%"></div>
+                            </div>
+                            <span>60%</span>
+                        </div>
+                        <div class="category-item">
+                            <span>Waste Management</span>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 45%"></div>
+                            </div>
+                            <span>45%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Show notification function
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.style.position = 'fixed';
+            notification.style.top = '16px';
+            notification.style.right = '16px';
+            notification.style.zIndex = '99999';
+            notification.style.maxWidth = '360px';
+            notification.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => notification.classList.add('show'), 100);
+            
+            // Remove notification after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
+        }
+
+        const API_BASE = 'http://localhost:4000/api';
+
+        // Admin Access Control
+        function checkAdminAccess() {
+            const isAdmin = (sessionStorage.getItem('isAdmin') === 'true') || (localStorage.getItem('isAdmin') === 'true');
+            const adminToken = sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken');
+            if (!isAdmin || !adminToken) {
+                window.location.href = 'admin-login.html';
+                return false;
+            }
+            return true;
+        }
+
+        let allCampaigns = [];
+        let currentReviewCampaign = null;
+
+        // Initialize dashboard
+        async function initializeDashboard() {
+            await loadCampaignRequests();
+            await updateStats();
+            await loadKycSubmissions();
+        }
+
+        // Load campaign requests from API
+        async function loadCampaignRequests() {
+            try {
+                const response = await fetch(`${API_BASE}/admin/campaigns`);
+                if (!response.ok) throw new Error('Failed to fetch campaigns');
+                
+                allCampaigns = await response.json();
+                displayCampaignRequests();
+            } catch (error) {
+                console.error('Error loading campaigns:', error);
+                showNotification('Failed to load campaigns', 'error');
+            }
+        }
+
+        // Display campaign requests
+        function displayCampaignRequests() {
+            const container = document.getElementById('campaignRequests');
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            let filteredCampaigns = allCampaigns;
+            if (statusFilter !== 'all') {
+                filteredCampaigns = allCampaigns.filter(campaign => campaign.status === statusFilter);
+            }
+
+            container.innerHTML = filteredCampaigns.map(campaign => `
+                <div class="campaign-request-card ${campaign.status}">
+                    <div class="request-header">
+                        <h3>${campaign.title}</h3>
+                        <span class="status-badge ${campaign.status}">${campaign.status.toUpperCase()}</span>
+                    </div>
+                    <div class="request-details">
+                        <div class="detail-row">
+                            <span><i class="fas fa-tag"></i> ${campaign.category || 'General'}</span>
+                            <span><i class="fas fa-calendar"></i> ${campaign.daysLeft || 30} days</span>
+                        </div>
+                        <div class="detail-row">
+                            <span><i class="fas fa-indian-rupee-sign"></i> ₹${campaign.goal.toLocaleString('en-IN')}</span>
+                            <span><i class="fas fa-clock"></i> Submitted: ${new Date(campaign.createdAt).toLocaleDateString()}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span><i class="fas fa-map-marker-alt"></i> ${campaign.location || 'Not specified'}</span>
+                            <span><i class="fas fa-image"></i> ${campaign.image ? 'Has image' : 'No image'}</span>
+                        </div>
+                    </div>
+                    <div class="request-description">
+                        <p>${campaign.description}</p>
+                    </div>
+                    <div class="request-actions">
+                        <button class="btn-review" data-action="review" data-cid="${campaign.id}">
+                            <i class="fas fa-eye"></i> Review Details
+                        </button>
+                        ${campaign.status === 'pending' ? `
+                            <button class="btn-approve" data-action="approve" data-cid="${campaign.id}">
+                                <i class="fas fa-check"></i> Approve
+                            </button>
+                            <button class="btn-reject" data-action="reject" data-cid="${campaign.id}">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Filter campaigns
+        function filterCampaigns() {
+            displayCampaignRequests();
+        }
+
+        // Open review modal
+        function openReviewModal(campaignId) {
+            const campaign = allCampaigns.find(c => String(c.id) === String(campaignId));
+            if (!campaign) return;
+
+            currentReviewCampaign = campaign;
+
+            // Populate modal content
+            document.getElementById('reviewTitle').textContent = campaign.title;
+            document.getElementById('reviewCreator').textContent = (campaign.creatorName || campaign.creator || campaign.organizerName || '').toString() || 'Unknown';
+            document.getElementById('reviewDate').textContent = new Date(campaign.createdAt).toLocaleDateString();
+            document.getElementById('reviewCategory').textContent = campaign.category || 'General';
+            document.getElementById('reviewDescription').textContent = campaign.description;
+            document.getElementById('reviewGoal').textContent = `₹${campaign.goal.toLocaleString('en-IN')}`;
+            document.getElementById('reviewDuration').textContent = `${campaign.daysLeft || 30} days`;
+            document.getElementById('reviewLocation').textContent = campaign.location || 'Not specified';
+
+            // Show campaign image if available
+            const imagePreview = document.getElementById('imagePreview');
+            if (campaign.image && campaign.image.startsWith('/uploads/')) {
+                imagePreview.innerHTML = `<img src="http://localhost:4000${campaign.image}" alt="Campaign Image" style="max-width: 100%; height: auto;">`;
+            } else if (campaign.image) {
+                imagePreview.innerHTML = `<img src="${campaign.image}" alt="Campaign Image" style="max-width: 100%; height: auto;">`;
+            } else {
+                imagePreview.innerHTML = '<p>No image provided</p>';
+            }
+
+            document.getElementById('campaignReviewModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close review modal
+        function closeReviewModal() {
+            document.getElementById('campaignReviewModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            currentReviewCampaign = null;
+        }
+
+        // ======================
+        // KYC Submissions (Admin)
+        // ======================
+        async function loadKycSubmissions() {
+            const container = document.getElementById('kycSubmissions');
+            if (!container) return;
+            container.innerHTML = '<p style="color: var(--text-light);">Loading KYC submissions...</p>';
+            try {
+                const res = await fetch(`${API_BASE}/admin/kyc`);
+                if (!res.ok) throw new Error('Failed to fetch KYC');
+                const list = await res.json();
+                window.kycList = list;
+                // Update header to show count for visibility
+                const kycHeader = document.querySelector('#kyc .section-header h2');
+                if (kycHeader) {
+                    const count = Array.isArray(list) ? list.length : 0;
+                    kycHeader.textContent = `KYC Submissions (${count})`;
+                }
+                displayKycSubmissions(list);
+            } catch (e) {
+                container.innerHTML = '<p style="color: var(--text-light);">Failed to load KYC submissions.</p>';
+            }
+        }
+
+        function displayKycSubmissions(list) {
+            const container = document.getElementById('kycSubmissions');
+            if (!container) return;
+            if (!list || list.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-light);">No KYC submissions found.</p>';
+                return;
+            }
+            const html = list.map(k => {
+                const maskedAadhaar = k.aadhaarNumber ? '••••' + String(k.aadhaarNumber).slice(-4) : 'N/A';
+                const createdAt = k.createdAt ? new Date(k.createdAt).toLocaleString() : '';
+                const files = k.files || {};
+                function fileButton(label, key) {
+                    const filename = files[key];
+                    const url = filename ? (filename.startsWith('http') ? filename : `http://localhost:4000/uploads/${filename}`) : '';
+                    return `
+                        <div class="doc-card">
+                            <div class="doc-title"><i class="fas fa-file-image"></i> ${label}</div>
+                            ${url ? `<button class="doc-view-btn" onclick="viewDocument('${url}')">View</button>` : '<div class="doc-title" style="opacity:.7;">No file</div>'}
+                        </div>`;
+                }
+                return `
+                    <div class="kyc-card ${k.status}" data-kyc-id="${k.id}">
+                        <div class="kyc-card-header">
+                            <div class="kyc-title">${k.fullName || 'Unknown'}</div>
+                            <span class="status-badge ${k.status}">${(k.status || '').toUpperCase()}</span>
+                        </div>
+                        <div class="kyc-meta">
+                            <span>KYC ID: #${k.id}</span>
+                            <span>Submitted: ${createdAt}</span>
+                        </div>
+                        <div class="kyc-grid">
+                            <div class="kyc-item"><label>Aadhaar Number:</label><span>${maskedAadhaar}</span></div>
+                            <div class="kyc-item"><label>PAN Number:</label><span>${k.panNumber || 'N/A'}</span></div>
+                            <div class="kyc-item"><label>Campaign ID:</label><span>${k.campaignId ?? 'N/A'}</span></div>
+                            <div class="kyc-item"><label>Status:</label><span class="status-badge ${k.status}">${(k.status || '').toUpperCase()}</span></div>
+                        </div>
+                        <div class="documents-grid">
+                            ${fileButton('Aadhaar Front','aadhaarFront')}
+                            ${fileButton('Aadhaar Back','aadhaarBack')}
+                            ${fileButton('Pan Photo','panPhoto')}
+                            ${fileButton('Selfie','selfie')}
+                        </div>
+                        <div class="kyc-actions">
+                            ${k.status === 'pending' ? `
+                                <button class="btn-approve" onclick="approveKyc('${k.id}')"><i class=\"fas fa-check\"></i> Verify</button>
+                                <button class="btn-reject" onclick="rejectKyc('${k.id}')"><i class=\"fas fa-times\"></i> Reject</button>
+                            ` : ''}
+                            <button class="btn-view" onclick="openKycDetails('${k.id}')"><i class="fas fa-eye"></i> View Details</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            container.innerHTML = html;
+        }
+
+        function openKycDetails(id) {
+            const k = (window.kycList || []).find(x => String(x.id) === String(id));
+            if (!k) return;
+            const maskedAadhaar = k.aadhaarNumber ? '••••' + String(k.aadhaarNumber).slice(-4) : 'N/A';
+            const createdAt = k.createdAt ? new Date(k.createdAt).toLocaleString() : '';
+            const files = k.files || {};
+            function docTile(label, key) {
+                const filename = files[key];
+                const url = filename ? (filename.startsWith('http') ? filename : `http://localhost:4000/uploads/${filename}`) : '';
+                return `
+                    <div class="doc-card">
+                        <div class="doc-title"><i class="fas fa-file-image"></i> ${label}</div>
+                        ${url ? `<button class="doc-view-btn" onclick="viewDocument('${url}')">View</button>` : '<div class="doc-title" style="opacity:.7;">No file</div>'}
+                    </div>`;
+            }
+            const actions = k.status === 'pending' ? `
+                <button class="btn-approve" onclick="approveKyc('${k.id}')"><i class='fas fa-check'></i> Verify</button>
+                <button class="btn-reject" onclick="rejectKyc('${k.id}')"><i class='fas fa-times'></i> Reject</button>
+            ` : '';
+            const content = `
+                <div class="kyc-card ${k.status}">
+                    <div class="kyc-card-header">
+                        <div class="kyc-title">${k.fullName || 'Unknown'}</div>
+                        <span class="status-badge ${k.status}">${(k.status || '').toUpperCase()}</span>
+                    </div>
+                    <div class="kyc-meta">
+                        <span>KYC ID: #${k.id}</span>
+                        <span>Submitted: ${createdAt}</span>
+                    </div>
+                    <div class="kyc-grid">
+                        <div class="kyc-item"><label>Aadhaar Number:</label><span>${maskedAadhaar}</span></div>
+                        <div class="kyc-item"><label>PAN Number:</label><span>${k.panNumber || 'N/A'}</span></div>
+                        <div class="kyc-item"><label>Campaign ID:</label><span>${k.campaignId ?? 'N/A'}</span></div>
+                        <div class="kyc-item"><label>Status:</label><span class="status-badge ${k.status}">${(k.status || '').toUpperCase()}</span></div>
+                    </div>
+                    <div class="documents-grid">
+                        ${docTile('Aadhaar Front','aadhaarFront')}
+                        ${docTile('Aadhaar Back','aadhaarBack')}
+                        ${docTile('Pan Photo','panPhoto')}
+                        ${docTile('Selfie','selfie')}
+                    </div>
+                    <div class="kyc-actions">${actions}
+                        <button class="btn-view" onclick="closeKycDetails()"><i class="fas fa-times"></i> Close</button>
+                    </div>
+                </div>`;
+            const container = document.getElementById('kycDetailsContainer');
+            if (container) container.innerHTML = content;
+            const modal = document.getElementById('kycDetailsModal');
+            if (modal) {
+                modal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeKycDetails() {
+            const modal = document.getElementById('kycDetailsModal');
+            if (modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        async function approveKyc(id) {
+            try {
+                const res = await fetch(`${API_BASE}/admin/kyc/${id}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'verified' })
+                });
+                if (!res.ok) throw new Error('Failed');
+                // Optimistically update the specific card UI
+                const card = document.querySelector(`.kyc-card[data-kyc-id="${id}"]`);
+                if (card) {
+                    card.classList.remove('pending');
+                    card.classList.add('verified');
+                    const badge = card.querySelector('.status-badge');
+                    if (badge) { badge.className = 'status-badge verified'; badge.textContent = 'VERIFIED'; }
+                    const actions = card.querySelector('.kyc-actions');
+                    if (actions) { actions.innerHTML = `<button class="btn-view" onclick="openKycDetails('${id}')"><i class="fas fa-eye"></i> View Details</button>`; }
+                }
+                closeKycDetails();
+                showNotification('KYC verified. Linked campaign updated.', 'success');
+                // Refresh datasets in background
+                loadKycSubmissions();
+                loadCampaignRequests();
+                updateStats();
+            } catch (e) {
+                showNotification('Failed to verify KYC.', 'error');
+            }
+        }
+
+        async function rejectKyc(id) {
+            const reason = prompt('Enter rejection reason (optional):') || '';
+            try {
+                const res = await fetch(`${API_BASE}/admin/kyc/${id}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'rejected', reason })
+                });
+                if (!res.ok) throw new Error('Failed');
+                // Optimistically update UI
+                const card = document.querySelector(`.kyc-card[data-kyc-id="${id}"]`);
+                if (card) {
+                    card.classList.remove('pending');
+                    card.classList.add('rejected');
+                    const badge = card.querySelector('.status-badge');
+                    if (badge) { badge.className = 'status-badge rejected'; badge.textContent = 'REJECTED'; }
+                    const actions = card.querySelector('.kyc-actions');
+                    if (actions) { actions.innerHTML = `<button class="btn-view" onclick="openKycDetails('${id}')"><i class="fas fa-eye"></i> View Details</button>`; }
+                }
+                closeKycDetails();
+                showNotification('KYC rejected. Linked campaign updated.', 'warning');
+                // Background refresh
+                loadKycSubmissions();
+                loadCampaignRequests();
+                updateStats();
+            } catch (e) {
+                showNotification('Failed to reject KYC.', 'error');
+            }
+        }
+
+        // Approve campaign via API
+        async function approveCampaign() {
+            if (!currentReviewCampaign) return;
+            
+            try {
+                const data = await AdminAPI.updateCampaignStatus(currentReviewCampaign.id, 'approved');
+                
+                // Update local data
+                currentReviewCampaign.status = 'approved';
+                currentReviewCampaign.reviewedAt = new Date().toISOString();
+                
+                // Update UI
+                await updateStats();
+                await loadCampaignRequests();
+                closeReviewModal();
+                
+                showNotification('Campaign approved successfully!', 'success');
+            } catch (error) {
+                console.error('Error approving campaign:', error);
+                showNotification(error.message || 'Failed to approve campaign', 'error');
+            }
+        }
+
+        // Reject campaign via API
+        async function rejectCampaign() {
+            if (!currentReviewCampaign) return;
+            
+            const notes = document.getElementById('reviewNotes').value;
+            if (!notes.trim()) {
+                showNotification('Please provide a reason for rejection.', 'error');
+                return;
+            }
+            
+            try {
+                const data = await AdminAPI.updateCampaignStatus(currentReviewCampaign.id, 'rejected', notes);
+                
+                // Update local data
+                currentReviewCampaign.status = 'rejected';
+                currentReviewCampaign.reviewedAt = new Date().toISOString();
+                currentReviewCampaign.rejectionReason = notes;
+                
+                // Update UI
+                await updateStats();
+                await loadCampaignRequests();
+                closeReviewModal();
+                
+                showNotification('Campaign rejected.', 'warning');
+            } catch (error) {
+                console.error('Error rejecting campaign:', error);
+                showNotification(error.message || 'Failed to reject campaign', 'error');
+            }
+        }
+
+        // Request changes
+        function requestChanges() {
+            if (!currentReviewCampaign) return;
+            
+            const notes = document.getElementById('reviewNotes').value;
+            if (!notes.trim()) {
+                showNotification('Please provide notes about what changes are needed.', 'error');
+                return;
+            }
+            
+            // In a real app, this would send a notification to the campaign creator
+            closeReviewModal();
+            showNotification('Change request sent to campaign creator.', 'info');
+        }
+
+        // Quick approve via API
+        async function quickApprove(campaignId) {
+            try {
+                const data = await AdminAPI.updateCampaignStatus(campaignId, 'approved');
+                
+                // Refresh data
+                await loadCampaignRequests();
+                await updateStats();
+                showNotification('Campaign approved!', 'success');
+            } catch (error) {
+                console.error('Error approving campaign:', error);
+                showNotification(error.message || 'Failed to approve campaign', 'error');
+            }
+        }
+
+        // Quick reject via API
+        async function quickReject(campaignId) {
+            const reason = prompt('Please provide a reason for rejection:');
+            if (!reason) return;
+            
+            try {
+                const data = await AdminAPI.updateCampaignStatus(campaignId, 'rejected', reason);
+                
+                // Refresh data
+                await loadCampaignRequests();
+                await updateStats();
+                showNotification('Campaign rejected.', 'warning');
+            } catch (error) {
+                console.error('Error rejecting campaign:', error);
+                showNotification(error.message || 'Failed to reject campaign', 'error');
+            }
+        }
+
+        // View document
+        function viewDocument(url) {
+            if (!url) return;
+            window.open(url, '_blank', 'noopener,noreferrer');
+        }
+
+        // Update statistics from API
+        async function updateStats() {
+            try {
+                const [campaignsResponse, pendingCountResponse, usersCountResponse] = await Promise.all([
+                    fetch(`${API_BASE}/admin/campaigns`),
+                    fetch(`${API_BASE}/admin/pending-count`),
+                    fetch(`${API_BASE}/admin/users-count`)
+                ]);
+
+                if (!campaignsResponse.ok || !pendingCountResponse.ok || !usersCountResponse.ok) {
+                    throw new Error('Failed to fetch stats');
+                }
+
+                const campaigns = await campaignsResponse.json();
+                const { pendingCount } = await pendingCountResponse.json();
+                const { totalUsers } = await usersCountResponse.json();
+
+                const approved = campaigns.filter(c => c.status === 'approved').length;
+                const rejected = campaigns.filter(c => c.status === 'rejected').length;
+
+                document.getElementById('pendingCount').textContent = pendingCount;
+                document.getElementById('approvedCount').textContent = approved;
+                document.getElementById('rejectedCount').textContent = rejected;
+                const totalUsersEl = document.getElementById('totalUsers');
+                if (totalUsersEl) totalUsersEl.textContent = totalUsers;
+            } catch (error) {
+                console.error('Error updating stats:', error);
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Profile dropdown toggle
+        function toggleProfileDropdown() {
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            profileDropdown.classList.toggle('active');
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const campaignModal = document.getElementById('campaignReviewModal');
+            const kycModal = document.getElementById('kycDetailsModal');
+            if (event.target === campaignModal) {
+                closeReviewModal();
+            }
+            if (event.target === kycModal) {
+                closeKycDetails();
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check admin access first
+            if (!checkAdminAccess()) {
+                return;
+            }
+            
+            initializeDashboard();
+            const container = document.getElementById('campaignRequests');
+            if (container) {
+                container.addEventListener('click', async (e) => {
+                    const btn = e.target.closest('button[data-action]');
+                    if (!btn) return;
+                    const action = btn.getAttribute('data-action');
+                    const cid = btn.getAttribute('data-cid');
+                    if (!cid) return;
+                    try {
+                        if (action === 'review') {
+                            openReviewModal(cid);
+                        } else if (action === 'approve') {
+                            await AdminAPI.updateCampaignStatus(cid, 'approved');
+                            await loadCampaignRequests();
+                            await updateStats();
+                            showNotification('Campaign approved!', 'success');
+                        } else if (action === 'reject') {
+                            const reason = prompt('Please provide a reason for rejection:');
+                            if (!reason) return;
+                            await AdminAPI.updateCampaignStatus(cid, 'rejected', reason);
+                            await loadCampaignRequests();
+                            await updateStats();
+                            showNotification('Campaign rejected.', 'warning');
+                        }
+                    } catch (err) {
+                        showNotification(err.message || 'Action failed', 'error');
+                    }
+                });
+            }
+            
+            // Mobile menu toggle
+            const hamburger = document.querySelector('.hamburger');
+            const navMenu = document.querySelector('.nav-menu');
+            
+            hamburger.addEventListener('click', () => {
+                hamburger.classList.toggle('active');
+                navMenu.classList.toggle('active');
+            });
+
+            // Close mobile menu when clicking a link
+            document.querySelectorAll('.nav-menu a').forEach(link => {
+                link.addEventListener('click', () => {
+                    hamburger.classList.remove('active');
+                    navMenu.classList.remove('active');
+                });
+            });
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            if (!profileDropdown.contains(e.target)) {
+                profileDropdown.classList.remove('active');
+            }
+        });
+
+        // Logout function
+        function logout() {
+            sessionStorage.removeItem('isAdmin');
+            sessionStorage.removeItem('adminToken');
+            sessionStorage.removeItem('adminUsername');
+            localStorage.removeItem('isAdmin');
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminUsername');
+            window.location.href = 'index.html';
+        }
+
+        // Add logout event listener
+        document.addEventListener('DOMContentLoaded', () => {
+            const logoutLink = document.querySelector('a[href="#logout"]');
+            if (logoutLink) {
+                logoutLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    logout();
+                });
+            }
+        });
+
+        // Profile Section Functionality
+        function showProfileSection() {
+            // Hide all sections
+            document.querySelectorAll('section[id]').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Show profile section
+            document.getElementById('profile').style.display = 'block';
+            
+            // Update navigation
+            document.querySelectorAll('.nav-menu a').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Load profile data
+            loadProfileData();
+        }
+
+        // Sample activity data
+        const recentActivities = [
+            {
+                id: 1,
+                action: "Approved campaign",
+                description: "Solar Panel Installation for Rural Schools",
+                time: "2 hours ago",
+                type: "approval"
+            },
+            {
+                id: 2,
+                action: "Rejected campaign",
+                description: "Community Water Purification System",
+                time: "4 hours ago",
+                type: "rejection"
+            },
+            {
+                id: 3,
+                action: "Requested changes",
+                description: "Urban Garden Initiative",
+                time: "6 hours ago",
+                type: "request"
+            },
+            {
+                id: 4,
+                action: "Updated profile",
+                description: "Changed email address",
+                time: "1 day ago",
+                type: "profile"
+            },
+            {
+                id: 5,
+                action: "Approved campaign",
+                description: "Smart Home Garden System",
+                time: "2 days ago",
+                type: "approval"
+            }
+        ];
+
+        // Load profile data
+        function loadProfileData() {
+            const adminUsername = sessionStorage.getItem('adminUsername') || 'admin';
+            document.getElementById('adminName').textContent = adminUsername;
+            document.getElementById('adminEmail').textContent = `${adminUsername}@greenfund.com`;
+            loadRecentActivity();
+            setupProfileEventListeners();
+        }
+
+        // Load recent activity
+        function loadRecentActivity() {
+            const activityList = document.getElementById('activityList');
+            activityList.innerHTML = recentActivities.map(activity => `
+                <div class="activity-item ${activity.type}">
+                    <div class="activity-icon">
+                        <i class="fas fa-${getActivityIcon(activity.type)}"></i>
+                    </div>
+                    <div class="activity-content">
+                        <h4>${activity.action}</h4>
+                        <p>${activity.description}</p>
+                        <span class="activity-time">${activity.time}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Get activity icon
+        function getActivityIcon(type) {
+            const icons = {
+                approval: 'check-circle',
+                rejection: 'times-circle',
+                request: 'edit',
+                profile: 'user-edit'
+            };
+            return icons[type] || 'info-circle';
+        }
+
+        // Toggle edit mode
+        function toggleEditMode(section) {
+            const form = document.getElementById(section === 'personal' ? 'personalForm' : 'securityForm');
+            const actions = document.getElementById(section === 'personal' ? 'personalActions' : 'securityActions');
+            const inputs = form.querySelectorAll('input');
+            
+            if (section === 'personal') {
+                inputs.forEach(input => {
+                    input.disabled = !input.disabled;
+                });
+                actions.style.display = actions.style.display === 'none' ? 'flex' : 'none';
+            }
+        }
+
+        // Save personal information
+        function savePersonalInfo() {
+            showNotification('Personal information updated successfully!', 'success');
+            toggleEditMode('personal');
+        }
+
+        // Cancel edit
+        function cancelEdit(section) {
+            toggleEditMode(section);
+        }
+
+        // Toggle 2FA
+        function toggle2FA() {
+            const button = event.target;
+            const status = button.textContent === 'Disable' ? 'Enable' : 'Disable';
+            button.textContent = status;
+            showNotification(`Two-factor authentication ${status.toLowerCase()}d`, 'info');
+        }
+
+        // Change session timeout
+        function changeSessionTimeout() {
+            const newTimeout = prompt('Enter new session timeout in minutes (15-120):', '30');
+            if (newTimeout && !isNaN(newTimeout) && newTimeout >= 15 && newTimeout <= 120) {
+                showNotification(`Session timeout updated to ${newTimeout} minutes`, 'success');
+            }
+        }
+
+        // Change password
+        function changePassword() {
+            const newPassword = prompt('Enter new password:');
+            if (newPassword && newPassword.length >= 8) {
+                showNotification('Password changed successfully!', 'success');
+            } else if (newPassword) {
+                showNotification('Password must be at least 8 characters long!', 'warning');
+            }
+        }
+
+        // Setup profile event listeners
+        function setupProfileEventListeners() {
+            // Avatar upload
+            document.getElementById('avatarInput').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('adminAvatar').src = e.target.result;
+                        showNotification('Profile picture updated!', 'success');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Avatar click
+            document.querySelector('.avatar-overlay').addEventListener('click', function() {
+                document.getElementById('avatarInput').click();
+            });
+        }
+
+        // Navigation functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            // Profile link click handler
+            const profileLink = document.querySelector('a[href="#profile"]');
+            if (profileLink) {
+                profileLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    showProfileSection();
+                });
+            }
+
+            // Check if URL has profile hash
+            if (window.location.hash === '#profile') {
+                showProfileSection();
+            }
+        });
+    </script>
+    <script>
+        async function loadCampaigns() {
+            try {
+                const campaigns = await AdminAPI.getAllCampaigns();
+                const campaignsTable = document.querySelector('.campaigns-table tbody');
+                
+                if (!campaignsTable) return;
+                
+                // Clear existing rows
+                campaignsTable.innerHTML = '';
+                
+                // Add campaign rows
+                campaigns.forEach(campaign => {
+                    const row = document.createElement('tr');
+                    
+                    // Format date
+                    const createdDate = new Date(campaign.createdAt);
+                    const formattedDate = createdDate.toLocaleDateString();
+                    
+                    // Set status class
+                    let statusClass = '';
+                    if (campaign.status === 'pending') statusClass = 'status-pending';
+                    else if (campaign.status === 'approved') statusClass = 'status-approved';
+                    else if (campaign.status === 'rejected') statusClass = 'status-rejected';
+                    
+                    row.innerHTML = `
+                        <td>${campaign.id}</td>
+                        <td>${campaign.title}</td>
+                        <td>${campaign.creatorName}</td>
+                        <td>${formattedDate}</td>
+                        <td><span class="status-badge ${statusClass}">${campaign.status}</span></td>
+                        <td>
+                            <button class="btn-view" onclick="viewCampaign('${campaign.id}')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </td>
+                    `;
+                    
+                    campaignsTable.appendChild(row);
+                });
+                
+            } catch (error) {
+                console.error('Error loading campaigns:', error);
+            }
+        }
+        
+        function viewCampaign(campaignId) {
+            // Show campaign review modal
+            document.getElementById('campaignReviewModal').classList.remove('hidden');
+            
+            // Load campaign details
+            loadCampaignDetails(campaignId);
+        }
+        
+        async function loadCampaignDetails(campaignId) {
+            try {
+                // Get campaign details
+                const campaign = await CampaignAPI.getCampaign(campaignId);
+                
+                // Update review modal with campaign details
+                document.getElementById('reviewTitle').textContent = campaign.title;
+                document.getElementById('reviewCreator').textContent = campaign.creatorName;
+                document.getElementById('reviewDate').textContent = new Date(campaign.createdAt).toLocaleDateString();
+                document.getElementById('reviewCategory').textContent = campaign.category;
+                document.getElementById('reviewDescription').textContent = campaign.description;
+                document.getElementById('reviewGoal').textContent = '$' + campaign.goalAmount.toLocaleString();
+                document.getElementById('reviewDuration').textContent = campaign.duration + ' days';
+                document.getElementById('reviewLocation').textContent = campaign.location || 'Not specified';
+                
+                // Set campaign image
+                const imagePreview = document.getElementById('imagePreview');
+                imagePreview.innerHTML = `<img src="${campaign.imageUrl}" alt="${campaign.title}">`;
+                
+                // Store campaign ID for approval/rejection
+                document.getElementById('campaignReviewModal').dataset.campaignId = campaignId;
+                
+            } catch (error) {
+                console.error('Error loading campaign details:', error);
+            }
+        }
+        
+        async function approveCampaign() {
+            const campaignId = document.getElementById('campaignReviewModal').dataset.campaignId;
+            const notes = document.getElementById('reviewNotes').value;
+            
+            try {
+                await AdminAPI.updateCampaignStatus(campaignId, 'approved', notes);
+                alert('Campaign approved successfully!');
+                document.getElementById('campaignReviewModal').classList.add('hidden');
+                loadDashboardStats();
+                loadCampaigns();
+            } catch (error) {
+                alert('Error approving campaign: ' + error.message);
+            }
+        }
+        
+        async function rejectCampaign() {
+            const campaignId = document.getElementById('campaignReviewModal').dataset.campaignId;
+            const notes = document.getElementById('reviewNotes').value;
+            
+            if (!notes) {
+                alert('Please provide a reason for rejection in the notes field.');
+                return;
+            }
+            
+            try {
+                await AdminAPI.updateCampaignStatus(campaignId, 'rejected', notes);
+                alert('Campaign rejected successfully!');
+                document.getElementById('campaignReviewModal').classList.add('hidden');
+                loadDashboardStats();
+                loadCampaigns();
+            } catch (error) {
+                alert('Error rejecting campaign: ' + error.message);
+            }
+        }
+        
+        function requestChanges() {
+            const campaignId = document.getElementById('campaignReviewModal').dataset.campaignId;
+            const notes = document.getElementById('reviewNotes').value;
+            
+            if (!notes) {
+                alert('Please specify the requested changes in the notes field.');
+                return;
+            }
+            
+            try {
+                // This would typically send an email or notification to the campaign creator
+                alert('Change request sent to campaign creator!');
+                document.getElementById('campaignReviewModal').classList.add('hidden');
+            } catch (error) {
+                alert('Error requesting changes: ' + error.message);
+            }
+        }
+        
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('campaignReviewModal');
+            if (event.target === modal) {
+                modal.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

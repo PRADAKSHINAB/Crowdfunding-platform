@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - GreenFund</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-leaf"></i>
+                <span>GreenFund</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="campaigns.html">Campaigns</a></li>
+                <li><a href="start-campaign.html">Start Campaign</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html" class="active">Contact</a></li>
+                <li><a href="login.html">Login</a></li>
+                <li><a href="admin-login.html">Admin</a></li>
+                <li class="profile-dropdown">
+                    <div class="profile-logo" onclick="toggleProfileDropdown()">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Profile</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="profile-menu" id="profileMenu">
+                        <a href="my-account.html"><i class="fas fa-user"></i> My Account</a>
+                        <a href="kyc-verification.html"><i class="fas fa-shield-alt"></i> Aadhaar KYC</a>
+                        <a href="my-account.html#campaigns"><i class="fas fa-leaf"></i> My Campaigns</a>
+                        <a href="my-account.html#donations"><i class="fas fa-heart"></i> My Donations</a>
+                        <a href="my-account.html#settings"><i class="fas fa-cog"></i> Settings</a>
+                        <a href="#logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contact Header -->
+    <section class="contact-header">
+        <div class="container">
+            <h1>Get in Touch</h1>
+            <p>We're here to help and answer any questions you might have</p>
+        </div>
+    </section>
+
+    <!-- Contact Content -->
+    <section class="contact-content">
+        <div class="container">
+            <div class="contact-grid">
+                <!-- Contact Information -->
+                <div class="contact-info">
+                    <h2>Contact Information</h2>
+                    <p>Reach out to us through any of the following channels. We're here to support your environmental initiatives!</p>
+                    
+                    <div class="contact-methods">
+                        <div class="contact-method">
+                            <i class="fas fa-envelope"></i>
+                            <div>
+                                <h3>Email</h3>
+                                <p>support@greenfund.com</p>
+                                <small>Response within 24 hours</small>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-method">
+                            <i class="fas fa-phone"></i>
+                            <div>
+                                <h3>Phone</h3>
+                                <p>9987654321</p>
+                                <small>Mon-Fri 9AM-6PM</small>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-method">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <div>
+                                <h3>Address</h3>
+                                <p>123 Green Street<br>Eco City, EC 12345<br>Bangalore</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-method">
+                            <i class="fas fa-clock"></i>
+                            <div>
+                                <h3>Business Hours</h3>
+                                <p>Monday - Friday: 9AM - 6PM <br>
+                                Saturday: 10AM - 4PM<br>
+                                Sunday: Closed</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--<div class="social-media">
+                        <h3>Follow Us</h3>
+                        <div class="social-links">
+                            <a href="#" class="social-link" aria-label="Follow us on Facebook"><i class="fab fa-facebook"></i></a>
+                            <a href="#" class="social-link" aria-label="Follow us on Twitter"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="social-link" aria-label="Follow us on Instagram"><i class="fab fa-instagram"></i></a>
+                            <a href="#" class="social-link" aria-label="Follow us on LinkedIn"><i class="fab fa-linkedin"></i></a>
+                            <a href="#" class="social-link" aria-label="Follow us on YouTube"><i class="fab fa-youtube"></i></a>
+                        </div>-->
+                    </div>
+                </div>
+
+                <!-- Contact Form -->
+                <div class="contact-form-container">
+                    <h2>Send us a Message</h2>
+                    <form id="contactForm" class="contact-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="firstName">First Name *</label>
+                                <input type="text" id="firstName" name="firstName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastName">Last Name *</label>
+                                <input type="text" id="lastName" name="lastName" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="subject">Subject *</label>
+                            <select id="subject" name="subject" required>
+                                <option value="">Select a subject</option>
+                                <option value="general">General Inquiry</option>
+                                <option value="campaign">Campaign Support</option>
+                                <option value="technical">Technical Support</option>
+                                <option value="partnership">Partnership Opportunities</option>
+                                <option value="donation">Donation Questions</option>
+                                <option value="media">Media &amp; Press</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="message">Message *</label>
+                            <textarea id="message" name="message" rows="6" required placeholder="Please provide as much detail as possible..."></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="newsletter" name="newsletter">
+                                <span class="checkmark"></span>
+                                Subscribe to our newsletter for updates on environmental campaigns
+                            </label>
+                        </div>
+                        
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                            Send Message
+                        </button>
+                        
+                        <div id="formMessage" class="form-message"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq-section">
+        <div class="container">
+            <h2>Frequently Asked Questions</h2>
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <h3>How do I start a campaign?</h3>
+                    <p>Starting a campaign is easy! Simply visit our <a href="start-campaign.html">Start Campaign</a> page and fill out the form with your campaign details. Our team will review your submission within 24-48 hours.</p>
+                </div>
+                
+                <div class="faq-item">
+                    <h3>What types of campaigns do you support?</h3>
+                    <p>We support environmental campaigns including renewable energy, water conservation, waste management, reforestation, wildlife protection, sustainable farming, and environmental education projects.</p>
+                </div>
+                
+                <div class="faq-item">
+                    <h3>How can I donate to campaigns?</h3>
+                    <p>Browse our <a href="campaigns.html">active campaigns</a> and click on any campaign to view details. You can donate securely using credit/debit cards or PayPal. All donations are processed through secure payment gateways.</p>
+                </div>
+                
+                <div class="faq-item">
+                    <h3>Is my donation secure?</h3>
+                    <p>Yes! We use industry-standard encryption and secure payment processing to protect all transactions. Your financial information is never stored on our servers.</p>
+                </div>
+                
+                <div class="faq-item">
+                    <h3>What happens if a campaign doesn't reach its goal?</h3>
+                    <p>We operate on an all-or-nothing funding model. If a campaign doesn't reach its goal, all donations are refunded to the backers. This ensures that projects have sufficient funding to be completed successfully.</p>
+                </div>
+                
+                <div class="faq-item">
+                    <h3>How do I contact campaign creators?</h3>
+                    <p>Each campaign page has a comment section where you can ask questions directly to the campaign creators. You can also contact our support team if you need additional assistance.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Map Section -->
+    <section class="map-section">
+        <div class="container">
+            <h2>Find Us</h2>
+            <div class="map-container">
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3024.123456789!2d-74.123456789!3d40.123456789!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDDCsDA3JzI0LjQiTiA3NMKwMDcnMjQuNCJX!5e0!3m2!1sen!2sus!4v1234567890123!5m2!1sen!2sus" 
+                    width="100%" 
+                    height="400" 
+                    style="border:0;" 
+                    allowfullscreen="" 
+                    loading="lazy" 
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>GreenFund</h3>
+                    <p>Empowering sustainable innovation through community crowdfunding.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="campaigns.html">Campaigns</a></li>
+                        <li><a href="start-campaign.html">Start Campaign</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="contact.html">Help Center</a></li>
+                        <li><a href="contact.html">Contact Us</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Newsletter</h4>
+                    <p>Stay updated with our latest campaigns and environmental news.</p>
+                    <form class="newsletter-form">
+                        <input type="email" placeholder="Enter your email" required>
+                        <button type="submit"><i class="fas fa-arrow-right"></i></button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 GreenFund. All rights reserved. | Built for a greener tomorrow.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Contact form handling
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const API_BASE = 'http://localhost:4000/api';
+            const formData = new FormData(this);
+            const formMessage = document.getElementById('formMessage');
+            formMessage.textContent = 'Sending your message...';
+            formMessage.className = 'form-message sending';
+            fetch(`${API_BASE}/contact`, {
+                method: 'POST',
+                body: JSON.stringify(Object.fromEntries(formData.entries())),
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(res => { if (!res.ok) throw new Error('Failed'); return res.json(); })
+            .then(() => {
+                formMessage.textContent = 'Thank you for your message! We\'ll get back to you within 24 hours.';
+                formMessage.className = 'form-message success';
+                this.reset();
+                setTimeout(() => { formMessage.textContent = ''; formMessage.className = 'form-message'; }, 5000);
+            })
+            .catch(() => {
+                formMessage.textContent = 'Failed to send message. Please try again later.';
+                formMessage.className = 'form-message';
+            });
+        });
+
+        // Show notification function
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => notification.classList.add('show'), 100);
+            
+            // Remove notification after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
+        }
+
+        // Newsletter form handling
+        document.querySelector('.newsletter-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            showNotification('Thank you for subscribing! You\'ll receive updates on our latest environmental campaigns and initiatives.', 'success');
+            this.reset();
+        });
+
+        // Profile dropdown toggle
+        function toggleProfileDropdown() {
+            const profileMenu = document.getElementById('profileMenu');
+            profileMenu.classList.toggle('show');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            const profileMenu = document.getElementById('profileMenu');
+            
+            if (!profileDropdown.contains(e.target)) {
+                profileMenu.classList.remove('show');
+            }
+        });
+
+        // Mobile menu toggle
+        document.querySelector('.hamburger').addEventListener('click', function() {
+            document.querySelector('.nav-menu').classList.toggle('active');
+            this.classList.toggle('active');
+        });
+    </script>
+
+    <style>
+        /* Contact Page Styles */
+        .contact-header {
+            background: linear-gradient(135deg, var(--primary-green), var(--accent-green));
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .contact-header h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .contact-header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .contact-content {
+            padding: 80px 0;
+            background: var(--bg-light);
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: start;
+        }
+
+        .contact-info h2,
+        .contact-form-container h2 {
+            color: var(--text-white);
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+        }
+
+        .contact-info p {
+            color: var(--text-gray);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .contact-methods {
+            margin-bottom: 2rem;
+        }
+
+        .contact-method {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 2rem;
+            padding: 20px;
+            background: var(--bg-dark);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .contact-method i {
+            color: var(--primary-green);
+            font-size: 1.5rem;
+            margin-top: 5px;
+        }
+
+        .contact-method h3 {
+            color: var(--text-white);
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        .contact-method p {
+            color: var(--text-gray);
+            margin-bottom: 5px;
+        }
+
+        .contact-method small {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .social-media h3 {
+            color: var(--text-white);
+            margin-bottom: 1rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            color: var(--text-white);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .social-link:hover {
+            background: var(--primary-green);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .contact-form {
+            background: var(--bg-dark);
+            padding: 40px;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-white);
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-light);
+            color: var(--text-white);
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-green);
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            color: var(--text-gray);
+            font-weight: normal;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .form-message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .form-message.sending {
+            background: var(--accent-green);
+            color: white;
+        }
+
+        .form-message.success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .faq-section {
+            padding: 80px 0;
+            background: var(--bg-dark);
+        }
+
+        .faq-section h2 {
+            text-align: center;
+            color: var(--text-white);
+            margin-bottom: 3rem;
+            font-size: 2.5rem;
+        }
+
+        .faq-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+        }
+
+        .faq-item {
+            background: var(--bg-light);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+        }
+
+        .faq-item h3 {
+            color: var(--text-white);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .faq-item p {
+            color: var(--text-gray);
+            line-height: 1.6;
+        }
+
+        .faq-item a {
+            color: var(--primary-green);
+            text-decoration: none;
+        }
+
+        .faq-item a:hover {
+            text-decoration: underline;
+        }
+
+        .map-section {
+            padding: 80px 0;
+            background: var(--bg-light);
+        }
+
+        .map-section h2 {
+            text-align: center;
+            color: var(--text-white);
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+        }
+
+        .map-container {
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .newsletter-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .newsletter-form input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background: var(--bg-light);
+            color: var(--text-white);
+        }
+
+        .newsletter-form button {
+            padding: 10px 15px;
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .newsletter-form button:hover {
+            background: var(--accent-green);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .contact-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .contact-header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .faq-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .contact-form {
+                padding: 25px;
+            }
+            
+            .contact-method {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</body>
+</html>

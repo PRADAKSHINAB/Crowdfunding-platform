@@ -1,0 +1,1568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account - GreenFund</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-leaf"></i>
+                <span>GreenFund</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="campaigns.html">Campaigns</a></li>
+                <li><a href="start-campaign.html">Start Campaign</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="login.html">Login</a></li>
+                <li><a href="admin-login.html">Admin</a></li>
+                <li class="profile-dropdown">
+                    <div class="profile-logo" onclick="toggleProfileDropdown()">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Profile</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="profile-menu" id="profileMenu">
+                        <a href="my-account.html"><i class="fas fa-user"></i> My Account</a>
+                        <a href="kyc-verification.html"><i class="fas fa-shield-alt"></i> Aadhaar KYC</a>
+                        <a href="my-account.html#campaigns"><i class="fas fa-leaf"></i> My Campaigns</a>
+                        <a href="my-account.html#donations"><i class="fas fa-heart"></i> My Donations</a>
+                        <a href="my-account.html#settings"><i class="fas fa-cog"></i> Settings</a>
+                        <a href="#logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Account Header -->
+    <section class="account-header">
+        <div class="container">
+            <h1>My Account</h1>
+            <p>Manage your profile, campaigns, and KYC verification</p>
+        </div>
+    </section>
+
+    <!-- Account Overview -->
+    <section id="overview" class="account-section">
+        <div class="container">
+            <div class="account-grid">
+                <div class="account-card">
+                    <div class="account-card-header">
+                        <h3>Account Overview</h3>
+                    </div>
+                    <div class="account-info">
+                        <div class="info-item">
+                            <i class="fas fa-user"></i>
+                            <div>
+                                <strong id="userName">Loading...</strong>
+                                <span>Full Name</span>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-envelope"></i>
+                            <div>
+                                <strong id="userEmail">Loading...</strong>
+                                <span>Email Address</span>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-phone"></i>
+                            <div>
+                                <strong id="userPhone">Loading...</strong>
+                                <span>Phone Number</span>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <div>
+                                <strong id="userLocation">Loading...</strong>
+                                <span>Location</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="account-stats">
+                    <div class="stat-card">
+                        <i class="fas fa-leaf"></i>
+                        <div>
+                            <h3>3</h3>
+                            <p>Active Campaigns</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-heart"></i>
+                        <div>
+                            <h3>12</h3>
+                            <p>Donations Made</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-indian-rupee-sign"></i>
+                        <div>
+                            <h3>₹5,240</h3>
+                            <p>Total Raised</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-users"></i>
+                        <div>
+                            <h3>156</h3>
+                            <p>Total Backers</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- KYC Verification Section -->
+    <section id="kyc" class="account-section">
+        <div class="container">
+            <div class="kyc-container">
+                <div class="kyc-header">
+                    <h2>KYC Verification</h2>
+                    <p>Complete your identity verification to unlock full platform features</p>
+                </div>
+
+                <div class="kyc-status">
+                    <div class="status-indicator pending">
+                        <i class="fas fa-clock"></i>
+                        <span>Verification Pending</span>
+                    </div>
+                    <p>Your KYC verification is currently under review. This process usually takes 24-48 hours.</p>
+                </div>
+
+                <div class="kyc-form">
+                    <h3>Submit KYC Documents</h3>
+                    <form id="kycForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>First Name *</label>
+                                <input type="text" id="firstName" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Last Name *</label>
+                                <input type="text" id="lastName" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Date of Birth *</label>
+                                <input type="date" id="dob" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Nationality *</label>
+                                <select id="nationality" required>
+                                    <option value="">Select nationality</option>
+                                    <option value="US">United States</option>
+                                    <option value="UK">United Kingdom</option>
+                                    <option value="CA">Canada</option>
+                                    <option value="AU">Australia</option>
+                                    <option value="IN">India</option>
+                                    <option value="DE">Germany</option>
+                                    <option value="FR">France</option>
+                                    <option value="JP">Japan</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Address *</label>
+                            <input type="text" id="address" placeholder="Street address" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>City *</label>
+                                <input type="text" id="city" required>
+                            </div>
+                            <div class="form-group">
+                                <label>State/Province *</label>
+                                <input type="text" id="state" required>
+                            </div>
+                            <div class="form-group">
+                                <label>ZIP/Postal Code *</label>
+                                <input type="text" id="zipCode" required>
+                            </div>
+                        </div>
+
+                        <div class="document-upload">
+                            <h4>Upload Documents</h4>
+                            <div class="upload-row">
+                                <div class="upload-group">
+                                    <label>Government ID (Front) *</label>
+                                    <div class="upload-area" id="idFrontUpload">
+                                        <i class="fas fa-upload"></i>
+                                        <p>Drag &amp; drop or click to upload</p>
+                                        <input type="file" id="idFront" accept="image/*,.pdf" required>
+                                    </div>
+                                </div>
+                                <div class="upload-group">
+                                    <label>Government ID (Back) *</label>
+                                    <div class="upload-area" id="idBackUpload">
+                                        <i class="fas fa-upload"></i>
+                                        <p>Drag &amp; drop or click to upload</p>
+                                        <input type="file" id="idBack" accept="image/*,.pdf" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="upload-group">
+                                <label>Proof of Address *</label>
+                                <div class="upload-area" id="addressProofUpload">
+                                    <i class="fas fa-upload"></i>
+                                    <p>Utility bill, bank statement, or lease agreement</p>
+                                    <input type="file" id="addressProof" accept="image/*,.pdf" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-check">
+                            <input type="checkbox" id="terms" required>
+                            <label for="terms">
+                                I agree to the <a href="#" target="_blank">Terms of Service</a> and <a href="#" target="_blank">Privacy Policy</a>
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-paper-plane"></i> Submit KYC Verification
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- My Campaigns Section -->
+    <section id="campaigns" class="account-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>My Campaigns</h2>
+                <a href="#" class="btn-primary">Start New Campaign</a>
+            </div>
+
+            <div class="campaigns-list">
+                <div class="campaign-item">
+                    <img src="images/campaign-placeholder.png" alt="Campaign">
+                    <div class="campaign-details">
+                        <h3>Clean Water Initiative</h3>
+                        <p>Bringing clean water to rural communities</p>
+                        <div class="campaign-meta">
+                            <span class="status active">Active</span>
+                            <span class="raised">₹2,340 raised of ₹5,000</span>
+                        </div>
+                        <div class="campaign-actions">
+                            <button class="btn-secondary">Edit</button>
+                            <button class="btn-primary">View Details</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="campaign-item">
+                    <img src="images/campaign-placeholder.png" alt="Campaign">
+                    <div class="campaign-details">
+                        <h3>Solar Panel Project</h3>
+                        <p>Installing solar panels in schools</p>
+                        <div class="campaign-meta">
+                            <span class="status completed">Completed</span>
+                            <span class="raised">₹8,750 raised of ₹7,500</span>
+                        </div>
+                        <div class="campaign-actions">
+                            <button class="btn-secondary">View Results</button>
+                            <button class="btn-primary">Share</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- My Donations Section -->
+    <section id="donations" class="account-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>My Donations</h2>
+                <p>Track your contributions and impact</p>
+            </div>
+
+            <div class="donations-list">
+                <div class="donation-item">
+                    <img src="images/campaign-placeholder.png" alt="Campaign">
+                    <div class="donation-details">
+                        <h4>Clean Water Initiative</h4>
+                        <p>Donated ₹50 • 2 days ago</p>
+                        <span class="donation-badge">Pending</span>
+                    </div>
+                </div>
+
+                <div class="donation-item">
+                    <img src="images/campaign-placeholder.png" alt="Campaign">
+                    <div class="donation-details">
+                        <h4>Solar Panel Project</h4>
+                        <p>Donated ₹100 • 1 week ago</p>
+                        <span class="donation-badge completed">Completed</span>
+                    </div>
+                </div>
+
+                <div class="donation-item">
+                    <img src="https://via.placeholder.com/80x80" alt="Campaign">
+                    <div class="donation-details">
+                        <h4>Tree Planting Drive</h4>
+                        <p>Donated ₹75 • 2 weeks ago</p>
+                        <span class="donation-badge completed">Completed</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Settings Section -->
+    <section id="settings" class="account-section">
+        <div class="container">
+            <h2>Account Settings</h2>
+            <div class="settings-container">
+                <div class="settings-card">
+                    <h3>Profile Information</h3>
+                    <form id="profileForm">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="fullName" value="Loading...">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="email" value="Loading...">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="tel" id="phone" value="Loading...">
+                        </div>
+                        <div class="form-group">
+                            <label>Bio</label>
+                            <textarea id="bio" rows="4" placeholder="Tell us about yourself...">Loading...</textarea>
+                        </div>
+                        <button type="submit" class="btn-primary">Save Changes</button>
+                    </form>
+                </div>
+
+                <div class="settings-card">
+                    <h3>Change Password</h3>
+                    <form id="passwordForm">
+                        <div class="form-group">
+                            <label>Current Password</label>
+                            <input type="password" id="currentPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label>New Password</label>
+                            <input type="password" id="newPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm New Password</label>
+                            <input type="password" id="confirmPassword" required>
+                        </div>
+                        <button type="submit" class="btn-primary">Update Password</button>
+                    </form>
+                </div>
+
+                <div class="settings-card">
+                    <h3>Notification Preferences</h3>
+                    <div class="notification-settings">
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" checked> Email notifications for campaign updates
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" checked> SMS notifications for donations
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" checked> Newsletter subscription
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox"> Marketing emails
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>GreenFund</h3>
+                    <p>Empowering sustainable projects through community crowdfunding.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="campaigns.html">Campaigns</a></li>
+                        <li><a href="index.html#about">About</a></li>
+                        <li><a href="index.html#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Newsletter</h4>
+                    <p>Subscribe to get updates on new campaigns.</p>
+                    <div class="newsletter">
+                        <input type="email" placeholder="Enter your email">
+                        <button type="submit"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 GreenFund. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Notification function
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
+            // Hide and remove notification
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        async function renderKycBadge() {
+            try {
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                if (!user.id) return;
+                const res = await fetch(`http://localhost:4000/api/kyc/status?userId=${encodeURIComponent(user.id)}`);
+                if (!res.ok) return;
+                const data = await res.json();
+                const status = (data.status || 'none').toLowerCase();
+                const navMenu = document.querySelector('.nav-menu');
+                if (!navMenu) return;
+                let badge = document.querySelector('.kyc-badge');
+                if (!badge) {
+                    badge = document.createElement('span');
+                    navMenu.appendChild(badge);
+                }
+                const isVerified = status === 'verified' || status === 'approved';
+                badge.className = `kyc-badge ${isVerified ? 'verified' : status}`;
+                const icon = isVerified ? 'fa-check-circle' : status === 'rejected' ? 'fa-times-circle' : 'fa-clock';
+                const label = isVerified ? 'KYC Verified' : status === 'rejected' ? 'KYC Rejected' : 'KYC Pending';
+                badge.innerHTML = `<i class="fas ${icon}"></i>${label}`;
+            } catch (_) {}
+        }
+
+        async function updateKycSection() {
+            try {
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                if (!user.id) return;
+                const res = await fetch(`http://localhost:4000/api/kyc/status?userId=${encodeURIComponent(user.id)}`);
+                if (!res.ok) return;
+                const data = await res.json();
+                const statusContainer = document.querySelector('.kyc-status .status-indicator');
+                const statusText = statusContainer?.querySelector('span');
+                if (!statusContainer || !statusText) return;
+                const s = (data.status || 'none').toLowerCase();
+                statusContainer.classList.remove('pending','verified','rejected','processing');
+                if (s === 'verified' || s === 'approved') {
+                    statusContainer.classList.add('verified');
+                    statusContainer.innerHTML = '<i class="fas fa-check-circle"></i><span>Verified</span>';
+                } else if (s === 'rejected') {
+                    statusContainer.classList.add('rejected');
+                    statusContainer.innerHTML = '<i class="fas fa-times-circle"></i><span>Rejected</span>';
+                } else if (s === 'pending') {
+                    statusContainer.classList.add('pending');
+                    statusContainer.innerHTML = '<i class="fas fa-clock"></i><span>Verification Pending</span>';
+                } else {
+                    statusContainer.classList.add('pending');
+                    statusContainer.innerHTML = '<i class="fas fa-clock"></i><span>Aadhaar Verification Required</span>';
+                }
+            } catch (_) {}
+        }
+        
+        // User Authentication Check
+        function checkUserAccess() {
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+            const userToken = sessionStorage.getItem('userToken');
+
+            if (!isLoggedIn || !userToken) {
+                window.location.href = 'login.html';
+                return false;
+            }
+            return true;
+        }
+
+        // Load user information
+        function loadUserInfo() {
+            const userName = sessionStorage.getItem('userName') || 'User';
+            const userEmail = sessionStorage.getItem('userEmail') || 'user@example.com';
+
+            // Load saved user profile data from localStorage (if exists)
+            const savedName = localStorage.getItem('userFullName') || userName;
+            const savedEmail = localStorage.getItem('userEmail') || userEmail;
+            const savedPhone = localStorage.getItem('userPhone') || '+91 9876543210';
+            const savedLocation = localStorage.getItem('userLocation') || 'India';
+            const savedBio = localStorage.getItem('userBio') || 'Passionate about environmental sustainability and supporting green initiatives.';
+
+            // Update account overview
+            document.getElementById('userName').textContent = savedName;
+            document.getElementById('userEmail').textContent = savedEmail;
+            document.getElementById('userPhone').textContent = savedPhone;
+            document.getElementById('userLocation').textContent = savedLocation;
+
+            // Update settings form
+            document.getElementById('fullName').value = savedName;
+            document.getElementById('email').value = savedEmail;
+            document.getElementById('phone').value = savedPhone;
+            document.getElementById('bio').value = savedBio;
+        }
+
+        // Save profile information
+        function saveProfileInfo() {
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const bio = document.getElementById('bio').value.trim();
+
+            // Basic validation
+            if (!fullName || !email || !phone) {
+                showNotification('Please fill in all required fields!', 'warning');
+                return;
+            }
+
+            // Save to localStorage
+            localStorage.setItem('userFullName', fullName);
+            localStorage.setItem('userEmail', email);
+            localStorage.setItem('userPhone', phone);
+            localStorage.setItem('userBio', bio);
+
+            // Update account overview
+            document.getElementById('userName').textContent = fullName;
+            document.getElementById('userEmail').textContent = email;
+            document.getElementById('userPhone').textContent = phone;
+
+            showNotification('Profile updated successfully!', 'success');
+        }
+
+        // Logout function
+        function logout() {
+            sessionStorage.removeItem('isLoggedIn');
+            sessionStorage.removeItem('userToken');
+            sessionStorage.removeItem('userEmail');
+            sessionStorage.removeItem('userName');
+            window.location.href = 'index.html';
+        }
+
+        // Enhanced file upload handling
+        function setupFileUploads() {
+            const uploadAreas = document.querySelectorAll('.upload-area');
+            
+            uploadAreas.forEach(area => {
+                const input = area.querySelector('input[type="file"]');
+                
+                area.addEventListener('click', () => input.click());
+                
+                input.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        const file = e.target.files[0];
+                        area.classList.add('uploaded');
+                        area.innerHTML = `
+                            <i class="fas fa-check-circle"></i>
+                            <p>${file.name}</p>
+                            <button type="button" class="remove-file" onclick="removeFile(this)">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        `;
+                    }
+                });
+            });
+        }
+
+        // Initialize file uploads
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!checkUserAccess()) {
+                return;
+            }
+
+            setupFileUploads();
+            loadUserInfo();
+            initializeAnimations();
+
+            renderKycBadge();
+            updateKycSection();
+
+            // Add logout event listener
+            const logoutLink = document.querySelector('a[href="#logout"]');
+            if (logoutLink) {
+                logoutLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    logout();
+                });
+            }
+        });
+
+        // Enhanced profile dropdown toggle
+        function toggleProfileDropdown() {
+            const menu = document.getElementById('profileMenu');
+            menu.classList.toggle('show');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            const menu = document.getElementById('profileMenu');
+            if (!profileDropdown.contains(e.target)) {
+                menu.classList.remove('show');
+            }
+        });
+
+        function removeFile(button) {
+            const uploadArea = button.parentElement;
+            const input = uploadArea.querySelector('input[type="file"]');
+            uploadArea.className = 'upload-area';
+            uploadArea.innerHTML = `
+                <i class="fas fa-upload"></i>
+                <p>Drag & drop or click to upload</p>
+                <input type="file" id="${input.id}" accept="image/*,.pdf" required>
+            `;
+        }
+
+        // Enhanced form handling
+        document.getElementById('kycForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            submitBtn.disabled = true;
+            
+            // Simulate form submission
+            const statusIndicator = document.querySelector('.status-indicator');
+            statusIndicator.className = 'status-indicator processing';
+            statusIndicator.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Processing...</span>';
+            
+            setTimeout(() => {
+                statusIndicator.className = 'status-indicator verified';
+                statusIndicator.innerHTML = '<i class="fas fa-check-circle"></i><span>Verified</span>';
+                showNotification('KYC verification submitted successfully!', 'success');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 2000);
+        });
+
+        // Profile form handling
+        document.getElementById('profileForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveProfileInfo();
+        });
+
+        // Password form handling
+        document.getElementById('passwordForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (newPassword !== confirmPassword) {
+                showNotification('Password confirmation doesn\'t match. Please check and try again.', 'error');
+                return;
+            }
+            
+            showNotification('Password updated successfully!', 'success');
+        });
+
+        // Mobile menu toggle
+        const hamburger = document.querySelector('.hamburger');
+        const navMenu = document.querySelector('.nav-menu');
+        
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            navMenu.classList.toggle('active');
+        });
+
+        // Close mobile menu when clicking a link
+        document.querySelectorAll('.nav-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                navMenu.classList.remove('active');
+            });
+        });
+
+        // Enhanced animations and interactions
+        function initializeAnimations() {
+            // Smooth scroll for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+
+            // Add hover effects to cards
+            const cards = document.querySelectorAll('.account-card, .stat-card, .campaign-item, .donation-item, .settings-card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+
+            // Enhanced form interactions
+            const formInputs = document.querySelectorAll('.form-group input, .form-group select, .form-group textarea');
+            formInputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.classList.add('focused');
+                });
+                input.addEventListener('blur', function() {
+                    if (!this.value) {
+                        this.parentElement.classList.remove('focused');
+                    }
+                });
+            });
+
+            // Add loading states to buttons
+            const buttons = document.querySelectorAll('.btn-primary, .btn-secondary');
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    if (this.type !== 'submit') {
+                        this.style.transform = 'scale(0.95)';
+                        setTimeout(() => {
+                            this.style.transform = '';
+                        }, 150);
+                    }
+                });
+            });
+        }
+
+        // Utility function for smooth animations
+        function animateValue(element, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                element.innerHTML = Math.floor(progress * (end - start) + start);
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // Initialize stats animation on page load
+        window.addEventListener('load', () => {
+            const statNumbers = document.querySelectorAll('.stat-card h3');
+            statNumbers.forEach(stat => {
+                const finalValue = parseInt(stat.textContent);
+                stat.textContent = '0';
+                animateValue(stat, 0, finalValue, 1000);
+            });
+        });
+    </script>
+
+    <style>
+        /* Enhanced Account Page Styles */
+        :root {
+            --account-gradient: linear-gradient(135deg, #34d399 0%, #059669 100%);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            --card-hover-shadow: 0 15px 40px rgba(52, 211, 153, 0.15);
+            --border-radius-xl: 16px;
+            --border-radius-lg: 12px;
+            --border-radius-md: 8px;
+            --spacing-xs: 8px;
+            --spacing-sm: 12px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+            --spacing-xxl: 48px;
+        }
+
+        /* Enhanced Navbar */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(52, 211, 153, 0.2);
+            padding: 0;
+        }
+
+        .navbar .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            height: 70px;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .nav-menu a {
+            color: var(--text-white);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: var(--border-radius-md);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-menu a:hover,
+        .nav-menu a.active {
+            color: var(--primary-color);
+            background: rgba(52, 211, 153, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .profile-dropdown {
+            position: relative;
+        }
+
+        .profile-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: var(--border-radius-md);
+            transition: all 0.3s ease;
+        }
+
+        .profile-logo:hover {
+            background: rgba(52, 211, 153, 0.1);
+        }
+
+        .profile-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            min-width: 200px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            margin-top: 8px;
+        }
+
+        .profile-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .profile-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--text-white);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .profile-menu a:hover {
+            background: rgba(52, 211, 153, 0.1);
+            color: var(--primary-color);
+        }
+
+        /* Enhanced Account Header */
+        .account-header {
+            background: var(--account-gradient);
+            color: white;
+            padding: var(--spacing-xxl) 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .account-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.1;
+        }
+
+        .account-header .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        .account-header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-sm);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .account-header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        /* Enhanced Account Sections */
+        .account-section {
+            padding: var(--spacing-xxl) 0;
+        }
+
+        .account-section:nth-child(even) {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        /* Enhanced Account Grid */
+        .account-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: var(--spacing-xl);
+            margin-bottom: var(--spacing-xxl);
+            align-items: start;
+        }
+
+        /* Enhanced Cards */
+        .account-card,
+        .stat-card,
+        .settings-card,
+        .kyc-status,
+        .kyc-form {
+            background: var(--bg-light);
+            border-radius: var(--border-radius-xl);
+            padding: var(--spacing-xl);
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .account-card:hover,
+        .stat-card:hover,
+        .settings-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        .account-card::before,
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--account-gradient);
+        }
+
+        /* Enhanced Account Info */
+        .account-card-header {
+            margin-bottom: var(--spacing-lg);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .account-card-header h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .account-info .info-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+            padding: var(--spacing-md);
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: var(--border-radius-lg);
+            transition: all 0.3s ease;
+        }
+
+        .account-info .info-item:hover {
+            background: rgba(52, 211, 153, 0.1);
+            transform: translateX(5px);
+        }
+
+        .account-info .info-item i {
+            width: 50px;
+            height: 50px;
+            background: var(--account-gradient);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 8px rgba(52, 211, 153, 0.3);
+        }
+
+        .account-info .info-item strong {
+            display: block;
+            font-size: 1.1rem;
+            color: var(--text-white);
+            margin-bottom: 4px;
+        }
+
+        .account-info .info-item span {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+        }
+
+        /* Enhanced Stats */
+        .account-stats {
+            display: grid;
+            gap: var(--spacing-lg);
+        }
+
+        .stat-card {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            padding: var(--spacing-xl);
+            background: var(--bg-light);
+            border-radius: var(--border-radius-xl);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px) scale(1.02);
+        }
+
+        .stat-card i {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color), #059669);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-white);
+            margin: 0 0 4px 0;
+        }
+
+        .stat-card p {
+            color: var(--text-gray);
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        /* Enhanced KYC Section */
+        .kyc-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .kyc-header {
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .kyc-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-white);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .kyc-header p {
+            color: var(--text-gray);
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        .kyc-status {
+            text-align: center;
+            padding: var(--spacing-xl);
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: var(--spacing-md);
+            transition: all 0.3s ease;
+        }
+
+        .status-indicator.pending {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            color: #856404;
+            box-shadow: 0 4px 8px rgba(255, 243, 205, 0.3);
+        }
+
+        .status-indicator.processing {
+            background: linear-gradient(135deg, #d1ecf1, #a8e6f0);
+            color: #0c5460;
+            box-shadow: 0 4px 8px rgba(209, 236, 241, 0.3);
+        }
+
+        .status-indicator.verified {
+            background: linear-gradient(135deg, #d4edda, #a8e6b8);
+            color: #155724;
+            box-shadow: 0 4px 8px rgba(212, 237, 218, 0.3);
+        }
+
+        /* Enhanced Forms */
+        .kyc-form {
+            padding: var(--spacing-xl);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: var(--spacing-sm);
+            font-weight: 600;
+            color: var(--text-white);
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            background: var(--bg-dark);
+            color: var(--text-white);
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.1);
+        }
+
+        /* Enhanced Upload Areas */
+        .document-upload {
+            margin: var(--spacing-xl) 0;
+        }
+
+        .upload-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: var(--border-radius-lg);
+            padding: var(--spacing-xl);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            background: var(--bg-dark);
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background: rgba(52, 211, 153, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .upload-area.uploaded {
+            border-color: var(--primary-color);
+            background: rgba(52, 211, 153, 0.1);
+        }
+
+        /* Enhanced Sections */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-xl);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .section-header h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--text-white);
+            margin: 0;
+        }
+
+        /* Enhanced Campaign and Donation Items */
+        .campaigns-list,
+        .donations-list {
+            display: grid;
+            gap: var(--spacing-lg);
+        }
+
+        .campaign-item,
+        .donation-item {
+            background: var(--bg-light);
+            border-radius: var(--border-radius-lg);
+            padding: var(--spacing-lg);
+            display: flex;
+            gap: var(--spacing-lg);
+            align-items: center;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .campaign-item:hover,
+        .donation-item:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        .campaign-item img,
+        .donation-item img {
+            width: 100px;
+            height: 100px;
+            border-radius: var(--border-radius-md);
+            object-fit: cover;
+            transition: all 0.3s ease;
+        }
+
+        .campaign-item:hover img,
+        .donation-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .campaign-details h3,
+        .donation-details h4 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-white);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .campaign-details p,
+        .donation-details p {
+            color: var(--text-gray);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .campaign-meta,
+        .donation-meta {
+            display: flex;
+            gap: var(--spacing-md);
+            margin: var(--spacing-sm) 0;
+            flex-wrap: wrap;
+        }
+
+        .status,
+        .donation-badge {
+            padding: 6px 16px;
+            border-radius: 25px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .status.active,
+        .donation-badge.completed {
+            background: var(--account-gradient);
+            color: white;
+            box-shadow: 0 2px 4px rgba(52, 211, 153, 0.3);
+        }
+
+        .campaign-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+            flex-wrap: wrap;
+        }
+
+        /* Enhanced Settings */
+        .settings-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: var(--spacing-xl);
+        }
+
+        .settings-card h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: var(--spacing-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .notification-settings {
+            display: grid;
+            gap: var(--spacing-md);
+        }
+
+        .setting-item label,
+        .form-check label {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            cursor: pointer;
+            padding: var(--spacing-sm);
+            border-radius: var(--border-radius-md);
+            transition: all 0.3s ease;
+        }
+
+        .setting-item label:hover,
+        .form-check label:hover {
+            background: rgba(52, 211, 153, 0.1);
+        }
+
+        /* Enhanced Buttons */
+        .btn-primary,
+        .btn-secondary {
+            padding: 14px 28px;
+            border-radius: var(--border-radius-md);
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .btn-primary {
+            background: var(--account-gradient);
+            color: white;
+            box-shadow: 0 4px 8px rgba(52, 211, 153, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(52, 211, 153, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-white);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        /* Enhanced Responsive Design */
+        @media (max-width: 1024px) {
+            .account-grid {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-lg);
+            }
+            
+            .settings-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar .container {
+                padding: 0 15px;
+            }
+            
+            .nav-menu {
+                position: fixed;
+                top: 70px;
+                left: -100%;
+                width: 100%;
+                height: calc(100vh - 70px);
+                background: var(--bg-dark);
+                flex-direction: column;
+                padding: var(--spacing-xl);
+                transition: left 0.3s ease;
+                border-top: 1px solid var(--border-color);
+            }
+            
+            .nav-menu.active {
+                left: 0;
+            }
+            
+            .account-header {
+                padding: var(--spacing-xl) 0;
+            }
+            
+            .account-header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .account-section {
+                padding: var(--spacing-xl) 0;
+            }
+            
+            .form-row,
+            .upload-row {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-md);
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--spacing-md);
+            }
+            
+            .campaign-item,
+            .donation-item {
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: center;
+            }
+            
+            .campaign-item img,
+            .donation-item img {
+                align-self: center;
+            }
+            
+            .campaign-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .campaign-actions button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .account-header h1 {
+                font-size: 2rem;
+            }
+            
+            .account-card,
+            .stat-card,
+            .settings-card {
+                padding: var(--spacing-lg);
+            }
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Loading animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .account-card,
+        .stat-card,
+        .campaign-item,
+        .donation-item,
+        .settings-card {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+    </style>
+</body>
+</html>

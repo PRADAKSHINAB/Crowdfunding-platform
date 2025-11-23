@@ -1,0 +1,325 @@
+[
+  {
+    "id": 1,
+    "files": {},
+    "status": "verified",
+    "createdAt": "2025-08-20T15:55:00.865Z",
+    "verifiedAt": "2025-09-28T16:48:44.772Z"
+  },
+  {
+    "id": 2,
+    "files": {},
+    "status": "rejected",
+    "createdAt": "2025-08-20T15:55:07.829Z",
+    "rejectedAt": "2025-11-16T12:21:26.008Z",
+    "reason": "No properimages"
+  },
+  {
+    "id": 3,
+    "files": {},
+    "status": "rejected",
+    "createdAt": "2025-08-20T16:40:15.826Z",
+    "rejectedAt": "2025-11-16T12:18:29.968Z",
+    "reason": "Upload photos"
+  },
+  {
+    "id": 4,
+    "aadhaarNumber": "123456789012",
+    "fullName": "Rag",
+    "panNumber": "ABCDE1234F",
+    "campaignId": 7,
+    "files": {
+      "aadhaarFront": "1759075779038-250467599.png",
+      "aadhaarBack": "1759075779039-448989997.png",
+      "panPhoto": "1759075779057-772628303.png",
+      "selfie": "1759075779060-210588993.png"
+    },
+    "status": "verified",
+    "createdAt": "2025-09-28T16:09:39.063Z",
+    "verifiedAt": "2025-09-28T16:09:39.063Z"
+  },
+  {
+    "id": 5,
+    "aadhaarNumber": "123456789012",
+    "fullName": "prad",
+    "panNumber": "ABCDE1234F",
+    "campaignId": 8,
+    "files": {
+      "aadhaarFront": "1759077874082-297488085.png",
+      "aadhaarBack": "1759077874092-562641086.png",
+      "panPhoto": "1759077874097-205724348.png",
+      "selfie": "1759077874097-907181179.png"
+    },
+    "status": "verified",
+    "createdAt": "2025-09-28T16:44:34.110Z",
+    "verifiedAt": "2025-10-02T06:26:58.235Z"
+  },
+  {
+    "id": 6,
+    "aadhaarNumber": "123456789012",
+    "fullName": "prad",
+    "panNumber": "ABCDE1234F",
+    "campaignId": 8,
+    "files": {
+      "aadhaarFront": "1759077888114-795147544.png",
+      "aadhaarBack": "1759077888132-66848386.png",
+      "panPhoto": "1759077888134-971472875.png",
+      "selfie": "1759077888134-316601958.png"
+    },
+    "status": "verified",
+    "createdAt": "2025-09-28T16:44:48.157Z",
+    "verifiedAt": "2025-10-02T06:26:35.900Z"
+  },
+  {
+    "id": 7,
+    "aadhaarNumber": "123456789012",
+    "fullName": "prad",
+    "panNumber": "ABCDE1234F",
+    "campaignId": 8,
+    "files": {
+      "aadhaarFront": "1759077890949-678062551.png",
+      "aadhaarBack": "1759077890957-171690666.png",
+      "panPhoto": "1759077890958-997872051.png",
+      "selfie": "1759077890959-123807406.png"
+    },
+    "status": "verified",
+    "createdAt": "2025-09-28T16:44:50.966Z",
+    "verifiedAt": "2025-09-28T16:49:00.058Z"
+  },
+  {
+    "id": 8,
+    "aadhaarNumber": "123456789012",
+    "fullName": "Raksavi",
+    "panNumber": "ABCDE1234F",
+    "campaignId": 9,
+    "files": {
+      "aadhaarFront": "1759386577804-286706749.png",
+      "aadhaarBack": "1759386577813-567831477.png",
+      "panPhoto": "1759386577825-461856208.png",
+      "selfie": "1759386577832-700696627.png"
+    },
+    "status": "rejected",
+    "createdAt": "2025-10-02T06:29:37.848Z",
+    "rejectedAt": "2025-10-02T06:30:39.209Z",
+    "reason": "NOT APPLICABLE"
+  },
+  {
+    "id": 9,
+    "aadhaarNumber": "123456789012",
+    "fullName": "Raksavi",
+    "panNumber": "ABCDE1234F",
+    "campaignId": 9,
+    "files": {
+      "aadhaarFront": "1759386584298-34773049.png",
+      "aadhaarBack": "1759386584306-287559456.png",
+      "panPhoto": "1759386584311-74616232.png",
+      "selfie": "1759386584314-915058576.png"
+    },
+    "status": "verified",
+    "createdAt": "2025-10-02T06:29:44.319Z",
+    "verifiedAt": "2025-10-02T06:30:43.046Z"
+  },
+  {
+    "id": 10,
+    "aadhaarNumber": "123456789012",
+    "fullName": "Raksavi",
+    "panNumber": "ABCDE1234F",
+    "campaignId": 9,
+    "files": {
+      "aadhaarFront": "1759386589735-97901825.png",
+      "aadhaarBack": "1759386589741-426695234.png",
+      "panPhoto": "1759386589748-271042728.png",
+      "selfie": "1759386589752-771497956.png"
+    },
+    "status": "verified",
+    "createdAt": "2025-10-02T06:29:49.757Z",
+    "verifiedAt": "2025-11-16T12:18:02.093Z"
+  },
+  {
+    "id": 11,
+    "aadhaarNumber": "123456789012",
+    "fullName": "Raksavi",
+    "panNumber": "ABCDE1234F",
+    "campaignId": 9,
+    "files": {
+      "aadhaarFront": "1759386591834-560128904.png",
+      "aadhaarBack": "1759386591843-839499760.png",
+      "panPhoto": "1759386591849-464735649.png",
+      "selfie": "1759386591853-986684485.png"
+    },
+    "status": "verified",
+    "createdAt": "2025-10-02T06:29:51.857Z",
+    "verifiedAt": "2025-11-16T12:29:39.765Z"
+  },
+  {
+    "id": 12,
+    "aadhaarNumber": "123456789012",
+    "fullName": "Raksavi",
+    "panNumber": "ABCDE1234F",
+    "campaignId": 9,
+    "files": {
+      "aadhaarFront": "1759386597631-601435671.png",
+      "aadhaarBack": "1759386597641-322151166.png",
+      "panPhoto": "1759386597650-802964213.png",
+      "selfie": "1759386597655-269728167.png"
+    },
+    "status": "verified",
+    "createdAt": "2025-10-02T06:29:57.662Z",
+    "verifiedAt": "2025-11-16T12:29:43.971Z"
+  },
+  {
+    "id": "691f2d7b3025e2d6c1c0e52d",
+    "userId": "691f2d7b3025e2d6c1c0e52c",
+    "aadhaarNumber": "938473937933",
+    "fullName": "PRAKASHJPSOKJ",
+    "panNumber": "PARDO1423D",
+    "campaignId": "691ae3582c49f148402e7179",
+    "files": {
+      "aadhaarFront": "1763650939023-508919173.jpg",
+      "aadhaarBack": "1763650939036-498497.png",
+      "panPhoto": "1763650939042-834594410.png",
+      "selfie": "1763650939064-37547452.jpg"
+    },
+    "status": "verified",
+    "createdAt": "2025-11-20T15:02:19.071Z",
+    "verifiedAt": "2025-11-20T15:41:21.781Z"
+  },
+  {
+    "id": "691fba391b01187e565bc2a4",
+    "userId": "691fba391b01187e565bc2a3",
+    "aadhaarNumber": "876743456778",
+    "fullName": "GUGAN S",
+    "panNumber": "GUGAN8773S",
+    "campaignId": "691ae3582c49f148402e7179",
+    "files": {
+      "aadhaarFront": "1763686968951-54836317.jpg",
+      "aadhaarBack": "1763686968963-731791823.png",
+      "panPhoto": "1763686968970-152471968.png",
+      "selfie": "1763686968996-923124962.png"
+    },
+    "status": "rejected",
+    "createdAt": "2025-11-21T01:02:49.040Z",
+    "rejectedAt": "2025-11-21T01:26:04.145Z",
+    "reason": "Duplicate"
+  },
+  {
+    "id": "691fbd688cf13ba315f804bc",
+    "userId": "691fbd688cf13ba315f804bb",
+    "aadhaarNumber": "978676452195",
+    "fullName": "GUGAN S",
+    "panNumber": "GUGAN2838S",
+    "campaignId": "691ae3582c49f148402e7179",
+    "files": {
+      "aadhaarFront": "1763687784543-227288493.jpg",
+      "aadhaarBack": "1763687784559-769966010.png",
+      "panPhoto": "1763687784570-192364789.png",
+      "selfie": "1763687784595-885388504.jpg"
+    },
+    "status": "rejected",
+    "createdAt": "2025-11-21T01:16:24.602Z",
+    "rejectedAt": "2025-11-21T01:32:59.793Z",
+    "reason": "Duplicate"
+  },
+  {
+    "id": "691fc29bff802d09c5134c16",
+    "userId": "691fc29bff802d09c5134c15",
+    "aadhaarNumber": "873443849922",
+    "fullName": "DIVISHA M",
+    "panNumber": "DIVIS1243H",
+    "campaignId": "691ae3582c49f148402e7179",
+    "files": {
+      "aadhaarFront": "1763689115448-642683948.jpg",
+      "aadhaarBack": "1763689115459-469744548.png",
+      "panPhoto": "1763689115466-114059181.png",
+      "selfie": "1763689115509-266586677.jpg"
+    },
+    "status": "verified",
+    "createdAt": "2025-11-21T01:38:35.521Z",
+    "verifiedAt": "2025-11-21T01:39:40.853Z"
+  },
+  {
+    "id": "691fc29dff802d09c5134c19",
+    "userId": "691fc29dff802d09c5134c18",
+    "aadhaarNumber": "873443849922",
+    "fullName": "DIVISHA M",
+    "panNumber": "DIVIS1243H",
+    "campaignId": "691ae3582c49f148402e7179",
+    "files": {
+      "aadhaarFront": "1763689117774-690571894.jpg",
+      "aadhaarBack": "1763689117795-933346999.png",
+      "panPhoto": "1763689117805-171125109.png",
+      "selfie": "1763689117856-89331606.jpg"
+    },
+    "status": "verified",
+    "createdAt": "2025-11-21T01:38:37.866Z",
+    "verifiedAt": "2025-11-21T01:39:29.117Z"
+  },
+  {
+    "id": "691fca2232b596d1f8f870a2",
+    "userId": "691fca2232b596d1f8f870a1",
+    "aadhaarNumber": "977776452135",
+    "fullName": "RITHI K",
+    "panNumber": "RITHI6299K",
+    "campaignId": "691ae3582c49f148402e7179",
+    "files": {
+      "aadhaarFront": "1763691042706-507908168.jpg",
+      "aadhaarBack": "1763691042722-477390054.png",
+      "panPhoto": "1763691042734-959777838.png",
+      "selfie": "1763691042780-127028547.png"
+    },
+    "status": "verified",
+    "createdAt": "2025-11-21T02:10:42.832Z",
+    "verifiedAt": "2025-11-21T02:10:59.671Z"
+  },
+  {
+    "id": "691fcc40d87f0d3a82f74322",
+    "userId": "691fcc40d87f0d3a82f74321",
+    "aadhaarNumber": "978678080135",
+    "fullName": "SINDHU M",
+    "panNumber": "SINDH6277U",
+    "campaignId": "691ae3582c49f148402e7179",
+    "files": {
+      "aadhaarFront": "1763691584180-627953850.jpg",
+      "aadhaarBack": "1763691584195-64189713.png",
+      "panPhoto": "1763691584204-448540897.png",
+      "selfie": "1763691584228-71128540.png"
+    },
+    "status": "verified",
+    "createdAt": "2025-11-21T02:19:44.249Z",
+    "verifiedAt": "2025-11-21T02:19:59.871Z"
+  },
+  {
+    "id": "691ff23855e9cb1efe01ba40",
+    "userId": "691ff23855e9cb1efe01ba3f",
+    "aadhaarNumber": "978623738934",
+    "fullName": "UDAY S",
+    "panNumber": "CDGEG2134K",
+    "campaignId": "",
+    "files": {
+      "aadhaarFront": "1763701304511-875710850.jpg",
+      "aadhaarBack": "1763701304530-537565399.png",
+      "panPhoto": "1763701304541-707568033.jpg",
+      "selfie": "1763701304555-953575466.png"
+    },
+    "status": "verified",
+    "createdAt": "2025-11-21T05:01:44.588Z",
+    "verifiedAt": "2025-11-21T05:02:54.095Z"
+  },
+  {
+    "id": "692004fe2cc799570311344a",
+    "userId": "692004fe2cc7995703113449",
+    "aadhaarNumber": "802467792408",
+    "fullName": "Rohin",
+    "panNumber": "ROHIN1234R",
+    "campaignId": "",
+    "files": {
+      "aadhaarFront": "1763706109949-505833603.jpg",
+      "aadhaarBack": "1763706109966-535329711.png",
+      "panPhoto": "1763706109975-167967693.png",
+      "selfie": "1763706109994-201958366.png"
+    },
+    "status": "verified",
+    "createdAt": "2025-11-21T06:21:50.065Z",
+    "verifiedAt": "2025-11-21T06:23:18.349Z"
+  }
+]

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - GreenFund</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="api.js"></script>
+    <style>
+        /* Password toggle button styles */
+        .toggle-password {
+            background: none;
+            border: none;
+            cursor: pointer;
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px;
+            width: 36px;
+            height: 36px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-leaf"></i>
+                <span>GreenFund</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="campaigns.html">Campaigns</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Admin Login Section -->
+    <section class="admin-login">
+        <div class="container">
+            <div class="login-container">
+                <div class="login-header">
+                    <i class="fas fa-user-shield"></i>
+                    <h1>Admin Access</h1>
+                    <p>Enter your credentials to access the admin dashboard</p>
+                </div>
+                
+                <form id="adminLoginForm" class="login-form">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <div class="input-group">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="username" name="username" required placeholder="Enter admin username">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="input-group">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="password" name="password" required placeholder="Enter admin password">
+                            <span class="toggle-password" onclick="togglePassword()" aria-label="Toggle password visibility">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="adminCode">Admin Code</label>
+                        <div class="input-group">
+                            <i class="fas fa-key"></i>
+                            <input type="text" id="adminCode" name="adminCode" required placeholder="Enter admin verification code">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn-login">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Access Admin Dashboard
+                    </button>
+                </form>
+                
+                <div class="login-footer">
+                    <p>For security reasons, this page is restricted to authorized administrators only.</p>
+                    <a href="index.html" class="back-link">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to Main Site
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Error Modal -->
+    <div id="errorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Access Denied</h3>
+                <button class="modal-close" onclick="closeErrorModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="errorMessage">Invalid credentials. Please try again.</p>
+                <button class="btn-primary" onclick="closeErrorModal()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:4000/api';
+
+        // Toggle password visibility
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleBtn = document.querySelector('.toggle-password i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleBtn.className = 'fas fa-eye-slash';
+            } else {
+                passwordInput.type = 'password';
+                toggleBtn.className = 'fas fa-eye';
+            }
+        }
+
+        // Show error modal
+        function showErrorModal(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorModal').style.display = 'block';
+        }
+
+        // Close error modal
+        function closeErrorModal() {
+            document.getElementById('errorModal').style.display = 'none';
+        }
+
+        // Handle login form submission
+        document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const adminCode = document.getElementById('adminCode').value;
+            try {
+                const res = await fetch(`${API_BASE}/admin/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, code: adminCode })
+                });
+                if (!res.ok) throw new Error('Invalid');
+                const data = await res.json();
+                sessionStorage.setItem('isAdmin', 'true');
+                sessionStorage.setItem('adminToken', data.token);
+                sessionStorage.setItem('adminUsername', username);
+                localStorage.setItem('isAdmin', 'true');
+                localStorage.setItem('adminToken', data.token);
+                localStorage.setItem('adminUsername', username);
+                window.location.href = 'admin-dashboard.html';
+            } catch (err) {
+                showErrorModal('Invalid credentials. Please check your username, password, and admin code.');
+            }
+        });
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('errorModal');
+            if (event.target === modal) {
+                closeErrorModal();
+            }
+        }
+
+        // Mobile menu toggle
+        document.addEventListener('DOMContentLoaded', () => {
+            const hamburger = document.querySelector('.hamburger');
+            const navMenu = document.querySelector('.nav-menu');
+            
+            hamburger.addEventListener('click', () => {
+                hamburger.classList.toggle('active');
+                navMenu.classList.toggle('active');
+            });
+
+            // Close mobile menu when clicking a link
+            document.querySelectorAll('.nav-menu a').forEach(link => {
+                link.addEventListener('click', () => {
+                    hamburger.classList.remove('active');
+                    navMenu.classList.remove('active');
+                });
+            });
+        });
+    </script>
+    
+</body>
+</html>

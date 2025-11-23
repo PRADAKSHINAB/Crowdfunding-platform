@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KYC Verification - Aadhaar Card - GreenFund</title>
+    <style>
+        :root {
+            --primary-green: #00ff00;
+            --dark-bg: #0d0d0d;
+            --darker-bg: #000000;
+            --text-primary: #ffffff;
+            --text-secondary: #666666;
+            --border-green: #00ff00;
+            --hover-green: #00cc00;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--darker-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: var(--dark-bg);
+            border-bottom: 1px solid var(--border-green);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-green);
+        }
+
+        .nav-logo i {
+            margin-right: 0.5rem;
+            color: var(--primary-green);
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            align-items: center;
+            gap: 2rem;
+            margin: 0;
+        }
+
+        .nav-menu a {
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-menu a:hover,
+        .nav-menu a.active {
+            color: var(--primary-green);
+        }
+
+        /* KYC Header */
+        .kyc-header-section {
+            background: linear-gradient(135deg, var(--primary-green), var(--hover-green));
+            color: var(--darker-bg);
+            padding: 3rem 0;
+            text-align: center;
+        }
+
+        .kyc-header-section h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 900;
+        }
+
+        .kyc-header-section p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        /* KYC Content */
+        .kyc-verification-section {
+            background: var(--dark-bg);
+            padding: 3rem 0;
+        }
+
+        .kyc-verification-container {
+            background: var(--darker-bg);
+            border: 1px solid var(--border-green);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 255, 0, 0.1);
+        }
+
+        /* Progress Steps */
+        .kyc-progress {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 3rem;
+        }
+
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            position: relative;
+        }
+
+        .progress-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background: var(--border-green);
+            z-index: 1;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--dark-bg);
+            border: 2px solid var(--border-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-green);
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            z-index: 2;
+        }
+
+        .progress-step.active .step-number {
+            background: var(--primary-green);
+            color: var(--darker-bg);
+        }
+
+        .step-label {
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        /* Status Card */
+        .kyc-status-card {
+            background: var(--dark-bg);
+            border: 1px solid var(--border-green);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .status-indicator i {
+            color: var(--primary-green);
+            margin-right: 0.5rem;
+        }
+
+        .status-indicator span {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* Form Sections - Fixed overlapping issues */
+        .kyc-form-container {
+            margin-top: 2rem;
+        }
+
+        .form-section {
+            background: var(--dark-bg);
+            border: 1px solid var(--border-green);
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-section h3 {
+            color: var(--primary-green);
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-section h3 i {
+            margin-right: 0.5rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--primary-green);
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            background: var(--darker-bg);
+            border: 1px solid var(--border-green);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: var(--text-secondary);
+        }
+
+        /* Upload Areas */
+        .upload-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .upload-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border-green);
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            background: var(--darker-bg);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-green);
+            background: var(--dark-bg);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+        }
+
+        .upload-area i {
+            font-size: 2.5rem;
+            color: var(--primary-green);
+            margin-bottom: 1rem;
+        }
+
+        .upload-area p {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-area small {
+            color: var(--text-secondary);
+        }
+
+        .upload-preview {
+            margin-top: 1rem;
+        }
+
+        .preview-item {
+            display: flex;
+            align-items: center;
+            background: var(--dark-bg);
+            border: 1px solid var(--border-green);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .preview-item img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-right: 1rem;
+            border: 1px solid var(--border-green);
+        }
+
+        .preview-item .remove-btn {
+            background: #ff0000;
+            color: var(--text-primary);
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* Consent Section */
+        .consent-box {
+            margin: 1.5rem 0;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            margin-right: 0.5rem;
+            accent-color: var(--primary-green);
+        }
+
+        .checkbox-label a {
+            color: var(--primary-green);
+            text-decoration: none;
+        }
+
+        .checkbox-label a:hover {
+            text-decoration: underline;
+        }
+
+        /* Buttons */
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-green);
+            color: var(--darker-bg);
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background: var(--hover-green);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 0, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--primary-green);
+            border: 2px solid var(--border-green);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-green);
+            color: var(--darker-bg);
+        }
+
+        /* Guidelines */
+        .verification-guidelines {
+            background: var(--dark-bg);
+            border: 1px solid var(--border-green);
+            border-radius: 10px;
+            padding: 2rem;
+        }
+
+        .verification-guidelines h3 {
+            color: var(--primary-green);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .verification-guidelines ul {
+            list-style: none;
+        }
+
+        .verification-guidelines li {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .verification-guidelines i {
+            color: var(--primary-green);
+            margin-right: 0.5rem;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--dark-bg);
+            border-top: 1px solid var(--border-green);
+            padding: 3rem 0 1rem;
+            margin-top: 3rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3,
+        .footer-section h4 {
+            color: var(--primary-green);
+            margin-bottom: 1rem;
+        }
+
+        .footer-section p,
+        .footer-section li,
+        .footer-section a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .footer-section a:hover {
+            color: var(--primary-green);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-green);
+            color: var(--text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .form-row,
+            .upload-row {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .form-actions {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .kyc-progress {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .progress-step::after {
+                display: none;
+            }
+
+            .kyc-verification-container {
+                padding: 1rem;
+                margin: 1rem;
+            }
+
+            .form-section {
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            /* Fix overlapping on mobile */
+            .kyc-form-container {
+                margin-top: 1rem;
+            }
+
+            .navbar {
+                position: relative;
+            }
+
+            .nav-menu {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--dark-bg);
+                border-top: 1px solid var(--border-green);
+                flex-direction: column;
+                padding: 1rem;
+                display: none;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .profile-dropdown {
+                position: static;
+            }
+
+            .profile-menu {
+                position: static;
+                box-shadow: none;
+                border: none;
+                background: var(--darker-bg);
+                margin-top: 0.5rem;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--darker-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-green);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-green);
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (!user.id) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            const kycForm = document.getElementById('aadhaarKycForm');
+            
+            if (kycForm) {
+                kycForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    // Create FormData object for file uploads
+                    const formData = new FormData(kycForm);
+                    
+                    // Add user ID to form data
+                    formData.append('userId', user.id);
+                 
+                 try {
+                     const response = await KYCAPI.submitKYC(formData);
+                     alert('KYC documents submitted successfully! They will be reviewed by our team.');
+                     window.location.href = 'my-account.html';
+                 } catch (error) {
+                     alert('Failed to submit KYC: ' + (error.message || 'Please try again'));
+                 }
+             });
+             
+             // Update navigation based on login status
+             checkLoginStatus();
+         });
+         
+         function checkLoginStatus() {
+             const user = JSON.parse(localStorage.getItem('user'));
+             const navMenu = document.querySelector('.nav-menu');
+             
+             if (user) {
+                 // Replace login link with profile dropdown
+                 const loginLink = navMenu.querySelector('a[href="login.html"]').parentNode;
+                 loginLink.innerHTML = `
+                     <div class="profile-dropdown">
+                         <a href="my-account.html" class="profile-link">
+                             <i class="fas fa-user-circle"></i> ${user.name}
+                         </a>
+                         <div class="dropdown-content">
+                             <a href="my-account.html">My Account</a>
+                             <a href="#" id="logoutBtn">Logout</a>
+                         </div>
+                     </div>
+                 `;
+                 
+                 // Add logout handler
+                 document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                     e.preventDefault();
+                     localStorage.removeItem('user');
+                     window.location.reload();
+                 });
+             }
+         }
+     </script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-leaf"></i>
+                <span>GreenFund</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="campaigns.html">Campaigns</a></li>
+                <li><a href="start-campaign.html">Start Campaign</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="login.html">Login</a></li>
+                <li><a href="admin-login.html">Admin</a></li>
+                <li class="profile-dropdown">
+                    <div class="profile-logo" onclick="toggleProfileDropdown()">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Profile</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="profile-menu" id="profileMenu">
+                        <a href="my-account.html"><i class="fas fa-user"></i> My Account</a>
+                        <a href="kyc-verification.html" class="active"><i class="fas fa-shield-alt"></i> Aadhaar KYC</a>
+                        <a href="my-account.html#campaigns"><i class="fas fa-leaf"></i> My Campaigns</a>
+                        <a href="my-account.html#donations"><i class="fas fa-heart"></i> My Donations</a>
+                        <a href="my-account.html#settings"><i class="fas fa-cog"></i> Settings</a>
+                        <a href="#logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- KYC Header -->
+    <section class="kyc-header-section">
+        <div class="container">
+            <h1>Aadhaar KYC Verification</h1>
+            <p>Complete your identity verification using Aadhaar card to unlock full platform features</p>
+        </div>
+    </section>
+
+    <!-- KYC Verification Content -->
+    <section class="kyc-verification-section">
+        <div class="container">
+            <div class="kyc-verification-container">
+                <!-- Progress Steps -->
+                <div class="kyc-progress">
+                    <div class="progress-step active">
+                        <div class="step-number">1</div>
+                        <div class="step-label">Aadhaar Details</div>
+                    </div>
+                    <div class="progress-step">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Document Upload</div>
+                    </div>
+                    <div class="progress-step">
+                        <div class="step-number">3</div>
+                        <div class="step-label">Verification</div>
+                    </div>
+                </div>
+
+                <!-- KYC Status -->
+                <div class="kyc-status-card">
+                    <div class="status-indicator pending">
+                        <i class="fas fa-clock"></i>
+                        <span>Aadhaar Verification Required</span>
+                    </div>
+                    <p>Please complete your Aadhaar KYC verification to access all platform features including creating campaigns and higher donation limits.</p>
+                </div>
+
+                <!-- Aadhaar KYC Form -->
+                <div class="kyc-form-container">
+                    <form id="aadhaarKycForm" class="aadhaar-kyc-form" autocomplete="off">
+                        <!-- Decoy fields to discourage browser autofill -->
+                        <input type="text" name="fake_name" autocomplete="off" style="position:absolute;left:-9999px;opacity:0;height:0;width:0;border:0;padding:0;margin:0;">
+                        <input type="password" name="fake_password" autocomplete="new-password" style="position:absolute;left:-9999px;opacity:0;height:0;width:0;border:0;padding:0;margin:0;">
+                        <input type="hidden" id="campaignId" name="campaignId" value="">
+                        <input type="hidden" id="userId" name="userId" value="">
+                        <!-- KYC Details Section -->
+                        <div class="form-section">
+                            <h3><i class="fas fa-id-card"></i> KYC Details</h3>
+                            
+                            <div class="form-group">
+                                <label for="aadhaarNumber">Aadhaar Number *</label>
+                                <input type="text" id="aadhaarNumber" name="aadhaarNumber" maxlength="12" pattern="[0-9]{12}" placeholder="1234 5678 9012" inputmode="numeric" autocomplete="off" spellcheck="false" autocapitalize="off" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="fullName">Full Name *</label>
+                                <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" autocomplete="off" spellcheck="false" autocapitalize="words" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="panNumber">PAN Number *</label>
+                                <input type="text" id="panNumber" name="panNumber" maxlength="10" pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}" placeholder="ABCDE1234F" autocomplete="off" spellcheck="false" autocapitalize="characters" required>
+                            </div>
+                        </div>
+
+                        <!-- Document Upload Section -->
+                        <div class="form-section">
+                            <h3><i class="fas fa-upload"></i> Document Upload</h3>
+                            
+                            <div class="form-group">
+                                <label for="aadhaarFront">Aadhaar Card Front *</label>
+                                <input type="file" id="aadhaarFront" name="aadhaarFront" accept="image/jpeg,image/png,application/pdf" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="aadhaarBack">Aadhaar Card Back *</label>
+                                <input type="file" id="aadhaarBack" name="aadhaarBack" accept="image/jpeg,image/png,application/pdf" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="panPhoto">PAN Card Photo *</label>
+                                <input type="file" id="panPhoto" name="panPhoto" accept="image/jpeg,image/png,application/pdf" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="selfie">Selfie with Aadhaar *</label>
+                                <input type="file" id="selfie" name="selfie" accept="image/jpeg,image/png" required>
+                            </div>
+                        </div>
+
+
+
+                        <!-- Consent Section -->
+                        <div class="form-section">
+                            <h3><i class="fas fa-shield-alt"></i> Consent &amp; Declaration</h3>
+                            <div class="consent-box">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="consent" required>
+                                    <span class="checkmark"></span>
+                                    I consent to the verification of my Aadhaar details and agree to the <a href="#terms">terms and conditions</a>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="accuracy" required>
+                                    <span class="checkmark"></span>
+                                    I confirm that all information provided is accurate and matches my Aadhaar card
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="saveDraft()">Save as Draft</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Submit for Verification
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Verification Guidelines -->
+                <div class="verification-guidelines">
+                    <h3><i class="fas fa-info-circle"></i> Verification Guidelines</h3>
+                    <ul>
+                        <li><i class="fas fa-check"></i> Ensure Aadhaar card is original and not photocopied</li>
+                        <li><i class="fas fa-check"></i> All details should be clearly visible and readable</li>
+                        <li><i class="fas fa-check"></i> Upload colored scans or high-quality photos</li>
+                        <li><i class="fas fa-check"></i> Selfie should clearly show your face and Aadhaar card</li>
+                        <li><i class="fas fa-check"></i> File size should not exceed 5MB per document</li>
+                        <li><i class="fas fa-check"></i> Accepted formats: JPEG, PNG, PDF</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>GreenFund</h3>
+                    <p>Empowering environmental change through crowdfunding</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="campaigns.html">Campaigns</a></li>
+                        <li><a href="my-account.html">My Account</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#privacy">Privacy Policy</a></li>
+                        <li><a href="#terms">Terms of Service</a></li>
+                        <li><a href="#kyc-policy">KYC Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 GreenFund. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        // Show notification function
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => notification.classList.add('show'), 100);
+            
+            // Remove notification after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
+        }
+
+        // Aadhaar KYC specific JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeAadhaarKYC();
+            initializeMobileMenu();
+            renderUserKycStatus();
+        });
+
+        function initializeMobileMenu() {
+            const hamburger = document.querySelector('.hamburger');
+            const navMenu = document.querySelector('.nav-menu');
+
+            if (hamburger && navMenu) {
+                hamburger.addEventListener('click', () => {
+                    hamburger.classList.toggle('active');
+                    navMenu.classList.toggle('active');
+                });
+
+                // Close mobile menu when clicking a link
+                document.querySelectorAll('.nav-menu a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        hamburger.classList.remove('active');
+                        navMenu.classList.remove('active');
+                    });
+                });
+            }
+        }
+
+        // Profile dropdown toggle
+        function toggleProfileDropdown() {
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            if (profileDropdown) {
+                profileDropdown.classList.toggle('active');
+            }
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            if (profileDropdown && !profileDropdown.contains(e.target)) {
+                profileDropdown.classList.remove('active');
+            }
+        });
+
+        function initializeAadhaarKYC() {
+            // Populate campaignId from query string if present
+            const params = new URLSearchParams(window.location.search);
+            const cid = params.get('campaignId');
+            const cidInput = document.getElementById('campaignId');
+            if (cid && cidInput) {
+                cidInput.value = cid;
+            }
+
+            // Set hidden userId from localStorage as a safety net
+            try {
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                const uidInput = document.getElementById('userId');
+                if (user && user.id && uidInput) {
+                    uidInput.value = user.id;
+                }
+            } catch (_) {}
+
+            setupFileUploads();
+            setupFormValidation();
+            setupAadhaarNumberFormatting();
+            setupPanNumberFormatting();
+        }
+
+        async function renderUserKycStatus() {
+            try {
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                const navMenu = document.querySelector('.nav-menu');
+                if (user && user.id && navMenu) {
+                    const res = await fetch(`http://localhost:4000/api/kyc/status?userId=${encodeURIComponent(user.id)}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        const s = String(data.status || 'none').toLowerCase();
+                        const isVerified = s === 'verified' || s === 'approved';
+
+                        let badge = document.querySelector('.kyc-badge');
+                        if (!badge) { badge = document.createElement('span'); navMenu.appendChild(badge); }
+                        badge.className = `kyc-badge ${isVerified ? 'verified' : s}`;
+                        const icon = isVerified ? 'fa-check-circle' : s === 'rejected' ? 'fa-times-circle' : 'fa-clock';
+                        const label = isVerified ? 'KYC Verified' : s === 'rejected' ? 'KYC Rejected' : 'KYC Pending';
+                        badge.innerHTML = `<i class="fas ${icon}"></i>${label}`;
+
+                        const statusEl = document.querySelector('.kyc-status-card .status-indicator');
+                        if (statusEl) {
+                            statusEl.classList.remove('pending','verified','rejected');
+                            if (isVerified) {
+                                statusEl.classList.add('verified');
+                                statusEl.innerHTML = '<i class="fas fa-check-circle"></i><span>Aadhaar Verified</span>';
+                                const params = new URLSearchParams(window.location.search);
+                                const campaignId = params.get('campaignId');
+                                if (campaignId) {
+                                    showNotification('Your KYC is already verified. Redirecting...', 'success');
+                                    setTimeout(() => { window.location.href = 'my-account.html'; }, 1000);
+                                }
+                            } else if (s === 'rejected') {
+                                statusEl.classList.add('rejected');
+                                statusEl.innerHTML = '<i class="fas fa-times-circle"></i><span>Aadhaar Rejected</span>';
+                            } else {
+                                statusEl.classList.add('pending');
+                                statusEl.innerHTML = '<i class="fas fa-clock"></i><span>Aadhaar Verification Required</span>';
+                            }
+                        }
+                    }
+                }
+            } catch (_) {}
+        }
+
+        function setupFileUploads() {
+            // Basic file upload setup - no complex drag and drop
+            const fileInputs = ['aadhaarFront', 'aadhaarBack', 'selfie'];
+            
+            fileInputs.forEach(inputId => {
+                const fileInput = document.getElementById(inputId);
+                if (fileInput) {
+                    fileInput.addEventListener('change', function(e) {
+                        if (this.files && this.files[0]) {
+                            // File selected for ${inputId}: ${this.files[0].name}
+                        }
+                    });
+                }
+            });
+        }
+
+
+
+        function setupFormValidation() {
+            const form = document.getElementById('aadhaarKycForm');
+            if (form) {
+                form.addEventListener('submit', handleKYCSubmit);
+            }
+        }
+
+        function setupAadhaarNumberFormatting() {
+            const aadhaarInput = document.getElementById('aadhaarNumber');
+            if (aadhaarInput) {
+                aadhaarInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\s/g, '').replace(/[^0-9]/g, '');
+                    if (value.length > 12) value = value.slice(0, 12);
+                    e.target.value = value;
+                });
+            }
+        }
+
+        function setupPanNumberFormatting() {
+            const panInput = document.getElementById('panNumber');
+            if (panInput) {
+                panInput.addEventListener('input', function(e) {
+                    let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                    if (value.length > 10) value = value.slice(0, 10);
+                    e.target.value = value;
+                });
+            }
+        }
+
+
+
+        function handleKYCSubmit(e) {
+            e.preventDefault();
+            
+            // Validate Aadhaar number
+            const aadhaarNumber = document.getElementById('aadhaarNumber').value;
+            if (!/^[0-9]{12}$/.test(aadhaarNumber)) {
+                showNotification('Please enter a valid 12-digit Aadhaar number (numbers only, no spaces or special characters)', 'error');
+                return;
+            }
+
+            // Validate PAN number
+            const panNumber = document.getElementById('panNumber').value;
+            if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(panNumber)) {
+                showNotification('Please enter a valid PAN number (format: ABCDE1234F)', 'error');
+                return;
+            }
+
+            // Validate all required fields
+            const requiredFields = [
+                'fullName', 'panNumber'
+            ];
+            for (let fieldId of requiredFields) {
+                const field = document.getElementById(fieldId);
+                if (!field || !field.value.trim()) {
+                    showNotification(`Please fill in the ${fieldId.replace(/([A-Z])/g, ' $1').toLowerCase()} field`, 'error');
+                    field.focus();
+                    return;
+                }
+            }
+
+            // Validate file uploads
+            const fileInputs = [
+                'aadhaarFront', 'aadhaarBack', 'panPhoto', 'selfie'
+            ];
+            for (let fileId of fileInputs) {
+                const fileInput = document.getElementById(fileId);
+                if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+                    let fileName = fileId.replace('aadhaar', 'Aadhaar ').replace('Front', ' front side').replace('Back', ' back side').replace('selfie', 'your selfie');
+                    
+                    showNotification(`Please upload ${fileName}`, 'error');
+                    return;
+                }
+            }
+
+            // Validate consent checkboxes
+            const consent = document.getElementById('consent');
+            const accuracy = document.getElementById('accuracy');
+            if (!consent.checked || !accuracy.checked) {
+                showNotification('Please accept both consent checkboxes to proceed with KYC verification', 'error');
+                return;
+            }
+
+            // Simulate submission
+            submitKYC();
+        }
+
+        function submitKYC() {
+            const submitBtn = document.querySelector('#aadhaarKycForm button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+            submitBtn.disabled = true;
+
+            // Submit to backend
+            const API_BASE = 'http://localhost:4000/api';
+            const form = document.getElementById('aadhaarKycForm');
+            const formData = new FormData(form);
+            // Append logged-in userId for backend persistence
+            try {
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                if (user && user.id) {
+                    formData.append('userId', user.id);
+                }
+            } catch (_) { /* ignore parse errors */ }
+            fetch(`${API_BASE}/kyc`, { method: 'POST', body: formData })
+                .then(res => {
+                    if (!res.ok) throw new Error('Failed');
+                    return res.json();
+                })
+                .then((data) => {
+                    // Success: show message and mark as pending admin review
+                    showNotification('Your KYC verification has been submitted successfully! Our team will review it within 24-48 hours.', 'success');
+                    const statusEl = document.querySelector('.kyc-status-card .status-indicator');
+                    if (statusEl) {
+                        statusEl.innerHTML = '<i class="fas fa-clock"></i><span>Verification Submitted - Pending Admin Review</span>';
+                    }
+                })
+                .catch(() => {
+                    showNotification('Unable to submit KYC verification. Please check your internet connection and try again.', 'error');
+                })
+                .finally(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                });
+        }
+
+
+
+        function saveDraft() {
+            // Save form data to localStorage
+            const formData = new FormData(document.getElementById('aadhaarKycForm'));
+            const data = {};
+            for (let [key, value] of formData.entries()) {
+                // Do not persist dynamic linkage fields so they always reflect the current campaign/user
+                if (key === 'campaignId' || key === 'userId') continue;
+                data[key] = value;
+            }
+            localStorage.setItem('aadhaarKycDraft', JSON.stringify(data));
+            showNotification('Your KYC form progress has been saved as a draft. You can continue later!', 'success');
+        }
+
+        function loadDraft() {
+            const draft = localStorage.getItem('aadhaarKycDraft');
+            if (draft) {
+                const data = JSON.parse(draft);
+                Object.keys(data).forEach(key => {
+                    // Never override the live campaign/user linkage set from URL or login
+                    if (key === 'campaignId' || key === 'userId') return;
+                    const field = document.getElementById(key);
+                    if (field) field.value = data[key];
+                });
+            }
+        }
+
+        // Load draft on page load
+        document.addEventListener('DOMContentLoaded', loadDraft);
+        
+        // Profile dropdown toggle
+        function toggleProfileDropdown() {
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            profileDropdown.classList.toggle('active');
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            if (!profileDropdown.contains(e.target)) {
+                profileDropdown.classList.remove('active');
+            }
+        });
+        
+        // Mobile menu toggle
+        document.addEventListener('DOMContentLoaded', () => {
+            const hamburger = document.querySelector('.hamburger');
+            const navMenu = document.querySelector('.nav-menu');
+            
+            hamburger.addEventListener('click', () => {
+                hamburger.classList.toggle('active');
+                navMenu.classList.toggle('active');
+            });
+
+            // Close mobile menu when clicking a link
+            document.querySelectorAll('.nav-menu a').forEach(link => {
+                link.addEventListener('click', () => {
+                    hamburger.classList.remove('active');
+                    navMenu.classList.remove('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

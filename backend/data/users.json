@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "firstName": "Ragavi",
+    "lastName": "R",
+    "email": "ragavir.23cse@kongu.edu",
+    "phone": "8248032506",
+    "password": "RagaviR03@",
+    "createdAt": "2025-08-20T15:44:29.244Z"
+  },
+  {
+    "id": 2,
+    "firstName": "PRAD",
+    "lastName": "B",
+    "email": "prad@gmail.com",
+    "phone": "987654322",
+    "password": "Prad@123",
+    "createdAt": "2025-08-20T15:58:55.755Z"
+  },
+  {
+    "id": 3,
+    "firstName": "Kavi",
+    "lastName": "R",
+    "email": "kavi@gmail.com",
+    "phone": "08248032506",
+    "password": "KavithaR03@",
+    "createdAt": "2025-10-02T13:43:54.916Z"
+  },
+  {
+    "id": 4,
+    "firstName": "kanna",
+    "lastName": "K A",
+    "email": "kanna@gmail.com",
+    "phone": "1234567890",
+    "password": "kanna03@",
+    "createdAt": "2025-10-02T13:53:23.572Z"
+  },
+  {
+    "id": 5,
+    "firstName": "Ragul",
+    "lastName": "S",
+    "email": "ragulmadhavans.23cse@kongu.edu",
+    "phone": "9047787622",
+    "password": "Ragul@123",
+    "createdAt": "2025-10-27T08:15:09.965Z"
+  }
+]

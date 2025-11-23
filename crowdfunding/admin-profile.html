@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Profile - GreenFund</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-leaf"></i>
+                <span>GreenFund Admin</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" target="_blank">View Site</a></li>
+                <li><a href="admin-dashboard.html">Dashboard</a></li>
+                <li><a href="admin-profile.html" class="active">Profile</a></li>
+                <li><a href="admin-settings.html">Settings</a></li>
+                <li><a href="admin-dashboard.html#reports">Reports</a></li>
+                <li class="profile-dropdown">
+                    <div class="profile-logo" onclick="toggleProfileDropdown()">
+                        <i class="fas fa-user-shield"></i>
+                        <span>Admin</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="profile-menu" id="profileMenu">
+                        <a href="admin-profile.html"><i class="fas fa-user"></i> Profile</a>
+                        <a href="admin-settings.html"><i class="fas fa-cog"></i> Settings</a>
+                        <a href="#logs"><i class="fas fa-list"></i> Activity Logs</a>
+                        <a href="#logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Admin Header -->
+    <section class="admin-header">
+        <div class="container">
+            <h1>Admin Profile</h1>
+            <p>Manage your profile information and view activity history</p>
+        </div>
+    </section>
+
+    <!-- Profile Content -->
+    <section class="profile-content">
+        <div class="container">
+            <div class="profile-grid">
+                <!-- Profile Card -->
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <!--<div class="profile-avatar">
+                            <img src="images/avatar-placeholder.png" alt="Admin Avatar" id="adminAvatar">
+                            <div class="avatar-overlay">
+                                <i class="fas fa-camera"></i>
+                                <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+                            </div>
+                        </div>-->
+                        <div class="profile-info">
+                            <h2 id="adminName">John Admin</h2>
+                            <p class="admin-role">Greenfund member</p>
+                            <p class="admin-email" id="adminEmail">admin@greenfund.com</p>
+                            <div class="admin-status">
+                                <span class="status-badge active">Active</span>
+                                <span class="last-login">Last login: <span id="lastLogin">2 hours ago</span></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <h3 id="campaignsReviewed">156</h3>
+                            <p>Campaigns Reviewed</p>
+                        </div>
+                        <div class="stat-item">
+                            <h3 id="approvalsGiven">142</h3>
+                            <p>Approvals Given</p>
+                        </div>
+                        <div class="stat-item">
+                            <h3 id="rejectionsGiven">14</h3>
+                            <p>Rejections Given</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Personal Information -->
+                <div class="info-card">
+                    <div class="card-header">
+                        <h3>Personal Information</h3>
+                        <button class="btn-edit" onclick="toggleEditMode('personal')">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                    </div>
+                    <div class="card-content">
+                        <form id="personalForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Full Name</label>
+                                    <input type="text" id="fullName" value="John Admin" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label>Email</label>
+                                    <input type="email" id="email" value="admin@greenfund.com" disabled>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Phone</label>
+                                    <input type="tel" id="phone" value="+1 (555) 123-4567" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label>Department</label>
+                                    <input type="text" id="department" value="Campaign Management" disabled>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Position</label>
+                                    <input type="text" id="position" value="Senior Administrator" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label>Employee ID</label>
+                                    <input type="text" id="employeeId" value="ADM-001" disabled>
+                                </div>
+                            </div>
+                            <div class="form-actions" id="personalActions" style="display: none;">
+                                <button type="button" class="btn-save" onclick="savePersonalInfo()">Save Changes</button>
+                                <button type="button" class="btn-cancel" onclick="cancelEdit('personal')">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Security Information -->
+                <div class="info-card">
+                    <div class="card-header">
+                        <h3>Security Information</h3>
+                        <button class="btn-edit" onclick="toggleEditMode('security')">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                    </div>
+                    <div class="card-content">
+                        <div class="security-info">
+                            <div class="security-item">
+                                <div class="security-label">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <span>Two-Factor Authentication</span>
+                                </div>
+                                <div class="security-status">
+                                    <span class="status-badge enabled">Enabled</span>
+                                    <button class="btn-toggle" onclick="toggle2FA()">Disable</button>
+                                </div>
+                            </div>
+                            <div class="security-item">
+                                <div class="security-label">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Session Timeout</span>
+                                </div>
+                                <div class="security-status">
+                                    <span>30 minutes</span>
+                                    <button class="btn-toggle" onclick="changeSessionTimeout()">Change</button>
+                                </div>
+                            </div>
+                            <div class="security-item">
+                                <div class="security-label">
+                                    <i class="fas fa-key"></i>
+                                    <span>Last Password Change</span>
+                                </div>
+                                <div class="security-status">
+                                    <span>15 days ago</span>
+                                    <button class="btn-toggle" onclick="changePassword()">Change</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="activity-card">
+                    <div class="card-header">
+                        <h3>Recent Activity</h3>
+                        <a href="#viewAll" class="btn-view-all">View All</a>
+                    </div>
+                    <div class="card-content">
+                        <div class="activity-list" id="activityList">
+                            <!-- Activity items will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Change Password Modal -->
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Change Password</h3>
+                <button class="modal-close" onclick="closePasswordModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="passwordForm">
+                    <div class="form-group">
+                        <label for="currentPassword">Current Password</label>
+                        <input type="password" id="currentPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword">New Password</label>
+                        <input type="password" id="newPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm New Password</label>
+                        <input type="password" id="confirmPassword" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">Change Password</button>
+                        <button type="button" class="btn-secondary" onclick="closePasswordModal()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Show notification function
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => notification.classList.add('show'), 100);
+            
+            // Remove notification after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
+        }
+
+        // Admin Access Control
+        function checkAdminAccess() {
+            const isAdmin = (sessionStorage.getItem('isAdmin') === 'true') || (localStorage.getItem('isAdmin') === 'true');
+            const adminToken = sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken');
+            if (!isAdmin || !adminToken) {
+                window.location.href = 'admin-login.html';
+                return false;
+            }
+            return true;
+        }
+
+        // Sample activity data
+        const recentActivities = [
+            {
+                id: 1,
+                action: "Approved campaign",
+                description: "Solar Panel Installation for Rural Schools",
+                time: "2 hours ago",
+                type: "approval"
+            },
+            {
+                id: 2,
+                action: "Rejected campaign",
+                description: "Community Water Purification System",
+                time: "4 hours ago",
+                type: "rejection"
+            },
+            {
+                id: 3,
+                action: "Requested changes",
+                description: "Urban Garden Initiative",
+                time: "6 hours ago",
+                type: "request"
+            },
+            {
+                id: 4,
+                action: "Updated profile",
+                description: "Changed email address",
+                time: "1 day ago",
+                type: "profile"
+            },
+            {
+                id: 5,
+                action: "Approved campaign",
+                description: "Smart Home Garden System",
+                time: "2 days ago",
+                type: "approval"
+            }
+        ];
+
+        // Initialize profile page
+        function initializeProfile() {
+            loadAdminInfo();
+            loadRecentActivity();
+            setupEventListeners();
+        }
+
+        // Load admin information
+        function loadAdminInfo() {
+            const adminUsername = sessionStorage.getItem('adminUsername') || 'admin';
+            
+            // Load saved personal info from localStorage
+            const savedName = localStorage.getItem('adminFullName') || adminUsername;
+            const savedEmail = localStorage.getItem('adminEmail') || `${adminUsername}@greenfund.com`;
+            const savedPhone = localStorage.getItem('adminPhone') || '+1 (555) 123-4567';
+            const savedDepartment = localStorage.getItem('adminDepartment') || 'Campaign Management';
+            const savedPosition = localStorage.getItem('adminPosition') || 'Senior Administrator';
+            const savedEmployeeId = localStorage.getItem('adminEmployeeId') || 'ADM-001';
+            
+            // Update display elements
+            document.getElementById('adminName').textContent = savedName;
+            document.getElementById('adminEmail').textContent = savedEmail;
+            
+            // Update form fields
+            document.getElementById('fullName').value = savedName;
+            document.getElementById('email').value = savedEmail;
+            document.getElementById('phone').value = savedPhone;
+            document.getElementById('department').value = savedDepartment;
+            document.getElementById('position').value = savedPosition;
+            document.getElementById('employeeId').value = savedEmployeeId;
+        }
+
+        // Load recent activity
+        function loadRecentActivity() {
+            const activityList = document.getElementById('activityList');
+            activityList.innerHTML = recentActivities.map(activity => `
+                <div class="activity-item ${activity.type}">
+                    <div class="activity-icon">
+                        <i class="fas fa-${getActivityIcon(activity.type)}"></i>
+                    </div>
+                    <div class="activity-content">
+                        <h4>${activity.action}</h4>
+                        <p>${activity.description}</p>
+                        <span class="activity-time">${activity.time}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Get activity icon
+        function getActivityIcon(type) {
+            const icons = {
+                approval: 'check-circle',
+                rejection: 'times-circle',
+                request: 'edit',
+                profile: 'user-edit'
+            };
+            return icons[type] || 'info-circle';
+        }
+
+        // Toggle edit mode
+        function toggleEditMode(section) {
+            const form = document.getElementById(section === 'personal' ? 'personalForm' : 'securityForm');
+            const actions = document.getElementById(section === 'personal' ? 'personalActions' : 'securityActions');
+            const inputs = form.querySelectorAll('input');
+            
+            if (section === 'personal') {
+                inputs.forEach(input => {
+                    input.disabled = !input.disabled;
+                });
+                actions.style.display = actions.style.display === 'none' ? 'flex' : 'none';
+            }
+        }
+
+        // Save personal information
+        function savePersonalInfo() {
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const department = document.getElementById('department').value.trim();
+            const position = document.getElementById('position').value.trim();
+            const employeeId = document.getElementById('employeeId').value.trim();
+
+            // Basic validation
+            if (!fullName || !email || !phone || !department || !position || !employeeId) {
+                showNotification('Please fill in all fields!', 'warning');
+                return;
+            }
+
+            // Save to localStorage
+            localStorage.setItem('adminFullName', fullName);
+            localStorage.setItem('adminEmail', email);
+            localStorage.setItem('adminPhone', phone);
+            localStorage.setItem('adminDepartment', department);
+            localStorage.setItem('adminPosition', position);
+            localStorage.setItem('adminEmployeeId', employeeId);
+
+            // Update display elements
+            document.getElementById('adminName').textContent = fullName;
+            document.getElementById('adminEmail').textContent = email;
+
+            showNotification('Personal information updated successfully!', 'success');
+            toggleEditMode('personal');
+        }
+
+        // Cancel edit
+        function cancelEdit(section) {
+            toggleEditMode(section);
+        }
+
+        // Change password
+        function changePassword() {
+            document.getElementById('passwordModal').style.display = 'block';
+        }
+
+        // Close password modal
+        function closePasswordModal() {
+            document.getElementById('passwordModal').style.display = 'none';
+            document.getElementById('passwordForm').reset();
+        }
+
+        // Toggle 2FA
+        function toggle2FA() {
+            const button = event.target;
+            const status = button.textContent === 'Disable' ? 'Enable' : 'Disable';
+            button.textContent = status;
+            showNotification(`Two-factor authentication has been ${status.toLowerCase()}d successfully!`, 'info');
+        }
+
+        // Change session timeout
+        function changeSessionTimeout() {
+            const newTimeout = prompt('Enter new session timeout in minutes (15-120):', '30');
+            if (newTimeout && !isNaN(newTimeout) && newTimeout >= 15 && newTimeout <= 120) {
+                showNotification(`Session timeout successfully updated to ${newTimeout} minutes!`, 'success');
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Avatar upload
+            document.getElementById('avatarInput').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('adminAvatar').src = e.target.result;
+                        showNotification('Profile picture has been updated successfully!', 'success');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Password form
+            document.getElementById('passwordForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const currentPassword = document.getElementById('currentPassword').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+
+                if (newPassword !== confirmPassword) {
+                    showNotification('Passwords do not match. Please try again.', 'warning');
+                    return;
+                }
+
+                if (newPassword.length < 8) {
+                    showNotification('Password must be at least 8 characters long!', 'warning');
+                    return;
+                }
+
+                // In a real app, this would validate and save to server
+                showNotification('Password changed successfully!', 'success');
+                closePasswordModal();
+            });
+
+            // Avatar click
+            document.querySelector('.avatar-overlay').addEventListener('click', function() {
+                document.getElementById('avatarInput').click();
+            });
+        }
+
+        // Profile dropdown toggle
+        function toggleProfileDropdown() {
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            profileDropdown.classList.toggle('active');
+        }
+
+        // Logout function
+        function logout() {
+            sessionStorage.removeItem('isAdmin');
+            sessionStorage.removeItem('adminToken');
+            sessionStorage.removeItem('adminUsername');
+            localStorage.removeItem('isAdmin');
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminUsername');
+            window.location.href = 'index.html';
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!checkAdminAccess()) {
+                return;
+            }
+            
+            initializeProfile();
+            
+            // Mobile menu toggle
+            const hamburger = document.querySelector('.hamburger');
+            const navMenu = document.querySelector('.nav-menu');
+            
+            hamburger.addEventListener('click', () => {
+                hamburger.classList.toggle('active');
+                navMenu.classList.toggle('active');
+            });
+
+            // Close mobile menu when clicking a link
+            document.querySelectorAll('.nav-menu a').forEach(link => {
+                link.addEventListener('click', () => {
+                    hamburger.classList.remove('active');
+                    navMenu.classList.remove('active');
+                });
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                const profileDropdown = document.querySelector('.profile-dropdown');
+                if (!profileDropdown.contains(e.target)) {
+                    profileDropdown.classList.remove('active');
+                }
+            });
+
+            // Add logout event listener
+            const logoutLink = document.querySelector('a[href="#logout"]');
+            if (logoutLink) {
+                logoutLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    logout();
+                });
+            }
+
+            // Close modals when clicking outside
+            window.onclick = function(event) {
+                const modal = document.getElementById('passwordModal');
+                if (event.target === modal) {
+                    closePasswordModal();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

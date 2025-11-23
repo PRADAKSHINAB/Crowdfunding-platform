@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - GreenFund</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-leaf"></i>
+                <span>GreenFund</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="campaigns.html">Campaigns</a></li>
+                <li><a href="start-campaign.html">Start Campaign</a></li>
+                <li><a href="about.html" class="active">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="login.html">Login</a></li>
+                <li><a href="admin-login.html">Admin</a></li>
+                <li class="profile-dropdown">
+                    <div class="profile-logo" onclick="toggleProfileDropdown()">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Profile</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="profile-menu" id="profileMenu">
+                        <a href="my-account.html"><i class="fas fa-user"></i> My Account</a>
+                        <a href="kyc-verification.html"><i class="fas fa-shield-alt"></i> Aadhaar KYC</a>
+                        <a href="my-account.html#campaigns"><i class="fas fa-leaf"></i> My Campaigns</a>
+                        <a href="my-account.html#donations"><i class="fas fa-heart"></i> My Donations</a>
+                        <a href="my-account.html#settings"><i class="fas fa-cog"></i> Settings</a>
+                        <a href="#logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero about-hero">
+        <div class="hero-content">
+            <h1>About GreenFund</h1>
+            <p>Empowering sustainable innovation through community-driven crowdfunding</p>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about-section">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2>Our Mission</h2>
+                    <p>GreenFund is a pioneering crowdfunding platform dedicated exclusively to supporting innovative, sustainable, and eco-friendly projects. We believe in the transformative power of community collaboration to drive positive environmental change and create a greener, more sustainable future for generations to come.</p>
+                    
+                    <p>Founded in 2024, our platform connects passionate environmental innovators with conscious backers who share a common vision: making meaningful contributions to global sustainability efforts. From renewable energy breakthroughs to sustainable agriculture initiatives, from zero-waste innovations to conservation projects, we help bring transformative green solutions to life.</p>
+
+                    <h3>What Makes Us Different</h3>
+                    <div class="about-features">
+                        <div class="feature-item">
+                            <i class="fas fa-leaf"></i>
+                            <div>
+                                <h4>100% Green Focus</h4>
+                                <p>Every project on our platform must demonstrate clear environmental benefits and sustainability goals.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-users"></i>
+                            <div>
+                                <h4>Community-Driven</h4>
+                                <p>We foster genuine connections between creators and backers who share environmental values.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-shield-alt"></i>
+                            <div>
+                                <h4>Transparent Process</h4>
+                                <p>Full transparency in project evaluation, funding distribution, and impact reporting.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-chart-line"></i>
+                            <div>
+                                <h4>Measurable Impact</h4>
+                                <p>Every funded project provides detailed impact metrics and sustainability reports.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-image">
+                    <img src="images/success-story.png" alt="GreenFund Team">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <h2>Our Impact</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number" data-count="9">0</div>
+                    <div class="stat-label">Green Projects Funded</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" data-count="244315">0</div>
+                    <div class="stat-label">Amount Raised</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" data-count="2045">0</div>
+                    <div class="stat-label">Active Backers</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" data-count="33">0</div>
+                    <div class="stat-label">Success Rate %</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="team-section">
+        <div class="container">
+            <h2>Our Team</h2>
+            <p class="section-subtitle">Meet the passionate individuals driving GreenFund's mission forward</p>
+            <div class="team-grid">
+                <div class="team-member">
+                    <h3>Pradakshina</h3>
+                    <p>Greenfund member</p>
+                </div>
+                <div class="team-member">
+                    <h3>Ragavi</h3>
+                    <p>Greenfund member</p>
+                </div>
+                <div class="team-member">
+                    <h3>Prahadheesh</h3>
+                    <p>Greenfund member</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Values Section -->
+    <section class="values-section">
+        <div class="container">
+            <h2>Our Core Values</h2>
+            <div class="values-grid">
+                <div class="value-card">
+                    <i class="fas fa-seedling"></i>
+                    <h3>Sustainability First</h3>
+                    <p>Every decision we make prioritizes long-term environmental health over short-term gains.</p>
+                </div>
+                <div class="value-card">
+                    <i class="fas fa-hands-helping"></i>
+                    <h3>Community Empowerment</h3>
+                    <p>We believe in empowering local communities to drive their own sustainable development.</p>
+                </div>
+                <div class="value-card">
+                    <i class="fas fa-search"></i>
+                    <h3>Innovation & Learning</h3>
+                    <p>We continuously seek innovative solutions and learn from both successes and failures.</p>
+                </div>
+                <div class="value-card">
+                    <i class="fas fa-balance-scale"></i>
+                    <h3>Integrity & Transparency</h3>
+                    <p>We maintain the highest standards of honesty and openness in all our operations.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>Ready to Make a Difference?</h2>
+            <p>Join thousands of changemakers creating a sustainable future</p>
+            <div class="cta-buttons">
+                <a href="start-campaign.html" class="btn-primary">Start a Campaign</a>
+                <a href="campaigns.html" class="btn-secondary">Explore Projects</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>GreenFund</h3>
+                    <p>Empowering sustainable innovation through community crowdfunding.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Explore</h4>
+                    <ul>
+                        <li><a href="campaigns.html">Campaigns</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="#">Success Stories</a></li>
+                        <li><a href="#">Categories</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Guidelines</a></li>
+                        <li><a href="contact.html">Contact Us</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Newsletter</h4>
+                    <p>Stay updated with the latest campaigns and news.</p>
+                    <form class="newsletter">
+                        <input type="email" placeholder="Enter your email" required>
+                        <button type="submit">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 GreenFund. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    
+    <script>
+        const API_BASE = 'http://localhost:4000/api';
+
+        // Fetch and update statistics from API
+        async function updateAboutStatistics() {
+            try {
+                const res = await fetch(`${API_BASE}/statistics`);
+                const stats = await res.json();
+
+                // Update the data-count attributes with real values
+                const statNumbers = document.querySelectorAll('.stat-number');
+                if (statNumbers.length >= 4) {
+                    statNumbers[0].setAttribute('data-count', stats.totalCampaigns);
+                    statNumbers[1].setAttribute('data-count', stats.totalRaised);
+                    statNumbers[2].setAttribute('data-count', stats.totalBackers);
+                    statNumbers[3].setAttribute('data-count', stats.successRate);
+                }
+
+                // Animate counters
+                animateCounters();
+            } catch (e) {
+                console.error('Failed to fetch statistics:', e);
+                // Use fallback values and animate
+                animateCounters();
+            }
+        }
+
+        // Animate counter numbers
+        function animateCounters() {
+            const counters = document.querySelectorAll('.stat-number');
+
+            counters.forEach(counter => {
+                const target = parseInt(counter.getAttribute('data-count'));
+                const duration = 2000; // 2 seconds
+                const increment = target / (duration / 16); // 60fps
+                let current = 0;
+
+                const updateCounter = () => {
+                    current += increment;
+
+                    if (current < target) {
+                        counter.textContent = Math.floor(current).toLocaleString();
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        counter.textContent = target.toLocaleString();
+                    }
+                };
+
+                updateCounter();
+            });
+        }
+
+        // Profile dropdown toggle
+        function toggleProfileDropdown() {
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            profileDropdown.classList.toggle('active');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            if (!profileDropdown.contains(e.target)) {
+                profileDropdown.classList.remove('active');
+            }
+        });
+
+        // Mobile menu toggle
+        document.addEventListener('DOMContentLoaded', () => {
+            const hamburger = document.querySelector('.hamburger');
+            const navMenu = document.querySelector('.nav-menu');
+
+            hamburger.addEventListener('click', () => {
+                hamburger.classList.toggle('active');
+                navMenu.classList.toggle('active');
+            });
+
+            // Close mobile menu when clicking a link
+            document.querySelectorAll('.nav-menu a').forEach(link => {
+                link.addEventListener('click', () => {
+                    hamburger.classList.remove('active');
+                    navMenu.classList.remove('active');
+                });
+            });
+
+            // Initialize statistics
+            updateAboutStatistics();
+        });
+    </script>
+</body>
+</html>
