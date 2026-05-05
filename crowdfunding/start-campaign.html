@@ -20,7 +20,7 @@
             try {
                 const user = JSON.parse(localStorage.getItem('user') || '{}');
                 if (!user.id) return;
-                const res = await fetch(`http://localhost:4000/api/kyc/status?userId=${encodeURIComponent(user.id)}`);
+                const res = await fetch(`https://crowdfunding-platform-backend-ffke.onrender.com/api/kyc/status?userId=${encodeURIComponent(user.id)}`);
                 if (!res.ok) return;
                 const data = await res.json();
                 const status = (data.status || 'none').toLowerCase();
@@ -529,7 +529,7 @@
                     token = u && u.token ? u.token : (sessionStorage.getItem('userToken') || '');
                 } catch (_) {}
 
-                const response = await fetch('http://localhost:4000/api/campaigns', {
+                const response = await fetch('https://crowdfunding-platform-backend-ffke.onrender.com/api/campaigns', {
                     method: 'POST',
                     headers: token ? { 'Authorization': `Bearer ${token}` } : undefined,
                     body: formData
@@ -546,7 +546,7 @@
                 try {
                     const u = JSON.parse(localStorage.getItem('user') || '{}');
                     if (u && u.id) {
-                        const kycResp = await fetch(`http://localhost:4000/api/kyc/status?userId=${encodeURIComponent(u.id)}`);
+                        const kycResp = await fetch(`https://crowdfunding-platform-backend-ffke.onrender.com/api/kyc/status?userId=${encodeURIComponent(u.id)}`);
                         if (kycResp.ok) {
                             const ks = await kycResp.json();
                             userKycStatus = String(ks.status || 'none').toLowerCase();

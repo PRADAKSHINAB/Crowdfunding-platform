@@ -484,7 +484,7 @@
             try {
                 const user = JSON.parse(localStorage.getItem('user') || '{}');
                 if (!user.id) return;
-                const res = await fetch(`http://localhost:4000/api/kyc/status?userId=${encodeURIComponent(user.id)}`);
+                const res = await fetch(`https://crowdfunding-platform-backend-ffke.onrender.com/api/kyc/status?userId=${encodeURIComponent(user.id)}`);
                 if (!res.ok) return;
                 const data = await res.json();
                 const status = (data.status || 'none').toLowerCase();
@@ -507,7 +507,7 @@
             try {
                 const user = JSON.parse(localStorage.getItem('user') || '{}');
                 if (!user.id) return;
-                const res = await fetch(`http://localhost:4000/api/kyc/status?userId=${encodeURIComponent(user.id)}`);
+                const res = await fetch(`https://crowdfunding-platform-backend-ffke.onrender.com/api/kyc/status?userId=${encodeURIComponent(user.id)}`);
                 if (!res.ok) return;
                 const data = await res.json();
                 const statusContainer = document.querySelector('.kyc-status .status-indicator');

@@ -489,7 +489,7 @@
             }, 5000);
         }
 
-        const API_BASE = 'http://localhost:4000/api';
+        const API_BASE = 'https://crowdfunding-platform-backend-ffke.onrender.com/api';
 
         // Admin Access Control
         function checkAdminAccess() {
@@ -601,7 +601,7 @@
             // Show campaign image if available
             const imagePreview = document.getElementById('imagePreview');
             if (campaign.image && campaign.image.startsWith('/uploads/')) {
-                imagePreview.innerHTML = `<img src="http://localhost:4000${campaign.image}" alt="Campaign Image" style="max-width: 100%; height: auto;">`;
+                imagePreview.innerHTML = `<img src="https://crowdfunding-platform-backend-ffke.onrender.com${campaign.image}" alt="Campaign Image" style="max-width: 100%; height: auto;">`;
             } else if (campaign.image) {
                 imagePreview.innerHTML = `<img src="${campaign.image}" alt="Campaign Image" style="max-width: 100%; height: auto;">`;
             } else {
@@ -656,7 +656,7 @@
                 const files = k.files || {};
                 function fileButton(label, key) {
                     const filename = files[key];
-                    const url = filename ? (filename.startsWith('http') ? filename : `http://localhost:4000/uploads/${filename}`) : '';
+                    const url = filename ? (filename.startsWith('http') ? filename : `https://crowdfunding-platform-backend-ffke.onrender.com/uploads/${filename}`) : '';
                     return `
                         <div class="doc-card">
                             <div class="doc-title"><i class="fas fa-file-image"></i> ${label}</div>
@@ -706,7 +706,7 @@
             const files = k.files || {};
             function docTile(label, key) {
                 const filename = files[key];
-                const url = filename ? (filename.startsWith('http') ? filename : `http://localhost:4000/uploads/${filename}`) : '';
+                const url = filename ? (filename.startsWith('http') ? filename : `https://crowdfunding-platform-backend-ffke.onrender.com/uploads/${filename}`) : '';
                 return `
                     <div class="doc-card">
                         <div class="doc-title"><i class="fas fa-file-image"></i> ${label}</div>
