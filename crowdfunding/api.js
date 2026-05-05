@@ -1,5 +1,9 @@
 // API Connection Utilities
-const API_URL = 'http://localhost:4000/api';
+// Render backend URL provided by user
+const RENDER_BACKEND_URL = 'https://crowdfunding-platform-backend-ffke.onrender.com';
+const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+    ? 'http://localhost:4000/api' 
+    : `${RENDER_BACKEND_URL}/api`;
 
 // Generic fetch wrapper with error handling
 async function fetchAPI(endpoint, options = {}) {

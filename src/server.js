@@ -171,10 +171,15 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dev_jwt_secret_change_me';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
 // Initialize Razorpay
-const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET
-});
+let razorpay = null;
+if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+    razorpay = new Razorpay({
+        key_id: process.env.RAZORPAY_KEY_ID,
+        key_secret: process.env.RAZORPAY_KEY_SECRET
+    });
+} else {
+    console.warn('Razorpay keys are not configured. Payment endpoints will be disabled.');
+}
 
 // Basic middleware
 app.use(cors({ origin: CLIENT_ORIGIN }));
@@ -465,6 +470,9 @@ app.get('/api/statistics', (req, res) => {
 
 app.post('/api/campaigns/:id/create-order', async (req, res) => {
     try {
+        if (!razorpay) {
+            return res.status(503).json({ message: 'Payment gateway is not configured' });
+        }
         const { amount, donorName, donorEmail } = req.body || {};
         const amt = parseInt(amount, 10);      
         if (!amt || amt <= 0) {
@@ -509,6 +517,9 @@ app.post('/api/campaigns/:id/create-order', async (req, res) => {
 // Verify Payment and Save Donation (Step 2: After payment success)
 app.post('/api/campaigns/:id/verify-payment', async (req, res) => {
     try {
+        if (!razorpay) {
+            return res.status(503).json({ message: 'Payment gateway is not configured' });
+        }
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature, amount, donorName, donorEmail } = req.body || {};
         
         // Verify signature to ensure payment is genuine
