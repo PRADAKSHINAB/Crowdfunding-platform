@@ -929,7 +929,7 @@
                 const user = JSON.parse(localStorage.getItem('user') || '{}');
                 const navMenu = document.querySelector('.nav-menu');
                 if (user && user.id && navMenu) {
-                    const res = await fetch(`http://localhost:4000/api/kyc/status?userId=${encodeURIComponent(user.id)}`);
+                    const res = await fetch(`https://crowdfunding-platform-backend-ffke.onrender.com/api/kyc/status?userId=${encodeURIComponent(user.id)}`);
                     if (res.ok) {
                         const data = await res.json();
                         const s = String(data.status || 'none').toLowerCase();
@@ -1080,7 +1080,7 @@
             submitBtn.disabled = true;
 
             // Submit to backend
-            const API_BASE = 'http://localhost:4000/api';
+            const API_BASE = 'https://crowdfunding-platform-backend-ffke.onrender.com/api';
             const form = document.getElementById('aadhaarKycForm');
             const formData = new FormData(form);
             // Append logged-in userId for backend persistence
