@@ -1,3 +1,66 @@
+// ─── GLOBAL: update navbar based on login state ─────────────────────────────
+function updateNavigation() {
+    const navMenu = document.querySelector('.nav-menu');
+    if (!navMenu) return;
+
+    const userData = localStorage.getItem('user');
+    const sessionLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+
+    if (userData || sessionLoggedIn) {
+        let user = {};
+        try { user = JSON.parse(userData || '{}'); } catch (_) {}
+
+        // Only show a real name — never fall back to email
+        const displayName = user.name
+            || user.fullName
+            || sessionStorage.getItem('userName')
+            || 'My Account';
+
+        // Hide Login and Register links
+        const loginLink = navMenu.querySelector('a[href="login.html"]');
+        const registerLink = navMenu.querySelector('a[href="register.html"]');
+        if (loginLink && loginLink.parentElement) loginLink.parentElement.remove();
+        if (registerLink && registerLink.parentElement) registerLink.parentElement.remove();
+
+        // Show profile dropdown with user's real name
+        const profileDropdown = document.querySelector('.profile-dropdown');
+        if (profileDropdown) {
+            profileDropdown.style.display = 'flex';
+            const nameSpan = profileDropdown.querySelector('.profile-logo span');
+            if (nameSpan) nameSpan.textContent = displayName;
+        }
+
+        // Wire up logout
+        const logoutLink = document.querySelector('a[href="#logout"]');
+        if (logoutLink && !logoutLink._logoutBound) {
+            logoutLink._logoutBound = true;
+            logoutLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                localStorage.removeItem('user');
+                sessionStorage.removeItem('isLoggedIn');
+                sessionStorage.removeItem('userToken');
+                sessionStorage.removeItem('userEmail');
+                sessionStorage.removeItem('userName');
+                window.location.href = 'index.html';
+            });
+        }
+    } else {
+        // Not logged in — hide profile dropdown, show login
+        const profileDropdown = document.querySelector('.profile-dropdown');
+        if (profileDropdown) profileDropdown.style.display = 'none';
+    }
+}
+
+// ─── GLOBAL: toggle profile dropdown ─────────────────────────────────────────
+function toggleProfileDropdown() {
+    const pd = document.querySelector('.profile-dropdown');
+    if (pd) pd.classList.toggle('active');
+}
+document.addEventListener('click', (e) => {
+    const pd = document.querySelector('.profile-dropdown');
+    if (pd && !pd.contains(e.target)) pd.classList.remove('active');
+});
+
 // About section scroll animations
 const aboutObserverOptions = {
     threshold: 0.2,
@@ -71,59 +134,7 @@ if (navbar) {
     });
 }
 
-// Function to update navigation based on user login status
-function updateNavigation() {
-    const navMenu = document.querySelector('.nav-menu');
-    if (!navMenu) return;
-
-    // Check if user is logged in (localStorage preferred, sessionStorage fallback)
-    const userData = localStorage.getItem('user');
-    const sessionLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
-
-    if (userData || sessionLoggedIn) {
-        let user = {};
-        try { user = JSON.parse(userData || '{}'); } catch (_) {}
-
-        // Resolve display name: name > email username > 'Profile'
-        const displayName = user.name
-            || user.fullName
-            || sessionStorage.getItem('userName')
-            || (user.email ? user.email.split('@')[0] : '')
-            || 'Profile';
-
-        // Remove login / register links
-        const loginLink = navMenu.querySelector('a[href="login.html"]');
-        const registerLink = navMenu.querySelector('a[href="register.html"]');
-        if (loginLink && loginLink.parentElement) loginLink.parentElement.remove();
-        if (registerLink && registerLink.parentElement) registerLink.parentElement.remove();
-
-        // Show profile dropdown and set the user's name
-        const profileDropdown = document.querySelector('.profile-dropdown');
-        if (profileDropdown) {
-            profileDropdown.style.display = 'block';
-            const nameSpan = profileDropdown.querySelector('.profile-logo span');
-            if (nameSpan) nameSpan.textContent = displayName;
-        }
-
-        // Wire up logout
-        const logoutLink = document.querySelector('a[href="#logout"]');
-        if (logoutLink) {
-            logoutLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                localStorage.removeItem('user');
-                sessionStorage.removeItem('isLoggedIn');
-                sessionStorage.removeItem('userToken');
-                sessionStorage.removeItem('userEmail');
-                sessionStorage.removeItem('userName');
-                window.location.href = 'index.html';
-            });
-        }
-    } else {
-        // Not logged in — hide profile dropdown
-        const profileDropdown = document.querySelector('.profile-dropdown');
-        if (profileDropdown) profileDropdown.style.display = 'none';
-    }
-}
+// updateNavigation and toggleProfileDropdown are now defined globally above
 
 // Animate elements on scroll
 const observerOptions = {
