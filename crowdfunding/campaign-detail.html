@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="api.js"></script>
+    <script src="script.js"></script>
     <style>
         .campaign-detail-container {
             max-width: 1200px;
@@ -238,6 +239,21 @@
                 <li><a href="contact.html">Contact</a></li>
                 <li><a href="login.html">Login</a></li>
                 <li><a href="admin-login.html">Admin</a></li>
+                <li class="profile-dropdown">
+                    <div class="profile-logo" onclick="toggleProfileDropdown()">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Profile</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="profile-menu" id="profileMenu">
+                        <a href="my-account.html"><i class="fas fa-user"></i> My Account</a>
+                        <a href="kyc-verification.html"><i class="fas fa-shield-alt"></i> Aadhaar KYC</a>
+                        <a href="my-account.html#campaigns"><i class="fas fa-leaf"></i> My Campaigns</a>
+                        <a href="my-account.html#donations"><i class="fas fa-heart"></i> My Donations</a>
+                        <a href="my-account.html#settings"><i class="fas fa-cog"></i> Settings</a>
+                        <a href="#logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </li>
             </ul>
             <div class="hamburger">
                 <span></span>
@@ -355,8 +371,17 @@
             }
         }
 
+        function getCampaignImageUrl(image) {
+            if (!image) return 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop';
+            if (image.startsWith('http') || image.startsWith('data:')) return image;
+            return API_URL.replace('/api', '') + image;
+        }
+
         function displayCampaign(campaign) {
-            document.getElementById('campaignImage').src = campaign.image;
+            const fallback = 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop';
+            const img = document.getElementById('campaignImage');
+            img.src = getCampaignImageUrl(campaign.image);
+            img.onerror = function() { this.onerror=null; this.src=fallback; };
             document.getElementById('campaignBadge').textContent = campaign.badge || 'Campaign';
             document.getElementById('campaignTitle').textContent = campaign.title;
             document.getElementById('campaignDescription').textContent = campaign.description;
@@ -478,6 +503,8 @@
 
         // Mobile navigation
         document.addEventListener('DOMContentLoaded', () => {
+            if (typeof updateNavigation === 'function') updateNavigation();
+
             const hamburger = document.querySelector('.hamburger');
             const navMenu = document.querySelector('.nav-menu');
 
@@ -495,6 +522,15 @@
                     });
                 });
             }
+        });
+
+        function toggleProfileDropdown() {
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            if (profileDropdown) profileDropdown.classList.toggle('active');
+        }
+        document.addEventListener('click', (e) => {
+            const pd = document.querySelector('.profile-dropdown');
+            if (pd && !pd.contains(e.target)) pd.classList.remove('active');
         });
     </script>
 </body>

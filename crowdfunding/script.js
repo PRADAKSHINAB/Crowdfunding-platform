@@ -75,58 +75,53 @@ if (navbar) {
 function updateNavigation() {
     const navMenu = document.querySelector('.nav-menu');
     if (!navMenu) return;
-    
-    // Check if user is logged in
+
+    // Check if user is logged in (localStorage preferred, sessionStorage fallback)
     const userData = localStorage.getItem('user');
-    
-    if (userData) {
-        try {
-            const user = JSON.parse(userData);
-            
-            // Find login and register links
-            const loginLink = navMenu.querySelector('a[href="login.html"]');
-            const registerLink = navMenu.querySelector('a[href="register.html"]');
-            const adminLink = navMenu.querySelector('a[href="admin-login.html"]');
-            
-            // Remove login/register links if they exist
-            if (loginLink) {
-                const loginItem = loginLink.parentElement;
-                if (loginItem) loginItem.remove();
-            }
-            
-            if (registerLink) {
-                const registerItem = registerLink.parentElement;
-                if (registerItem) registerItem.remove();
-            }
-            
-            // Show profile dropdown
-            const profileDropdown = document.querySelector('.profile-dropdown');
-            if (profileDropdown) {
-                profileDropdown.style.display = 'block';
-                const profileLogo = profileDropdown.querySelector('.profile-logo span');
-                if (profileLogo) {
-                    profileLogo.textContent = user.name || 'Profile';
-                }
-            }
-            
-            // Add logout functionality
-            const logoutLink = document.querySelector('a[href="#logout"]');
-            if (logoutLink) {
-                logoutLink.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    localStorage.removeItem('user');
-                    window.location.href = 'index.html';
-                });
-            }
-        } catch (error) {
-            console.error('Error parsing user data:', error);
-        }
-    } else {
-        // User is not logged in, hide profile dropdown
+    const sessionLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+
+    if (userData || sessionLoggedIn) {
+        let user = {};
+        try { user = JSON.parse(userData || '{}'); } catch (_) {}
+
+        // Resolve display name: name > email username > 'Profile'
+        const displayName = user.name
+            || user.fullName
+            || sessionStorage.getItem('userName')
+            || (user.email ? user.email.split('@')[0] : '')
+            || 'Profile';
+
+        // Remove login / register links
+        const loginLink = navMenu.querySelector('a[href="login.html"]');
+        const registerLink = navMenu.querySelector('a[href="register.html"]');
+        if (loginLink && loginLink.parentElement) loginLink.parentElement.remove();
+        if (registerLink && registerLink.parentElement) registerLink.parentElement.remove();
+
+        // Show profile dropdown and set the user's name
         const profileDropdown = document.querySelector('.profile-dropdown');
         if (profileDropdown) {
-            profileDropdown.style.display = 'none';
+            profileDropdown.style.display = 'block';
+            const nameSpan = profileDropdown.querySelector('.profile-logo span');
+            if (nameSpan) nameSpan.textContent = displayName;
         }
+
+        // Wire up logout
+        const logoutLink = document.querySelector('a[href="#logout"]');
+        if (logoutLink) {
+            logoutLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                localStorage.removeItem('user');
+                sessionStorage.removeItem('isLoggedIn');
+                sessionStorage.removeItem('userToken');
+                sessionStorage.removeItem('userEmail');
+                sessionStorage.removeItem('userName');
+                window.location.href = 'index.html';
+            });
+        }
+    } else {
+        // Not logged in — hide profile dropdown
+        const profileDropdown = document.querySelector('.profile-dropdown');
+        if (profileDropdown) profileDropdown.style.display = 'none';
     }
 }
 

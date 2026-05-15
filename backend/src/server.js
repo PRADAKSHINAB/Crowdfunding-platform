@@ -677,7 +677,8 @@ app.post('/api/auth/login', async (req, res) => {
             }
             if (!ok) return res.status(401).json({ message: 'Invalid credentials' });
             const token = signToken({ id: user._id.toString(), email: user.email });
-            return res.json({ id: user._id, email: user.email, token });
+            const fullName = user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username || '';
+            return res.json({ id: user._id, email: user.email, token, name: fullName });
         }
 
         // File-based fallback
@@ -692,7 +693,8 @@ app.post('/api/auth/login', async (req, res) => {
         }
         if (!ok) return res.status(401).json({ message: 'Invalid credentials' });
         const token = signToken({ id: user.id, email: user.email });
-        return res.json({ id: user.id, email: user.email, token });
+        const fullName = user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || '';
+        return res.json({ id: user.id, email: user.email, token, name: fullName });
     } catch (error) {
         console.error('Login error:', error);
         return res.status(500).json({ message: 'Server error during login' });
