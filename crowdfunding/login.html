@@ -203,7 +203,7 @@
     </script>
 
     <script>
-        const API_BASE = 'https://crowdfunding-platform-backend-ffke.onrender.com/api';
+        const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:4000/api' : 'https://crowdfunding-platform-backend-ffke.onrender.com/api');
 
         // Toggle password visibility
         function togglePassword() {
@@ -259,7 +259,9 @@
                 sessionStorage.setItem('isLoggedIn', 'true');
                 sessionStorage.setItem('userToken', data.token);
                 sessionStorage.setItem('userEmail', email);
-                sessionStorage.setItem('userName', data.name || email);
+                // Store the real name — never store the email as a name
+                const realName = data.name || data.fullName || '';
+                sessionStorage.setItem('userName', realName);
                 if (rememberMe) localStorage.setItem('rememberedEmail', email); else localStorage.removeItem('rememberedEmail');
                 showNotification('Welcome back! Login successful. Redirecting to home page...', 'success');
                 // Restore button state
