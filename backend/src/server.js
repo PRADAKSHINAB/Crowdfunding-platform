@@ -710,6 +710,85 @@ app.post('/api/admin/login', (req, res) => {
     res.json({ token: `admin_${Date.now()}` });
 });
 
+// ─── User Profile & Activity Endpoints ───────────────────────────────────────
+
+// GET /api/user/me — authenticated user's profile
+app.get('/api/user/me', requireAuth, async (req, res) => {
+    try {
+        if (useMongoDb) {
+            try {
+                const user = await mongoDb.getUserById(req.user.id);
+                if (user) {
+                    const o = user.toObject ? user.toObject() : user;
+                    return res.json({
+                        id: o._id.toString(),
+                        name: o.fullName || `${o.firstName || ''} ${o.lastName || ''}`.trim(),
+                        firstName: o.firstName || '',
+                        lastName: o.lastName || '',
+                        email: o.email || '',
+                        phone: o.phone || '',
+                        username: o.username || '',
+                        createdAt: o.createdAt || null
+                    });
+                }
+            } catch (e) { console.log('Mongo getUserById failed:', e.message); }
+        }
+        const users = readJson('users.json', []);
+        const user = users.find(u => String(u.id) === String(req.user.id));
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        return res.json({
+            id: user.id,
+            name: user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+            firstName: user.firstName || '',
+            lastName: user.lastName || '',
+            email: user.email || '',
+            phone: user.phone || '',
+            createdAt: user.createdAt || null
+        });
+    } catch (e) {
+        console.error('Get user profile error:', e);
+        res.status(500).json({ message: 'Failed to get user profile' });
+    }
+});
+
+// GET /api/user/campaigns — campaigns created by the authenticated user
+app.get('/api/user/campaigns', requireAuth, (req, res) => {
+    try {
+        const campaigns = readJson('campaigns.json', []);
+        const userCampaigns = campaigns.filter(c =>
+            String(c.creatorId) === String(req.user.id)
+        );
+        res.json(userCampaigns);
+    } catch (e) {
+        console.error('Get user campaigns error:', e);
+        res.status(500).json({ message: 'Failed to get user campaigns' });
+    }
+});
+
+// GET /api/user/donations — donations made by the authenticated user (matched by email)
+app.get('/api/user/donations', requireAuth, (req, res) => {
+    try {
+        const donations = readJson('donations.json', []);
+        const campaigns = readJson('campaigns.json', []);
+        const userEmail = (req.user.email || '').toLowerCase();
+        const userDonations = donations.filter(d =>
+            d.donorEmail && d.donorEmail.toLowerCase() === userEmail
+        );
+        const enriched = userDonations.map(d => {
+            const campaign = campaigns.find(c => String(c.id) === String(d.campaignId));
+            return {
+                ...d,
+                campaignTitle: campaign ? campaign.title : 'Unknown Campaign',
+                campaignImage: campaign ? campaign.image : null
+            };
+        }).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+        res.json(enriched);
+    } catch (e) {
+        console.error('Get user donations error:', e);
+        res.status(500).json({ message: 'Failed to get user donations' });
+    }
+});
+
 // Create campaign with Base64 image support
 app.post('/api/campaigns', requireAuth, async (req, res) => {
     try {
