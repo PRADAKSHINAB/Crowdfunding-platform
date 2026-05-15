@@ -10,7 +10,11 @@ const Razorpay = require('razorpay');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const helmet = require('helmet');
 require('dotenv').config();
+
+// Security middleware & helpers
+const security = require('./security');
 
 // Import MongoDB connection and utilities
 const { connectMongoDB, mongoDb, migrateData } = require('./mongodb');
@@ -31,7 +35,7 @@ connectMongoDB().then(connected => {
 });
 
 // Admin: List users (Mongo-first, fallback to file). Returns safe fields only.
-app.get('/api/admin/users', async (req, res) => {
+app.get('/api/admin/users', security.requireAdminAuth, async (req, res) => {
     try {
         if (useMongoDb) {
             try {
@@ -73,7 +77,7 @@ app.get('/api/admin/users', async (req, res) => {
 // - Primary group key: campaignId when present (stringified)
 // - Fallback group key: `${userId}:${aadhaarNumber}` when campaignId is empty
 // - Keep priority: verified > pending > rejected. If same status, keep newest createdAt
-app.delete('/api/admin/kyc/deduplicate', async (req, res) => {
+app.delete('/api/admin/kyc/deduplicate', security.requireAdminAuth, async (req, res) => {
     try {
         let deletedMongo = 0;
         let deletedFile = 0;
@@ -181,11 +185,34 @@ if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
     console.warn('Razorpay keys are not configured. Payment endpoints will be disabled.');
 }
 
-// Basic middleware
-app.use(cors({ origin: CLIENT_ORIGIN }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(morgan('dev'));
+// ─── Security headers (Helmet) ───────────────────────────────────────────────
+app.use(helmet(security.helmetOptions()));
+app.use(helmet.referrerPolicy({ policy: 'strict-origin-when-cross-origin' }));
+app.use(helmet.noSniff());
+app.use(helmet.xssFilter());
+app.use(helmet.hidePoweredBy());
+app.disable('x-powered-by');
+
+// ─── CORS ─────────────────────────────────────────────────────────────────────
+const allowedOrigins = (CLIENT_ORIGIN === '*')
+    ? true
+    : CLIENT_ORIGIN.split(',').map(s => s.trim());
+app.use(cors({
+    origin: allowedOrigins,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+}));
+
+// ─── Body parsers with size limits ────────────────────────────────────────────
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ extended: true, limit: '2mb' }));
+
+// ─── HTTP request logging (production-safe: no 'dev' verbose) ─────────────────
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+
+// ─── Global rate limiter ──────────────────────────────────────────────────────
+app.use('/api/', security.generalLimiter);
 
 // JWT helpers
 function signToken(payload) {
@@ -301,7 +328,15 @@ function ensureSeeds() {
     if (!users) writeJson('users.json', []);
 
     const admins = readJson('admins.json', null);
-    if (!admins) writeJson('admins.json', [{ username: 'admin', password: 'admin123', code: 'GREENFUND2024' }]);
+    if (!admins) {
+        // IMPORTANT: Default admin credentials are intentionally weak for dev only.
+        // On first run, change via /api/admin/change-password or set env vars.
+        const defaultAdminPass = process.env.ADMIN_DEFAULT_PASSWORD || 'Admin@2024!';
+        const defaultAdminCode = process.env.ADMIN_INVITE_CODE || 'GREENFUND2024';
+        const hashedPass = bcrypt.hashSync(defaultAdminPass, 12);
+        writeJson('admins.json', [{ username: 'admin', password: hashedPass, code: defaultAdminCode }]);
+        console.log('[SECURITY] Default admin created. Change password immediately!');
+    }
 
     const settings = readJson('settings.json', null);
     if (!settings) writeJson('settings.json', { autoApprovalThreshold: 5000, reviewTime: 48 });
@@ -389,14 +424,14 @@ app.get('/api/kyc/status', async (req, res) => {
 });
 
 // Admin: Get all campaigns (including pending/rejected)
-app.get('/api/admin/campaigns', (req, res) => {
+app.get('/api/admin/campaigns', security.requireAdminAuth, (req, res) => {
     const campaigns = readJson('campaigns.json', []);
     // Return all campaigns so admin can view every launch (pending/approved/rejected)
     res.json(campaigns);
 });
 
 // Admin: Update campaign status (approve/reject)
-app.put('/api/admin/campaigns/:id/status', (req, res) => {
+app.put('/api/admin/campaigns/:id/status', security.requireAdminAuth, (req, res) => {
     const { status, reason } = req.body || {};
     if (!['approved', 'rejected'].includes(status)) {
         return res.status(400).json({ message: 'Invalid status. Must be approved or rejected' });
@@ -415,7 +450,7 @@ app.put('/api/admin/campaigns/:id/status', (req, res) => {
 });
 
 // Admin: Get pending campaigns count
-app.get('/api/admin/pending-count', (req, res) => {
+app.get('/api/admin/pending-count', security.requireAdminAuth, (req, res) => {
     const campaigns = readJson('campaigns.json', []);
     try {
         // Simple rule: show count of all campaigns with status 'pending'
@@ -428,7 +463,7 @@ app.get('/api/admin/pending-count', (req, res) => {
 });
 
 // Get total users count
-app.get('/api/admin/users-count', async (req, res) => {
+app.get('/api/admin/users-count', security.requireAdminAuth, async (req, res) => {
     try {
         const users = await mongoDb.getUsers();
         return res.json({ totalUsers: Array.isArray(users) ? users.length : 0 });
@@ -468,7 +503,7 @@ app.get('/api/statistics', (req, res) => {
     });
 });
 
-app.post('/api/campaigns/:id/create-order', async (req, res) => {
+app.post('/api/campaigns/:id/create-order', requireAuth, security.paymentLimiter, security.validateCampaignId, security.handleValidationErrors, async (req, res) => {
     try {
         if (!razorpay) {
             return res.status(503).json({ message: 'Payment gateway is not configured' });
@@ -515,7 +550,7 @@ app.post('/api/campaigns/:id/create-order', async (req, res) => {
 });
 
 // Verify Payment and Save Donation (Step 2: After payment success)
-app.post('/api/campaigns/:id/verify-payment', async (req, res) => {
+app.post('/api/campaigns/:id/verify-payment', requireAuth, security.paymentLimiter, async (req, res) => {
     try {
         if (!razorpay) {
             return res.status(503).json({ message: 'Payment gateway is not configured' });
@@ -608,7 +643,7 @@ app.post('/api/campaigns/:id/donations', (req, res) => {
 });
 
 // Auth
-app.post('/api/auth/register', async (req, res) => {
+app.post('/api/auth/register', security.authLimiter, security.validateRegister, security.handleValidationErrors, async (req, res) => {
     const { firstName, lastName, email, phone, password } = req.body || {};
     if (!email || !password) return res.status(400).json({ message: 'Email and password required' });
     
@@ -671,7 +706,7 @@ app.post('/api/auth/register', async (req, res) => {
 });
 
 // Login
-app.post('/api/auth/login', async (req, res) => {
+app.post('/api/auth/login', security.authLimiter, security.validateLogin, security.handleValidationErrors, async (req, res) => {
     const { email, password } = req.body || {};
     if (!email || !password) return res.status(400).json({ message: 'Email and password required' });
 
@@ -710,13 +745,25 @@ app.post('/api/auth/login', async (req, res) => {
     }
 });
 
-// Admin login
-app.post('/api/admin/login', (req, res) => {
+// Admin login — now issues a signed JWT, uses bcrypt for password comparison
+app.post('/api/admin/login', security.authLimiter, security.validateAdminLogin, security.handleValidationErrors, async (req, res) => {
     const admins = readJson('admins.json', []);
     const { username, password, code } = req.body || {};
-    const ok = admins.find(a => a.username === username && a.password === password && a.code === code);
-    if (!ok) return res.status(401).json({ message: 'Invalid credentials' });
-    res.json({ token: `admin_${Date.now()}` });
+    const admin = admins.find(a => a.username === username && a.code === code);
+    if (!admin) return res.status(401).json({ message: 'Invalid credentials' });
+
+    // Compare password (bcrypt if hash present, fallback for legacy plain-text)
+    let passwordOk = false;
+    if (admin.password && admin.password.startsWith('$2')) {
+        passwordOk = await bcrypt.compare(password, admin.password);
+    } else {
+        // Legacy plain-text (only during first boot before migration)
+        passwordOk = (admin.password === password);
+    }
+    if (!passwordOk) return res.status(401).json({ message: 'Invalid credentials' });
+
+    const token = security.signAdminToken({ username: admin.username, role: 'admin' });
+    res.json({ token });
 });
 
 // Create campaign with Base64 image support
@@ -820,16 +867,35 @@ app.post('/api/campaigns', requireAuth, async (req, res) => {
     }
 });
 
-// KYC submission (stores minimal info and uploaded files)
-app.post('/api/kyc', upload.fields([
+// KYC submission — now with rate limiting, file type validation, and encrypted Aadhaar/PAN
+const secureKycUpload = multer({
+    storage,
+    fileFilter: security.kycFileFilter,
+    limits: { fileSize: security.MAX_FILE_SIZE_BYTES, files: 4 }
+});
+
+app.post('/api/kyc', requireAuth, security.kycLimiter, secureKycUpload.fields([
     { name: 'aadhaarFront', maxCount: 1 },
     { name: 'aadhaarBack', maxCount: 1 },
     { name: 'panPhoto', maxCount: 1 },
     { name: 'selfie', maxCount: 1 }
-]), async (req, res) => {
+]), security.validateKYC, security.handleValidationErrors, async (req, res) => {
     try {
-        const { aadhaarNumber, fullName, panNumber, campaignId, userId } = req.body || {};
+        const { aadhaarNumber, fullName, panNumber, campaignId } = req.body || {};
+        // userId comes from the verified JWT token, not user input
+        const userId = req.user?.id || req.body?.userId;
         const files = Object.fromEntries(Object.entries(req.files || {}).map(([k, v]) => [k, v[0]?.filename]));
+
+        // Encrypt sensitive identity fields before storage
+        let encryptedAadhaar = aadhaarNumber;
+        let encryptedPan = panNumber;
+        try {
+            encryptedAadhaar = security.encryptSensitiveField(aadhaarNumber);
+            if (panNumber) encryptedPan = security.encryptSensitiveField(panNumber);
+        } catch (encErr) {
+            console.warn('[SECURITY] Encryption unavailable — storing without encryption:', encErr.message);
+        }
+        const maskedAadhaar = security.maskAadhaar(aadhaarNumber);
         
         let record;
         
@@ -842,9 +908,10 @@ app.post('/api/kyc', upload.fields([
             }
             record = await mongoDb.createKYC({
                 userId: mongoUserId,
-                aadhaarNumber,
-                fullName,
-                panNumber,
+                aadhaarNumber: encryptedAadhaar,
+                fullName: security.sanitiseString(fullName),
+                panNumber: encryptedPan,
+                maskedAadhaar,
                 // Preserve campaignId as string when coming from Mongo/ObjectId
                 campaignId: campaignId || undefined,
                 files,
@@ -877,9 +944,10 @@ app.post('/api/kyc', upload.fields([
             record = {
                 id: kycList.length ? Math.max(...kycList.map(k => Number(k.id) || 0)) + 1 : 1,
                 userId,
-                aadhaarNumber,
-                fullName,
-                panNumber,
+                aadhaarNumber: encryptedAadhaar,
+                maskedAadhaar,
+                fullName: security.sanitiseString(fullName),
+                panNumber: encryptedPan,
                 campaignId: campaignId ? Number(campaignId) : undefined,
                 files,
                 status: 'pending',
@@ -897,7 +965,7 @@ app.post('/api/kyc', upload.fields([
 });
 
 // Admin: list KYC submissions
-app.get('/api/admin/kyc', async (req, res) => {
+app.get('/api/admin/kyc', security.requireAdminAuth, async (req, res) => {
     try {
         // Disable caching to ensure the admin dashboard always sees fresh KYC data
         res.set('Cache-Control', 'no-store');
@@ -971,7 +1039,7 @@ app.get('/api/admin/kyc', async (req, res) => {
 });
 
 // Admin: update KYC status (verified/rejected) and propagate to campaign
-app.put('/api/admin/kyc/:id/status', async (req, res) => {
+app.put('/api/admin/kyc/:id/status', security.requireAdminAuth, async (req, res) => {
     const { status, reason } = req.body || {};
     if (!['verified', 'rejected'].includes(status)) {
         return res.status(400).json({ message: 'Invalid status. Must be verified or rejected' });
@@ -1155,13 +1223,17 @@ app.put('/api/admin/kyc/:id/status', async (req, res) => {
     }
 });
 
-// Contact messages
-app.post('/api/contact', (req, res) => {
+// Contact messages — with validation and input sanitisation
+app.post('/api/contact', security.generalLimiter, security.validateContactForm, security.handleValidationErrors, (req, res) => {
     const messages = readJson('messages.json', []);
     const { firstName, lastName, email, subject, message } = req.body || {};
     const record = {
         id: messages.length ? Math.max(...messages.map(m => Number(m.id) || 0)) + 1 : 1,
-        firstName, lastName, email, subject, message,
+        firstName: security.sanitiseString(firstName),
+        lastName: security.sanitiseString(lastName),
+        email,
+        subject: security.sanitiseString(subject),
+        message: security.sanitiseString(message),
         createdAt: new Date().toISOString()
     };
     messages.push(record);
@@ -1186,7 +1258,23 @@ if (fs.existsSync(FRONTEND_DIR)) {
     });
 }
 
+// ─── Global error handler (never leak stack traces to client) ────────────────
+app.use((err, req, res, next) => {
+    // Multer file-filter rejections
+    if (err && err.message && err.message.includes('Only JPEG')) {
+        return res.status(400).json({ message: err.message });
+    }
+    if (err && err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ message: 'File too large. Maximum allowed size is 5 MB.' });
+    }
+    console.error('[SERVER ERROR]', err);
+    res.status(500).json({ message: 'An internal server error occurred.' });
+});
+
 // Start server
 app.listen(PORT, () => {
     console.log(`API listening on http://localhost:${PORT}`);
+    if (process.env.NODE_ENV === 'production') {
+        console.log('[SECURITY] Running in PRODUCTION mode — debug output suppressed.');
+    }
 });

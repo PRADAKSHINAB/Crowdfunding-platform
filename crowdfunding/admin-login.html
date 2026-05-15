@@ -30,23 +30,59 @@
     </style>
 </head>
 <body>
-    <!-- Navigation -->
+        <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
-            <div class="nav-logo">
-                <i class="fas fa-leaf"></i>
-                <span>GreenFund</span>
+            <div class="nav-left">
+                <a href="index.html" class="nav-logo">
+                    <i class="fas fa-leaf"></i>
+                    <span>GreenFund</span>
+                </a>
+                <ul class="nav-menu">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="campaigns.html">Campaigns</a></li>
+                    <li><a href="start-campaign.html">Start Campaign</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
             </div>
-            <ul class="nav-menu">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="campaigns.html">Campaigns</a></li>
-                <li><a href="about.html">About</a></li>
-                <li><a href="contact.html">Contact</a></li>
-            </ul>
-            <div class="hamburger">
-                <span></span>
-                <span></span>
-                <span></span>
+            
+            <div class="nav-right">
+                <div class="nav-auth-links" id="navAuthLinks">
+                    <a href="login.html" class="nav-login-btn">Login</a>
+                    <a href="admin-login.html" class="nav-admin-btn">Admin</a>
+                </div>
+
+                <div class="nav-user-controls" id="navUserControls" style="display: none;">
+                    <div class="kyc-badge-container" id="navKycBadge"></div>
+                    <div class="nav-notification">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-dot"></span>
+                    </div>
+                    <div class="profile-dropdown">
+                        <div class="profile-logo" onclick="toggleProfileDropdown()">
+                            <img src="https://ui-avatars.com/api/?name=Profile&background=00d4aa&color=fff" alt="User" id="navAvatar">
+                            <span class="nav-user-name" id="navUserName">Profile</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="profile-menu" id="profileMenu">
+                            <a href="my-account.html"><i class="fas fa-user"></i> My Account</a>
+                            <a href="kyc-verification.html"><i class="fas fa-shield-alt"></i> Aadhaar KYC</a>
+                            <a href="my-account.html#campaigns"><i class="fas fa-leaf"></i> My Campaigns</a>
+                            <a href="my-account.html#donations"><i class="fas fa-heart"></i> My Donations</a>
+                            <a href="my-account.html#settings"><i class="fas fa-cog"></i> Settings</a>
+                            <div class="menu-divider"></div>
+                            <a href="admin-login.html"><i class="fas fa-lock"></i> Admin Panel</a>
+                            <a href="#logout" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
             </div>
         </div>
     </nav>
@@ -121,7 +157,7 @@
     </div>
 
     <script>
-        const API_BASE = 'https://crowdfunding-platform-backend-ffke.onrender.com/api';
+        const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:4000/api' : 'https://crowdfunding-platform-backend-ffke.onrender.com/api');
 
         // Toggle password visibility
         function togglePassword() {
@@ -151,27 +187,39 @@
         // Handle login form submission
         document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
-            const username = document.getElementById('username').value;
+            const btn = this.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+
+            const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
-            const adminCode = document.getElementById('adminCode').value;
+            const adminCode = document.getElementById('adminCode').value.trim();
             try {
                 const res = await fetch(`${API_BASE}/admin/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password, code: adminCode })
                 });
-                if (!res.ok) throw new Error('Invalid');
                 const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.message || 'Invalid credentials');
+                }
+                // Store JWT in sessionStorage ONLY — clears when browser tab closes
                 sessionStorage.setItem('isAdmin', 'true');
                 sessionStorage.setItem('adminToken', data.token);
                 sessionStorage.setItem('adminUsername', username);
-                localStorage.setItem('isAdmin', 'true');
-                localStorage.setItem('adminToken', data.token);
-                localStorage.setItem('adminUsername', username);
+                // Clear any stale localStorage admin state
+                localStorage.removeItem('isAdmin');
+                localStorage.removeItem('adminToken');
+                localStorage.removeItem('adminUsername');
                 window.location.href = 'admin-dashboard.html';
             } catch (err) {
-                showErrorModal('Invalid credentials. Please check your username, password, and admin code.');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Access Admin Dashboard';
+                const msg = err.message === 'Too many attempts. Please try again after 15 minutes.'
+                    ? 'Too many failed attempts. Please wait 15 minutes before trying again.'
+                    : 'Invalid credentials. Please check your username, password and admin code.';
+                showErrorModal(msg);
             }
         });
 
