@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="api.js"></script>
+    <script src="script.js"></script>
     <style>
         .campaigns-grid {
             display: grid;
@@ -473,18 +474,27 @@
 
     <script>
         // API base
-        const API_BASE = 'https://crowdfunding-platform-backend-ffke.onrender.com/api';
+        const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:4000/api' : 'https://crowdfunding-platform-backend-ffke.onrender.com/api');
 
         // Campaign data (loaded from backend)
         let campaigns = [];
 
+        // Resolve campaign image URL (handles http, base64 data URIs, and relative paths)
+        function getCampaignImageUrl(image) {
+            if (!image) return 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop';
+            if (image.startsWith('http') || image.startsWith('data:')) return image;
+            return API_BASE.replace('/api', '') + image;
+        }
+
         // Create campaign cards
         function createCampaignCard(campaign) {
-            const progress = (campaign.raised / campaign.goal) * 100;
+            const progress = campaign.goal > 0 ? (campaign.raised / campaign.goal) * 100 : 0;
+            const imgSrc = getCampaignImageUrl(campaign.image);
+            const fallbackImg = 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop';
             return `
                 <div class="campaign-card" onclick="window.location.href='campaign-detail.html?id=${campaign.id}'">
                     <div class="campaign-image">
-                        <img src="${campaign.image}" alt="${campaign.title}">
+                        <img src="${imgSrc}" alt="${campaign.title}" onerror="this.onerror=null;this.src='${fallbackImg}';">
                         <div class="campaign-badge">${campaign.badge}</div>
                     </div>
                     <div class="campaign-content">
@@ -715,6 +725,7 @@
         // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
             initializeCampaigns();
+            if (typeof updateNavigation === 'function') updateNavigation();
             
             // Mobile menu toggle
             const hamburger = document.querySelector('.hamburger');
@@ -748,140 +759,6 @@
             });
         });
     </script>
-    <script>
-        // Load all campaigns from API
-        async function loadCampaigns() {
-            try {
-                const campaigns = await CampaignAPI.getAllCampaigns();
-                displayCampaigns(campaigns);
-            } catch (error) {
-                console.error('Failed to load campaigns:', error);
-                document.querySelector('.campaigns-grid').innerHTML = `
-                    <div class="error-message">
-                        <p>Failed to load campaigns. Please try again later.</p>
-                    </div>
-                `;
-            }
-        }
 
-        // Display campaigns in the grid
-        function displayCampaigns(campaigns) {
-            const campaignsGrid = document.querySelector('.campaigns-grid');
-            campaignsGrid.innerHTML = '';
-
-            if (campaigns.length === 0) {
-                campaignsGrid.innerHTML = `
-                    <div class="no-results">
-                        <p>No campaigns found. Check back later or try different filters.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            campaigns.forEach(campaign => {
-                const percentFunded = Math.min(Math.round((campaign.raised / campaign.goal) * 100), 100);
-                
-                const campaignCard = document.createElement('div');
-                campaignCard.className = 'campaign-card';
-                campaignCard.innerHTML = `
-                    <div class="campaign-image">
-                        <img src="${campaign.image}" alt="${campaign.title}">
-                        ${campaign.badge ? `<div class="campaign-badge">${campaign.badge}</div>` : ''}
-                    </div>
-                    <div class="campaign-content">
-                        <h3>${campaign.title}</h3>
-                        <p>${campaign.description.substring(0, 100)}...</p>
-                        <div class="campaign-progress">
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${percentFunded}%"></div>
-                            </div>
-                            <div class="progress-stats">
-                                <span>₹${formatNumber(campaign.raised)} raised</span>
-                                <span>${percentFunded}%</span>
-                            </div>
-                        </div>
-                        <div class="campaign-meta">
-                            <div class="meta-item">
-                                <i class="fas fa-user-friends"></i>
-                                <span>${campaign.backers} backers</span>
-                            </div>
-                            <div class="meta-item">
-                                <i class="fas fa-clock"></i>
-                                <span>${campaign.daysLeft} days left</span>
-                            </div>
-                        </div>
-                        <a href="campaign-detail.html?id=${campaign.id}" class="btn-primary">View Campaign</a>
-                    </div>
-                `;
-                
-                campaignsGrid.appendChild(campaignCard);
-                
-                // Add click event to navigate to campaign detail
-                campaignCard.addEventListener('click', (e) => {
-                    // Only navigate if the click wasn't on the button
-                    if (!e.target.closest('.btn-primary')) {
-                        window.location.href = `campaign-detail.html?id=${campaign.id}`;
-                    }
-                });
-            });
-        }
-
-        // Filter campaigns by category
-        function filterCampaigns(category) {
-            const categoryButtons = document.querySelectorAll('.category-filter button');
-            categoryButtons.forEach(button => {
-                button.classList.remove('active');
-                if (button.getAttribute('data-category') === category) {
-                    button.classList.add('active');
-                }
-            });
-
-            // Implement actual filtering logic here
-            loadCampaigns().then(() => {
-                // After loading, we could filter the displayed campaigns
-                // For now, we'll just reload all campaigns
-            });
-        }
-
-        // Helper function to format numbers
-        function formatNumber(num) {
-            if (num >= 1000000) {
-                return (num / 1000000).toFixed(1) + 'M';
-            } else if (num >= 1000) {
-                return (num / 1000).toFixed(1) + 'K';
-            }
-            return num.toString();
-        }
-
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', () => {
-            loadCampaigns();
-            
-            // Set up category filter buttons
-            const categoryButtons = document.querySelectorAll('.category-filter button');
-            categoryButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const category = button.getAttribute('data-category');
-                    filterCampaigns(category);
-                });
-            });
-            
-            // Check login status
-            const token = localStorage.getItem('token');
-            if (token) {
-                document.querySelector('.nav-menu li a[href="login.html"]').style.display = 'none';
-            } else {
-                document.querySelector('.profile-dropdown').style.display = 'none';
-            }
-            
-            // Handle logout
-            document.querySelector('a[href="#logout"]')?.addEventListener('click', (e) => {
-                e.preventDefault();
-                localStorage.removeItem('token');
-                localStorage.removeItem('userName');
-                window.location.href = 'index.html';
-            });
-        });
-    </script>
 </body>
 </html>

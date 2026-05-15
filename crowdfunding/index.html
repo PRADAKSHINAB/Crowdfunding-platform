@@ -120,42 +120,7 @@
         <div class="container">
             <h2>Success Stories</h2>
             <div class="stories-grid">
-                <div class="story-card">
-                    <img src="images/success-story.png" alt="Community Garden Success">
-                    <div class="story-content">
-                        <h3>Community Garden Project</h3>
-                        <p class="story-stats">₹2,07,500 raised • 450+ backers • 100% funded</p>
-                        <p class="story-description">A local community transformed an abandoned lot into a thriving urban garden, providing fresh produce and education for over 200 families.</p>
-                        <div class="story-impact">
-                            <span><i class="fas fa-seedling"></i> 500+ plants grown</span>
-                            <span><i class="fas fa-users"></i> 200+ families served</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="story-card">
-                    <img src="images/success-story.png" alt="Solar Power Success">
-                    <div class="story-content">
-                        <h3>Solar Power for Schools</h3>
-                        <p class="story-stats">₹1,49,31,000 raised • 1,200+ backers • 120% funded</p>
-                        <p class="story-description">Installed solar panels in 15 rural schools, providing clean energy and reducing carbon emissions by 45 tons annually.</p>
-                        <div class="story-impact">
-                            <span><i class="fas fa-solar-panel"></i> 15 schools powered</span>
-                            <span><i class="fas fa-leaf"></i> 45 tons CO2 saved</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="story-card">
-                    <img src="images/success-story.png" alt="Water Conservation Success">
-                    <div class="story-content">
-                        <h3>Clean Water Initiative</h3>
-                        <p class="story-stats">₹6,22,500 raised • 800+ backers • 150% funded</p>
-                        <p class="story-description">Built water purification systems in 10 villages, providing clean drinking water to over 5,000 people.</p>
-                        <div class="story-impact">
-                            <span><i class="fas fa-tint"></i> 5,000+ people served</span>
-                            <span><i class="fas fa-home"></i> 10 villages impacted</span>
-                        </div>
-                    </div>
-                </div>
+                <!-- Real campaigns will be dynamically loaded here by the JS -->
             </div>
         </div>
     </section>
@@ -166,19 +131,19 @@
             <h2>Our Global Impact</h2>
             <div class="stats-grid">
                 <div class="stat-item">
-                    <div class="stat-number">₹2.5M+</div>
+                    <div class="stat-number">₹0</div>
                     <div class="stat-label">Total Funds Raised</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-number">1,200+</div>
+                    <div class="stat-number">0</div>
                     <div class="stat-label">Projects Funded</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-number">50K+</div>
+                    <div class="stat-number">0</div>
                     <div class="stat-label">Active Backers</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-number">85%</div>
+                    <div class="stat-number">0%</div>
                     <div class="stat-label">Success Rate</div>
                 </div>
             </div>
@@ -380,7 +345,7 @@
     </footer>
 
     <script>
-        const API_BASE = 'https://crowdfunding-platform-backend-ffke.onrender.com/api';
+        const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:4000/api' : 'https://crowdfunding-platform-backend-ffke.onrender.com/api');
         let featuredCampaigns = [];
 
         // Fetch and update statistics from API
@@ -421,13 +386,22 @@
             return num.toLocaleString();
         }
 
+        // Resolve campaign image URL (handles http, base64 data URIs, and relative paths)
+        function getCampaignImageUrl(image) {
+            if (!image) return 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop';
+            if (image.startsWith('http') || image.startsWith('data:')) return image;
+            return API_BASE.replace('/api', '') + image;
+        }
+
         // Create campaign card
         function createCampaignCard(campaign) {
-            const progress = (campaign.raised / campaign.goal) * 100;
+            const progress = campaign.goal > 0 ? (campaign.raised / campaign.goal) * 100 : 0;
+            const imgSrc = getCampaignImageUrl(campaign.image);
+            const fallbackImg = 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop';
             return `
                 <div class="campaign-card" onclick="openModal(${campaign.id})">
                     <div class="campaign-image">
-                        <img src="${campaign.image}" alt="${campaign.title}">
+                        <img src="${imgSrc}" alt="${campaign.title}" onerror="this.onerror=null;this.src='${fallbackImg}';">
                         <div class="campaign-badge">${campaign.badge}</div>
                     </div>
                     <div class="campaign-content">
@@ -633,122 +607,6 @@
             }
         });
     </script>
-    <script>
-        // Load statistics for homepage
-        async function loadStatistics() {
-            try {
-                const stats = await CampaignAPI.getStatistics();
-                
-                // Update hero stats
-                document.getElementById('total-raised').textContent = '₹' + formatNumber(stats.totalRaised);
-                document.getElementById('total-campaigns').textContent = formatNumber(stats.totalCampaigns);
-                document.getElementById('total-backers').textContent = formatNumber(stats.totalBackers);
-                
-                // Update impact stats section
-                const impactStatsSection = document.querySelector('.impact-stats');
-                if (impactStatsSection) {
-                    const statItems = impactStatsSection.querySelectorAll('.stat-item');
-                    if (statItems.length >= 4) {
-                        statItems[0].querySelector('.stat-number').textContent = '₹' + formatNumber(stats.totalRaised);
-                        statItems[1].querySelector('.stat-number').textContent = formatNumber(stats.totalCampaigns);
-                        statItems[2].querySelector('.stat-number').textContent = formatNumber(stats.totalBackers);
-                        statItems[3].querySelector('.stat-number').textContent = stats.successRate + '%';
-                    }
-                }
-            } catch (error) {
-                console.error('Failed to load statistics:', error);
-            }
-        }
 
-        // Load featured campaigns
-        async function loadFeaturedCampaigns() {
-            try {
-                const campaigns = await CampaignAPI.getAllCampaigns();
-                
-                // Get featured campaigns section
-                const storiesGrid = document.querySelector('.stories-grid');
-                if (!storiesGrid || !campaigns.length) return;
-                
-                // Clear existing content
-                storiesGrid.innerHTML = '';
-                
-                // Display up to 3 campaigns
-                const featuredCampaigns = campaigns.slice(0, 3);
-                
-                featuredCampaigns.forEach(campaign => {
-                    const percentFunded = Math.min(Math.round((campaign.raised / campaign.goal) * 100), 100);
-                    const formattedRaised = formatNumber(campaign.raised);
-                    
-                    const storyCard = document.createElement('div');
-                    storyCard.className = 'story-card';
-                    storyCard.innerHTML = `
-                        <img src="${campaign.image}" alt="${campaign.title}">
-                        <div class="story-content">
-                            <h3>${campaign.title}</h3>
-                            <p class="story-stats">₹${formattedRaised} raised • ${campaign.backers}+ backers • ${percentFunded}% funded</p>
-                            <p class="story-description">${campaign.description.substring(0, 120)}...</p>
-                            <div class="story-impact">
-                                <span><i class="fas fa-leaf"></i> ${campaign.daysLeft} days left</span>
-                                <span><i class="fas fa-map-marker-alt"></i> ${campaign.location || 'India'}</span>
-                            </div>
-                            <a href="campaign-detail.html?id=${campaign.id}" class="btn-secondary">View Campaign</a>
-                        </div>
-                    `;
-                    
-                    storiesGrid.appendChild(storyCard);
-                });
-            } catch (error) {
-                console.error('Failed to load featured campaigns:', error);
-            }
-        }
-
-        // Helper function to format numbers
-        function formatNumber(num) {
-            if (num >= 1000000) {
-                return (num / 1000000).toFixed(1) + 'M';
-            } else if (num >= 1000) {
-                return (num / 1000).toFixed(1) + 'K';
-            }
-            return num.toString();
-        }
-
-        // Check if user is logged in
-        function checkLoginStatus() {
-            const token = localStorage.getItem('token');
-            const userName = localStorage.getItem('userName');
-            
-            if (token) {
-                // User is logged in
-                document.querySelector('.nav-menu li a[href="login.html"]').style.display = 'none';
-                
-                // Show profile name if available
-                const profileLogo = document.querySelector('.profile-logo');
-                if (profileLogo && userName) {
-                    const nameSpan = profileLogo.querySelector('span');
-                    if (nameSpan) {
-                        nameSpan.textContent = userName;
-                    }
-                }
-            } else {
-                // User is not logged in
-                document.querySelector('.profile-dropdown').style.display = 'none';
-            }
-        }
-
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', () => {
-            loadStatistics();
-            loadFeaturedCampaigns();
-            checkLoginStatus();
-            
-            // Handle logout
-            document.querySelector('a[href="#logout"]')?.addEventListener('click', (e) => {
-                e.preventDefault();
-                localStorage.removeItem('token');
-                localStorage.removeItem('userName');
-                window.location.href = 'index.html';
-            });
-        });
-    </script>
 </body>
 </html>
