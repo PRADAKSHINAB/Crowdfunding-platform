@@ -1,3 +1,27 @@
-backend/.env
+# ─── Environment & secrets ───────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+*.env
+
+# ─── Node ────────────────────────────────────────────────────────────────────
+node_modules/
 backend/node_modules/
-crowdfunding/.env
+
+# ─── Sensitive data files (never commit real user data) ──────────────────────
+data/users.json
+data/kyc.json
+data/donations.json
+data/admins.json
+data/messages.json
+
+# ─── Uploaded KYC documents ──────────────────────────────────────────────────
+uploads/
+
+# ─── Build output ────────────────────────────────────────────────────────────
+dist/
+build/
+
+# ─── Logs ────────────────────────────────────────────────────────────────────
+*.log
+npm-debug.log*

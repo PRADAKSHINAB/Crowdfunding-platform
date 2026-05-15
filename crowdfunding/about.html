@@ -8,41 +8,59 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <!-- Navigation -->
+        <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
-            <div class="nav-logo">
-                <i class="fas fa-leaf"></i>
-                <span>GreenFund</span>
+            <div class="nav-left">
+                <a href="index.html" class="nav-logo">
+                    <i class="fas fa-leaf"></i>
+                    <span>GreenFund</span>
+                </a>
+                <ul class="nav-menu">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="campaigns.html">Campaigns</a></li>
+                    <li><a href="start-campaign.html">Start Campaign</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
             </div>
-            <ul class="nav-menu">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="campaigns.html">Campaigns</a></li>
-                <li><a href="start-campaign.html">Start Campaign</a></li>
-                <li><a href="about.html" class="active">About</a></li>
-                <li><a href="contact.html">Contact</a></li>
-                <li><a href="login.html">Login</a></li>
-                <li><a href="admin-login.html">Admin</a></li>
-                <li class="profile-dropdown">
-                    <div class="profile-logo" onclick="toggleProfileDropdown()">
-                        <i class="fas fa-user-circle"></i>
-                        <span>Profile</span>
-                        <i class="fas fa-chevron-down"></i>
+            
+            <div class="nav-right">
+                <div class="nav-auth-links" id="navAuthLinks">
+                    <a href="login.html" class="nav-login-btn">Login</a>
+                    <a href="admin-login.html" class="nav-admin-btn">Admin</a>
+                </div>
+
+                <div class="nav-user-controls" id="navUserControls" style="display: none;">
+                    <div class="kyc-badge-container" id="navKycBadge"></div>
+                    <div class="nav-notification">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-dot"></span>
                     </div>
-                    <div class="profile-menu" id="profileMenu">
-                        <a href="my-account.html"><i class="fas fa-user"></i> My Account</a>
-                        <a href="kyc-verification.html"><i class="fas fa-shield-alt"></i> Aadhaar KYC</a>
-                        <a href="my-account.html#campaigns"><i class="fas fa-leaf"></i> My Campaigns</a>
-                        <a href="my-account.html#donations"><i class="fas fa-heart"></i> My Donations</a>
-                        <a href="my-account.html#settings"><i class="fas fa-cog"></i> Settings</a>
-                        <a href="#logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    <div class="profile-dropdown">
+                        <div class="profile-logo" onclick="toggleProfileDropdown()">
+                            <img src="https://ui-avatars.com/api/?name=Profile&background=00d4aa&color=fff" alt="User" id="navAvatar">
+                            <span class="nav-user-name" id="navUserName">Profile</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="profile-menu" id="profileMenu">
+                            <a href="my-account.html"><i class="fas fa-user"></i> My Account</a>
+                            <a href="kyc-verification.html"><i class="fas fa-shield-alt"></i> Aadhaar KYC</a>
+                            <a href="my-account.html#campaigns"><i class="fas fa-leaf"></i> My Campaigns</a>
+                            <a href="my-account.html#donations"><i class="fas fa-heart"></i> My Donations</a>
+                            <a href="my-account.html#settings"><i class="fas fa-cog"></i> Settings</a>
+                            <div class="menu-divider"></div>
+                            <a href="admin-login.html"><i class="fas fa-lock"></i> Admin Panel</a>
+                            <a href="#logout" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        </div>
                     </div>
-                </li>
-            </ul>
-            <div class="hamburger">
-                <span></span>
-                <span></span>
-                <span></span>
+                </div>
+
+                <div class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
             </div>
         </div>
     </nav>
@@ -242,7 +260,7 @@
     <script src="script.js"></script>
     
     <script>
-        const API_BASE = 'https://crowdfunding-platform-backend-ffke.onrender.com/api';
+        const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:4000/api' : 'https://crowdfunding-platform-backend-ffke.onrender.com/api');
 
         // Fetch and update statistics from API
         async function updateAboutStatistics() {

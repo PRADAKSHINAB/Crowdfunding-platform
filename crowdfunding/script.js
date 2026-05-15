@@ -1,8 +1,8 @@
 // ─── GLOBAL: update navbar based on login state ─────────────────────────────
-function updateNavigation() {
-    const navMenu = document.querySelector('.nav-menu');
-    if (!navMenu) return;
-
+async function updateNavigation() {
+    const navAuthLinks = document.getElementById('navAuthLinks');
+    const navUserControls = document.getElementById('navUserControls');
+    
     const userData = localStorage.getItem('user');
     const sessionLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
 
@@ -10,28 +10,24 @@ function updateNavigation() {
         let user = {};
         try { user = JSON.parse(userData || '{}'); } catch (_) {}
 
-        // Only show a real name — never fall back to email
         const displayName = user.name
             || user.fullName
             || sessionStorage.getItem('userName')
             || 'My Account';
 
-        // Hide Login and Register links
-        const loginLink = navMenu.querySelector('a[href="login.html"]');
-        const registerLink = navMenu.querySelector('a[href="register.html"]');
-        if (loginLink && loginLink.parentElement) loginLink.parentElement.remove();
-        if (registerLink && registerLink.parentElement) registerLink.parentElement.remove();
+        if (navAuthLinks) navAuthLinks.style.display = 'none';
+        if (navUserControls) navUserControls.style.display = 'flex';
 
-        // Show profile dropdown with user's real name
-        const profileDropdown = document.querySelector('.profile-dropdown');
-        if (profileDropdown) {
-            profileDropdown.style.display = 'flex';
-            const nameSpan = profileDropdown.querySelector('.profile-logo span');
-            if (nameSpan) nameSpan.textContent = displayName;
+        const nameSpan = document.getElementById('navUserName');
+        if (nameSpan) nameSpan.textContent = displayName;
+        
+        const navAvatar = document.getElementById('navAvatar');
+        if (navAvatar) {
+            navAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=00d4aa&color=fff`;
         }
 
         // Wire up logout
-        const logoutLink = document.querySelector('a[href="#logout"]');
+        const logoutLink = document.querySelector('.logout-link');
         if (logoutLink && !logoutLink._logoutBound) {
             logoutLink._logoutBound = true;
             logoutLink.addEventListener('click', (e) => {
@@ -44,10 +40,32 @@ function updateNavigation() {
                 window.location.href = 'index.html';
             });
         }
+        
+        // Fetch and show KYC badge
+        const kycContainer = document.getElementById('navKycBadge');
+        if (kycContainer && user.id && typeof API_URL !== 'undefined') {
+            try {
+                const res = await fetch(`${API_URL}/kyc/status?userId=${encodeURIComponent(user.id)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    const s = (data.status || 'none').toLowerCase();
+                    if (s === 'verified' || s === 'approved') {
+                        kycContainer.innerHTML = '<div class="kyc-badge verified"><i class="fas fa-shield-check"></i> Verified</div>';
+                    } else if (s === 'pending') {
+                        kycContainer.innerHTML = '<div class="kyc-badge pending"><i class="fas fa-clock"></i> Pending</div>';
+                    } else if (s === 'rejected') {
+                        kycContainer.innerHTML = '<div class="kyc-badge rejected"><i class="fas fa-times-circle"></i> Rejected</div>';
+                    } else {
+                        kycContainer.innerHTML = '<div class="kyc-badge pending"><i class="fas fa-exclamation-circle"></i> KYC Required</div>';
+                    }
+                }
+            } catch (e) {
+                console.error('Navbar KYC badge error:', e);
+            }
+        }
     } else {
-        // Not logged in — hide profile dropdown, show login
-        const profileDropdown = document.querySelector('.profile-dropdown');
-        if (profileDropdown) profileDropdown.style.display = 'none';
+        if (navAuthLinks) navAuthLinks.style.display = 'flex';
+        if (navUserControls) navUserControls.style.display = 'none';
     }
 }
 

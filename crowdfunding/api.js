@@ -28,6 +28,20 @@ async function fetchAPI(endpoint, options = {}) {
     }
 }
 
+/** Returns the stored admin JWT token (sessionStorage preferred, localStorage fallback) */
+function getAdminToken() {
+    return (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('adminToken'))
+        || (typeof localStorage !== 'undefined' && localStorage.getItem('adminToken'))
+        || '';
+}
+
+/** Returns the stored user JWT token */
+function getUserToken() {
+    return (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('token'))
+        || (typeof localStorage !== 'undefined' && localStorage.getItem('token'))
+        || '';
+}
+
 // Campaign related API calls
 const CampaignAPI = {
     // Get all approved campaigns
@@ -117,35 +131,43 @@ const KYCAPI = {
     }
 };
 
-// Admin related API calls
+// Admin related API calls — all carry the admin JWT
 const AdminAPI = {
     // Get all campaigns (including pending/rejected)
     getAllCampaigns: async () => {
-        return await fetchAPI('/admin/campaigns');
+        return await fetchAPI('/admin/campaigns', {
+            headers: { 'Authorization': `Bearer ${getAdminToken()}` }
+        });
     },
 
     // Update campaign status
     updateCampaignStatus: async (campaignId, status, reason) => {
         return await fetchAPI(`/admin/campaigns/${campaignId}/status`, {
             method: 'PUT',
+            headers: { 'Authorization': `Bearer ${getAdminToken()}` },
             body: JSON.stringify({ status, reason })
         });
     },
 
     // Get pending campaigns count
     getPendingCount: async () => {
-        return await fetchAPI('/admin/pending-count');
+        return await fetchAPI('/admin/pending-count', {
+            headers: { 'Authorization': `Bearer ${getAdminToken()}` }
+        });
     },
 
     // Get all KYC submissions
     getAllKYC: async () => {
-        return await fetchAPI('/admin/kyc');
+        return await fetchAPI('/admin/kyc', {
+            headers: { 'Authorization': `Bearer ${getAdminToken()}` }
+        });
     },
 
     // Update KYC status
     updateKYCStatus: async (kycId, status, reason) => {
         return await fetchAPI(`/admin/kyc/${kycId}/status`, {
             method: 'PUT',
+            headers: { 'Authorization': `Bearer ${getAdminToken()}` },
             body: JSON.stringify({ status, reason })
         });
     }
