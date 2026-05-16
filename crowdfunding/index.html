@@ -8,8 +8,9 @@
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="api.js"></script>
-    <script src="script.js"></script>
+    <script src="api.js" defer></script>
+    <script src="script.js" defer></script>
+</head>
 <body>
         <!-- Navigation -->
     <nav class="navbar">
@@ -611,19 +612,7 @@
             });
         });
         
-        // Profile dropdown toggle
-        function toggleProfileDropdown() {
-            const profileDropdown = document.querySelector('.profile-dropdown');
-            profileDropdown.classList.toggle('active');
-        }
-        
-        // Close dropdown when clicking outside
-        document.addEventListener('click', (e) => {
-            const profileDropdown = document.querySelector('.profile-dropdown');
-            if (!profileDropdown.contains(e.target)) {
-                profileDropdown.classList.remove('active');
-            }
-        });
+        // toggleProfileDropdown and close-on-outside-click are handled by script.js
     </script>
 
 </body>

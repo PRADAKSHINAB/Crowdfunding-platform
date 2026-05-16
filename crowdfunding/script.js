@@ -79,20 +79,6 @@ document.addEventListener('click', (e) => {
     if (pd && !pd.contains(e.target)) pd.classList.remove('active');
 });
 
-// About section scroll animations
-const aboutObserverOptions = {
-    threshold: 0.2,
-    rootMargin: '0px 0px -100px 0px'
-};
-
-const aboutObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.classList.add('animate');
-        }
-    });
-}, aboutObserverOptions);
-
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', () => {
     // Check if user is logged in and update navigation
