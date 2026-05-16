@@ -501,7 +501,7 @@
         // Admin Access Control — runs on page load
         function checkAdminAccess() {
             const isAdmin = (sessionStorage.getItem('isAdmin') === 'true') || (localStorage.getItem('isAdmin') === 'true');
-            const adminToken = getAdminToken();
+            const adminToken = sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken') || '';
             if (!isAdmin || !adminToken || adminToken.length < 20) {
                 window.location.replace('admin-login.html');
                 return false;
