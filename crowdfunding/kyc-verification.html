@@ -9,6 +9,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         /* ── KYC PAGE SPECIFIC STYLES (uses shared CSS variables from styles.css) ── */
+        body {
+            background-color: var(--bg-black) !important;
+            color: var(--text-white) !important;
+        }
 
         /* ── KYC HEADER ── */
         .kyc-header-section{
@@ -43,12 +47,11 @@
         /* ── MAIN SECTION ── */
         .kyc-verification-section{padding:0 0 5rem;position:relative;z-index:1;}
         .kyc-verification-container{
-            background:rgba(26, 26, 26, 0.85);
-            border:1px solid rgba(0, 255, 65, 0.2);
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
             border-radius:20px;
             padding:2.5rem;
-            box-shadow:0 0 60px rgba(0, 255, 65, 0.05),0 25px 50px rgba(0,0,0,0.4);
-            backdrop-filter:blur(16px);
+            box-shadow:0 0 60px rgba(0, 255, 65, 0.05),0 25px 50px rgba(0,0,0,0.6);
         }
 
         /* ── PROGRESS STEPS ── */
@@ -101,8 +104,8 @@
         /* ── FORM ── */
         .kyc-form-container{margin-top:1.5rem;}
         .form-section{
-            background:rgba(255,255,255,0.02);
-            border:1px solid rgba(0, 255, 65, 0.15);
+            background: var(--bg-darker);
+            border:1px solid var(--border-color);
             border-radius:14px;
             padding:1.8rem 2rem;
             margin-bottom:1.5rem;
@@ -131,7 +134,7 @@
         .form-group label{display:block;margin-bottom:0.45rem;color:var(--text-gray);font-size:0.82rem;font-weight:600;letter-spacing:0.3px;}
         .form-group input,.form-group select,.form-group textarea{
             width:100%;padding:0.8rem 1rem;
-            background:rgba(255,255,255,0.04);
+            background: var(--bg-black);
             border:1px solid var(--border-color);
             border-radius:10px;
             color:var(--text-white);font-size:0.95rem;font-family:'Inter',sans-serif;
@@ -166,7 +169,7 @@
             border:2px dashed var(--border-color);
             border-radius:12px;padding:1.75rem;
             text-align:center;
-            background:rgba(0, 255, 65, 0.02);
+            background: var(--bg-black);
             cursor:pointer;
             transition:all 0.25s;
         }
