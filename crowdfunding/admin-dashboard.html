@@ -8,6 +8,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="api.js"></script>
+    <script>
+        // ── Synchronous admin gate — runs BEFORE body is painted ──────────────
+        (function() {
+            var isAdmin = (sessionStorage.getItem('isAdmin') === 'true') || (localStorage.getItem('isAdmin') === 'true');
+            var token = sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken') || '';
+            if (!isAdmin || !token || token.length < 20) {
+                window.location.replace('admin-login.html');
+            }
+        })();
+    </script>
     <style>
         .kyc-card { border: 1px solid var(--primary-green); border-radius: 12px; padding: 20px; margin-bottom: 20px; background: rgba(255,255,255,0.04); }
         .kyc-card.pending { border-color: #f57c00; }
@@ -493,7 +503,7 @@
             const isAdmin = (sessionStorage.getItem('isAdmin') === 'true') || (localStorage.getItem('isAdmin') === 'true');
             const adminToken = getAdminToken();
             if (!isAdmin || !adminToken || adminToken.length < 20) {
-                window.location.href = 'admin-login.html';
+                window.location.replace('admin-login.html');
                 return false;
             }
             return true;
