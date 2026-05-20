@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Email - GreenFund</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="api.js"></script>
+    <script src="script.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-left">
+                <a href="index.html" class="nav-logo">
+                    <i class="fas fa-leaf"></i>
+                    <span>GreenFund</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Email Verification Loading/Result Card -->
+    <section class="user-login">
+        <div class="container">
+            <div class="login-container" id="statusCard" style="text-align: center; padding: 3rem 2rem;">
+                <div id="loader">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 4rem; color: #00ff66; margin-bottom: 2rem;"></i>
+                    <h1>Verifying Your Account</h1>
+                    <p>Please wait while we verify your email address...</p>
+                </div>
+                
+                <div id="successState" style="display: none;">
+                    <i class="fas fa-check-circle" style="font-size: 5rem; color: #00ff66; margin-bottom: 2rem;"></i>
+                    <h1 style="color: #00ff66; margin-bottom: 1rem;">Verification Successful!</h1>
+                    <p style="margin-bottom: 2rem;">Your email address has been verified successfully. You can now access all features of GreenFund.</p>
+                    <a href="login.html" class="btn-login" style="display: inline-block; width: auto; padding: 12px 30px; text-decoration: none;">
+                        <i class="fas fa-sign-in-alt"></i> Proceed to Login
+                    </a>
+                </div>
+
+                <div id="errorState" style="display: none;">
+                    <i class="fas fa-times-circle" style="font-size: 5rem; color: #ff3333; margin-bottom: 2rem;"></i>
+                    <h1 style="color: #ff3333; margin-bottom: 1rem;">Verification Failed</h1>
+                    <p id="errorMessage" style="margin-bottom: 2rem;">The verification link is invalid, expired, or has already been used.</p>
+                    <a href="login.html" class="signup-link" style="display: block; margin-bottom: 1rem;">Go to Login</a>
+                    <a href="index.html" class="back-link" style="display: inline-flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-arrow-left"></i> Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+
+            const loader = document.getElementById('loader');
+            const successState = document.getElementById('successState');
+            const errorState = document.getElementById('errorState');
+            const errorMessage = document.getElementById('errorMessage');
+
+            if (!token) {
+                loader.style.display = 'none';
+                errorState.style.display = 'block';
+                errorMessage.textContent = 'Verification token is missing. Please check your verification link.';
+                return;
+            }
+
+            try {
+                const res = await AuthAPI.verifyEmail(token);
+                loader.style.display = 'none';
+                successState.style.display = 'block';
+                if (window.showNotification) {
+                    window.showNotification('Email verified successfully!', 'success');
+                }
+            } catch (error) {
+                loader.style.display = 'none';
+                errorState.style.display = 'block';
+                errorMessage.textContent = error.message || 'Verification token is invalid or has expired.';
+                if (window.showNotification) {
+                    window.showNotification(error.message || 'Verification failed.', 'error');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

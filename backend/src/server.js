@@ -316,10 +316,12 @@ app.get('/api/campaigns', (req, res) => {
     
     if (status) {
         const filtered = campaigns.filter(c => c.status === status);
+        filtered.sort((a, b) => (b.isVerified ? 1 : 0) - (a.isVerified ? 1 : 0));
         res.json(filtered);
     } else {
         // Only return approved campaigns for public view
         const publicCampaigns = campaigns.filter(c => c.status === 'approved');
+        publicCampaigns.sort((a, b) => (b.isVerified ? 1 : 0) - (a.isVerified ? 1 : 0));
         res.json(publicCampaigns);
     }
 });
@@ -534,9 +536,27 @@ app.post('/api/campaigns/:id/verify-payment', async (req, res) => {
         const paidPaise = paymentInfo?.amount || Number(amount) || 0; // prefer gateway value
         const paidRupees = Math.round(paidPaise / 100);
         const paymentStatus = (paymentInfo?.status || '').toLowerCase();
-        const normalizedStatus = paymentStatus === 'captured' || paymentStatus === 'authorized' ? 'completed' : (paymentStatus || 'completed');
+        const isPaid = paymentStatus === 'captured' || paymentStatus === 'authorized' || !paymentStatus;
 
-        // Payment is verified - now save the donation
+        if (!isPaid) {
+            return res.status(400).json({ message: 'Payment was not successfully completed.' });
+        }
+
+        // Fraud prevention checks
+        const fraudKeywords = ['fraud', 'scam', 'testpayment', 'tempmail', 'disposable', 'hack', 'fake'];
+        const lowerName = String(donorName || '').toLowerCase();
+        const lowerEmail = String(donorEmail || '').toLowerCase();
+        let isSuspicious = false;
+        let fraudReason = null;
+        if (fraudKeywords.some(kw => lowerName.includes(kw) || lowerEmail.includes(kw))) {
+            isSuspicious = true;
+            fraudReason = 'Suspicious keywords in donor name/email';
+        } else if (paidRupees > 100000 && lowerName === 'anonymous') {
+            isSuspicious = true;
+            fraudReason = 'Large donation from Anonymous donor';
+        }
+
+        // Payment is verified - now save the donation as "held"
         const campaigns = readJson('campaigns.json', []);
         const campaign = campaigns.find(c => String(c.id) === String(req.params.id));
         if (!campaign) {
@@ -553,28 +573,54 @@ app.post('/api/campaigns/:id/verify-payment', async (req, res) => {
             razorpayOrderId: razorpay_order_id,
             razorpayPaymentId: razorpay_payment_id,
             createdAt: new Date().toISOString(),
-            status: normalizedStatus || 'completed'
+            status: 'held',
+            isSuspicious,
+            fraudReason
         };
         donations.push(donation);
         writeJson('donations.json', donations);
 
         // Update campaign totals (file store)
-        if (donation.status === 'completed') {
-            campaign.raised += donation.amount;
-            campaign.backers += 1;
-        }
+        campaign.raised += donation.amount;
+        campaign.backers += 1;
         writeJson('campaigns.json', campaigns);
 
-        // Update campaign totals in MongoDB if available
+        // Save donation and increment campaign stats in MongoDB
         if (useMongoDb) {
             try {
-                if (donation.status === 'completed') {
-                    await mongoDb.incrementCampaignStats(campaign.id, donation.amount);
-                }
+                await mongoDb.createDonation({
+                    campaignId: String(campaign.id),
+                    amount: paidRupees,
+                    donorName: donorName || 'Anonymous',
+                    donorEmail: donorEmail || '',
+                    razorpayOrderId: razorpay_order_id,
+                    razorpayPaymentId: razorpay_payment_id,
+                    status: 'held',
+                    createdAt: new Date()
+                });
+                await mongoDb.incrementCampaignStats(campaign.id, donation.amount);
             } catch (e) {
-                console.log('Mongo incrementCampaignStats failed:', e.message);
+                console.log('Mongo donation recording failed:', e.message);
             }
         }
+
+        // Log transaction to Escrow ledger
+        try {
+            const escrowLog = {
+                id: `escrow_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+                donationId: donation.id,
+                campaignId: campaign.id,
+                amount: paidRupees,
+                action: 'hold',
+                status: 'held',
+                isSuspicious,
+                fraudReason,
+                timestamp: new Date().toISOString()
+            };
+            const paymentLogs = readJson('payment-logs.json', []);
+            paymentLogs.push(escrowLog);
+            writeJson('payment-logs.json', paymentLogs);
+        } catch (_) {}
 
         res.json({ 
             success: true, 
@@ -1222,6 +1268,343 @@ app.put('/api/admin/kyc/:id/status', async (req, res) => {
     } catch (e) {
         console.error('Error updating KYC status:', e);
         res.status(500).json({ message: 'Failed to update KYC status' });
+    }
+});
+
+// --- Crowdfunding Escrow & Campaign Verification Request/Dashboard Routes ---
+
+// GET /api/campaigns/:id/donations — Get donations (escrow timeline) for a campaign
+app.get('/api/campaigns/:id/donations', async (req, res) => {
+    try {
+        const campaignId = req.params.id;
+        let campaignDonations = [];
+        
+        if (useMongoDb) {
+            try {
+                const list = await mongoDb.getDonationsByCampaignId(campaignId);
+                campaignDonations = (list || []).map(d => ({
+                    id: d._id.toString(),
+                    campaignId: d.campaignId,
+                    amount: d.amount,
+                    donorName: d.donorName,
+                    donorEmail: d.donorEmail,
+                    razorpayOrderId: d.razorpayOrderId,
+                    razorpayPaymentId: d.razorpayPaymentId,
+                    status: d.status,
+                    createdAt: d.createdAt
+                }));
+            } catch (e) {
+                console.log('Mongo getDonationsByCampaignId failed:', e.message);
+            }
+        }
+        
+        // Fallback or union with file-based store
+        if (campaignDonations.length === 0) {
+            const donationsFile = readJson('donations.json', []);
+            campaignDonations = donationsFile.filter(d => String(d.campaignId) === String(campaignId));
+        }
+
+        // Sort by date descending
+        campaignDonations.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        
+        res.json(campaignDonations);
+    } catch (error) {
+        console.error('Error fetching campaign donations:', error);
+        res.status(500).json({ message: 'Failed to fetch donations' });
+    }
+});
+
+// POST /api/campaigns/:id/verify-request — Creator requests campaign verification
+app.post('/api/campaigns/:id/verify-request', requireAuth, async (req, res) => {
+    try {
+        const campaignId = req.params.id;
+        const { notes } = req.body || {};
+        
+        const campaigns = readJson('campaigns.json', []);
+        const campaign = campaigns.find(c => String(c.id) === String(campaignId));
+        
+        if (!campaign) {
+            return res.status(404).json({ message: 'Campaign not found' });
+        }
+        
+        // Update local file store
+        campaign.verificationStatus = 'pending';
+        campaign.verificationNotes = notes || '';
+        writeJson('campaigns.json', campaigns);
+        
+        // Update MongoDB if active
+        if (useMongoDb) {
+            try {
+                await mongoDb.updateCampaign(campaignId, {
+                    verificationStatus: 'pending',
+                    verificationNotes: notes || ''
+                });
+            } catch (e) {
+                console.log('Mongo campaign verification request update failed:', e.message);
+            }
+        }
+
+        // Log request in audit trail
+        try {
+            const auditTrail = readJson('verification-audit.json', []);
+            auditTrail.push({
+                id: `audit_${Date.now()}`,
+                campaignId,
+                campaignTitle: campaign.title,
+                action: 'request',
+                status: 'pending',
+                notes: notes || '',
+                timestamp: new Date().toISOString()
+            });
+            writeJson('verification-audit.json', auditTrail);
+        } catch (_) {}
+
+        res.json({ success: true, message: 'Verification request submitted successfully.' });
+    } catch (error) {
+        console.error('Error requesting campaign verification:', error);
+        res.status(500).json({ message: 'Failed to submit verification request' });
+    }
+});
+
+// GET /api/admin/verification-requests — List campaigns with verification requests
+app.get('/api/admin/verification-requests', async (req, res) => {
+    try {
+        const campaigns = readJson('campaigns.json', []);
+        // Return campaigns that have requested verification or are verified
+        const requests = campaigns.filter(c => c.verificationStatus && c.verificationStatus !== 'none');
+        res.json(requests);
+    } catch (error) {
+        console.error('Error loading verification requests:', error);
+        res.status(500).json({ message: 'Failed to load requests' });
+    }
+});
+
+// POST /api/admin/campaigns/:id/verify-approve — Admin approves verification
+app.post('/api/admin/campaigns/:id/verify-approve', async (req, res) => {
+    try {
+        const campaignId = req.params.id;
+        const { notes } = req.body || {};
+        
+        const campaigns = readJson('campaigns.json', []);
+        const campaign = campaigns.find(c => String(c.id) === String(campaignId));
+        
+        if (!campaign) {
+            return res.status(404).json({ message: 'Campaign not found' });
+        }
+        
+        campaign.isVerified = true;
+        campaign.verificationStatus = 'approved';
+        campaign.verificationNotes = notes || 'Approved by administrator';
+        writeJson('campaigns.json', campaigns);
+        
+        if (useMongoDb) {
+            try {
+                await mongoDb.updateCampaign(campaignId, {
+                    isVerified: true,
+                    verificationStatus: 'approved',
+                    verificationNotes: notes || 'Approved by administrator'
+                });
+            } catch (e) {
+                console.log('Mongo campaign verify-approve update failed:', e.message);
+            }
+        }
+
+        // Log audit
+        try {
+            const auditTrail = readJson('verification-audit.json', []);
+            auditTrail.push({
+                id: `audit_${Date.now()}`,
+                campaignId,
+                campaignTitle: campaign.title,
+                action: 'approve',
+                status: 'approved',
+                notes: notes || 'Approved by administrator',
+                timestamp: new Date().toISOString()
+            });
+            writeJson('verification-audit.json', auditTrail);
+        } catch (_) {}
+
+        res.json({ success: true, campaign });
+    } catch (error) {
+        console.error('Error approving campaign verification:', error);
+        res.status(500).json({ message: 'Failed to approve verification' });
+    }
+});
+
+// POST /api/admin/campaigns/:id/verify-reject — Admin rejects verification
+app.post('/api/admin/campaigns/:id/verify-reject', async (req, res) => {
+    try {
+        const campaignId = req.params.id;
+        const { notes } = req.body || {};
+        
+        const campaigns = readJson('campaigns.json', []);
+        const campaign = campaigns.find(c => String(c.id) === String(campaignId));
+        
+        if (!campaign) {
+            return res.status(404).json({ message: 'Campaign not found' });
+        }
+        
+        campaign.isVerified = false;
+        campaign.verificationStatus = 'rejected';
+        campaign.verificationNotes = notes || 'Rejected by administrator';
+        writeJson('campaigns.json', campaigns);
+        
+        if (useMongoDb) {
+            try {
+                await mongoDb.updateCampaign(campaignId, {
+                    isVerified: false,
+                    verificationStatus: 'rejected',
+                    verificationNotes: notes || 'Rejected by administrator'
+                });
+            } catch (e) {
+                console.log('Mongo campaign verify-reject update failed:', e.message);
+            }
+        }
+
+        // Log audit
+        try {
+            const auditTrail = readJson('verification-audit.json', []);
+            auditTrail.push({
+                id: `audit_${Date.now()}`,
+                campaignId,
+                campaignTitle: campaign.title,
+                action: 'reject',
+                status: 'rejected',
+                notes: notes || 'Rejected by administrator',
+                timestamp: new Date().toISOString()
+            });
+            writeJson('verification-audit.json', auditTrail);
+        } catch (_) {}
+
+        res.json({ success: true, campaign });
+    } catch (error) {
+        console.error('Error rejecting campaign verification:', error);
+        res.status(500).json({ message: 'Failed to reject verification' });
+    }
+});
+
+// POST /api/admin/campaigns/:id/release-funds — Admin approves payment release
+app.post('/api/admin/campaigns/:id/release-funds', async (req, res) => {
+    try {
+        const campaignId = req.params.id;
+        
+        const campaigns = readJson('campaigns.json', []);
+        const campaign = campaigns.find(c => String(c.id) === String(campaignId));
+        
+        if (!campaign) {
+            return res.status(404).json({ message: 'Campaign not found' });
+        }
+        
+        // Verification: Check if goal is met
+        if (campaign.raised < campaign.goal) {
+            return res.status(400).json({ message: 'Cannot release funds: Campaign goal has not been reached yet.' });
+        }
+
+        // Update donations in file store to released
+        const donations = readJson('donations.json', []);
+        let updatedCount = 0;
+        donations.forEach(d => {
+            if (String(d.campaignId) === String(campaignId) && d.status === 'held') {
+                d.status = 'released';
+                updatedCount++;
+            }
+        });
+        writeJson('donations.json', donations);
+
+        // Update donations in MongoDB
+        if (useMongoDb) {
+            try {
+                const list = await mongoDb.getDonationsByCampaignId(campaignId);
+                for (const d of (list || [])) {
+                    if (d.status === 'held') {
+                        await mongoDb.updateDonation(d._id, { status: 'released' });
+                    }
+                }
+            } catch (e) {
+                console.log('Mongo release update failed:', e.message);
+            }
+        }
+
+        // Log release event in Payment / Escrow History logs
+        try {
+            const escrowLog = {
+                id: `escrow_${Date.now()}_release`,
+                campaignId,
+                campaignTitle: campaign.title,
+                action: 'release',
+                amountReleased: campaign.raised,
+                donationsCount: updatedCount,
+                timestamp: new Date().toISOString()
+            };
+            const paymentLogs = readJson('payment-logs.json', []);
+            paymentLogs.push(escrowLog);
+            writeJson('payment-logs.json', paymentLogs);
+        } catch (_) {}
+
+        res.json({ success: true, message: `Successfully released escrow funds for ${updatedCount} donations.` });
+    } catch (error) {
+        console.error('Error releasing funds:', error);
+        res.status(500).json({ message: 'Failed to release funds' });
+    }
+});
+
+// POST /api/admin/campaigns/:id/refund-funds — Admin rejects campaign and handles refunding
+app.post('/api/admin/campaigns/:id/refund-funds', async (req, res) => {
+    try {
+        const campaignId = req.params.id;
+        
+        const campaigns = readJson('campaigns.json', []);
+        const campaign = campaigns.find(c => String(c.id) === String(campaignId));
+        
+        if (!campaign) {
+            return res.status(404).json({ message: 'Campaign not found' });
+        }
+
+        // Update donations in file store to refunded
+        const donations = readJson('donations.json', []);
+        let refundedCount = 0;
+        donations.forEach(d => {
+            if (String(d.campaignId) === String(campaignId) && d.status === 'held') {
+                d.status = 'refunded';
+                refundedCount++;
+            }
+        });
+        writeJson('donations.json', donations);
+
+        // Update donations in MongoDB
+        if (useMongoDb) {
+            try {
+                const list = await mongoDb.getDonationsByCampaignId(campaignId);
+                for (const d of (list || [])) {
+                    if (d.status === 'held') {
+                        await mongoDb.updateDonation(d._id, { status: 'refunded' });
+                    }
+                }
+            } catch (e) {
+                console.log('Mongo refund update failed:', e.message);
+            }
+        }
+
+        // Log refund event in Escrow logs
+        try {
+            const escrowLog = {
+                id: `escrow_${Date.now()}_refund`,
+                campaignId,
+                campaignTitle: campaign.title,
+                action: 'refund',
+                amountRefunded: campaign.raised,
+                donationsCount: refundedCount,
+                timestamp: new Date().toISOString()
+            };
+            const paymentLogs = readJson('payment-logs.json', []);
+            paymentLogs.push(escrowLog);
+            writeJson('payment-logs.json', paymentLogs);
+        } catch (_) {}
+
+        res.json({ success: true, message: `Successfully marked ${refundedCount} donations as refunded.` });
+    } catch (error) {
+        console.error('Error refunding campaign:', error);
+        res.status(500).json({ message: 'Failed to process refunds' });
     }
 });
 

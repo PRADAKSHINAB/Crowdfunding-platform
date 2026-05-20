@@ -37,6 +37,21 @@ const CampaignSchema = new mongoose.Schema({
     enum: ['pending', 'approved', 'rejected'],
     default: 'pending'
   },
+  city: String,
+  state: String,
+  country: String,
+  latitude: Number,
+  longitude: Number,
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
+  verificationStatus: {
+    type: String,
+    enum: ['none', 'pending', 'approved', 'rejected'],
+    default: 'none'
+  },
+  verificationNotes: String,
   createdAt: {
     type: Date,
     default: Date.now

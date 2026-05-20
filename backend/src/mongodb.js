@@ -7,6 +7,7 @@ const User = require('../models/User');
 const Campaign = require('../models/Campaign');
 const KYC = require('../models/KYC');
 const Admin = require('../models/Admin');
+const Donation = require('../models/Donation');
 
 // Data directories
 const DATA_DIR = path.join(__dirname, '..', 'data');
@@ -139,6 +140,24 @@ const mongoDb = {
     return { deletedCount: res.deletedCount || 0 };
   },
   
+  // Donation operations
+  getDonations: async () => {
+    return await Donation.find();
+  },
+  
+  getDonationsByCampaignId: async (campaignId) => {
+    return await Donation.find({ campaignId });
+  },
+  
+  createDonation: async (donationData) => {
+    const donation = new Donation(donationData);
+    return await donation.save();
+  },
+  
+  updateDonation: async (id, donationData) => {
+    return await Donation.findByIdAndUpdate(id, donationData, { new: true });
+  },
+
   // Admin operations
   getAdmins: async () => {
     return await Admin.find();
@@ -290,11 +309,39 @@ const migrateKYCs = async () => {
   }
 };
 
+const migrateDonations = async () => {
+  try {
+    const donationsPath = path.join(DATA_DIR, 'donations.json');
+    if (fs.existsSync(donationsPath)) {
+      const donations = JSON.parse(fs.readFileSync(donationsPath, 'utf8')) || [];
+      for (const d of donations) {
+        const existing = await Donation.findOne({ razorpayPaymentId: d.razorpayPaymentId });
+        if (!existing) {
+          await Donation.create({
+            campaignId: String(d.campaignId),
+            amount: Number(d.amount),
+            donorName: d.donorName || 'Anonymous',
+            donorEmail: d.donorEmail || '',
+            razorpayOrderId: d.razorpayOrderId || '',
+            razorpayPaymentId: d.razorpayPaymentId || '',
+            status: d.status || 'held',
+            createdAt: d.createdAt ? new Date(d.createdAt) : new Date()
+          });
+        }
+      }
+      console.log('Donations migrated successfully');
+    }
+  } catch (error) {
+    console.error('Error migrating donations:', error);
+  }
+};
+
 const migrateData = async () => {
   await migrateUsers();
   await migrateCampaigns();
   await migrateKYCs();
   await migrateAdmins();
+  await migrateDonations();
   console.log('All data migrated successfully');
 };
 

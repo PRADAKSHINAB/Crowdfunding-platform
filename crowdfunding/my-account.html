@@ -319,22 +319,44 @@
                     if (campaigns.length === 0) {
                         campaignsList.innerHTML = '<p class="no-data">You have not created any campaigns yet.</p>';
                     } else {
-                        campaignsList.innerHTML = campaigns.map(c => `
-                            <div class="campaign-item">
-                                <img src="${getCampaignImageUrl(c.image)}" alt="Campaign" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop';">
-                                <div class="campaign-details">
-                                    <h3>${c.title}</h3>
-                                    <p>${c.description ? c.description.substring(0, 50) + '...' : ''}</p>
-                                    <div class="campaign-meta">
-                                        <span class="status active">Active</span>
-                                        <span class="raised">₹${c.raised.toLocaleString('en-IN')} raised of ₹${c.goal.toLocaleString('en-IN')}</span>
-                                    </div>
-                                    <div class="campaign-actions">
-                                        <button class="btn-primary" onclick="window.location.href='campaign-detail.html?id=${c.id}'">View Details</button>
+                        campaignsList.innerHTML = campaigns.map(c => {
+                            let verifyButton = '';
+                            let verifyStatusTag = '';
+                            
+                            if (c.isVerified) {
+                                verifyStatusTag = `<span style="background: rgba(0, 255, 65, 0.15); color: var(--primary-green); border: 1px solid var(--primary-green); padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-check-circle"></i> Verified</span>`;
+                            } else {
+                                const status = c.verificationStatus || 'none';
+                                if (status === 'pending') {
+                                    verifyStatusTag = `<span style="background: rgba(255, 193, 7, 0.15); color: #ffc107; border: 1px solid #ffc107; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-clock"></i> Verification Pending</span>`;
+                                } else if (status === 'rejected') {
+                                    verifyStatusTag = `<span style="background: rgba(220, 53, 69, 0.15); color: #dc3545; border: 1px solid #dc3545; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" title="Notes: ${c.verificationNotes || 'No notes'}"><i class="fas fa-times-circle"></i> Rejected</span>`;
+                                    verifyButton = `<button class="btn-primary" style="background: var(--primary-green); border: none; margin-left: 10px;" onclick="requestVerification('${c.id}')"><i class="fas fa-redo"></i> Re-submit Request</button>`;
+                                } else {
+                                    verifyStatusTag = `<span style="background: rgba(255, 255, 255, 0.15); color: #fff; border: 1px solid rgba(255, 255, 255, 0.3); padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-circle-question"></i> Not Verified</span>`;
+                                    verifyButton = `<button class="btn-primary" style="background: var(--primary-green); border: none; margin-left: 10px;" onclick="requestVerification('${c.id}')"><i class="fas fa-shield-halved"></i> Request Verified Badge</button>`;
+                                }
+                            }
+                            
+                            return `
+                                <div class="campaign-item">
+                                    <img src="${getCampaignImageUrl(c.image)}" alt="Campaign" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop';">
+                                    <div class="campaign-details">
+                                        <h3>${c.title}</h3>
+                                        <p>${c.description ? c.description.substring(0, 50) + '...' : ''}</p>
+                                        <div class="campaign-meta" style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center; flex-wrap: wrap;">
+                                            <span class="status active">Active</span>
+                                            <span class="raised">₹${c.raised.toLocaleString('en-IN')} raised of ₹${c.goal.toLocaleString('en-IN')}</span>
+                                            ${verifyStatusTag}
+                                        </div>
+                                        <div class="campaign-actions">
+                                            <button class="btn-primary" onclick="window.location.href='campaign-detail.html?id=${c.id}'">View Details</button>
+                                            ${verifyButton}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        `).join('');
+                            `;
+                        }).join('');
                     }
                 }
 
@@ -404,6 +426,34 @@
                 }
             } catch (e) {
                 console.error('Error fetching KYC status:', e);
+            }
+        }
+
+        async function requestVerification(campaignId) {
+            const notes = prompt("Enter verification details or compliance notes (e.g. details of identity/documents):");
+            if (notes === null) return;
+            
+            try {
+                const token = sessionStorage.getItem('userToken');
+                const res = await fetch(`${API_URL}/campaigns/${campaignId}/verify-request`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` 
+                    },
+                    body: JSON.stringify({ notes })
+                });
+                
+                if (res.ok) {
+                    alert("Verification request submitted successfully!");
+                    fetchUserData();
+                } else {
+                    const data = await res.json();
+                    alert(data.message || "Failed to submit request.");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Error submitting verification request.");
             }
         }
 
