@@ -240,12 +240,40 @@
                         
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="location">Location *</label>
-                                <input type="text" id="location" name="location" required placeholder="City, State, Country">
-                                <small>Where will this campaign have impact?</small>
+                                <label for="city">City *</label>
+                                <input type="text" id="city" name="city" required placeholder="e.g., Mumbai">
+                                <small>City name where the campaign is based</small>
                             </div>
                             
                             <div class="form-group">
+                                <label for="state">State *</label>
+                                <input type="text" id="state" name="state" required placeholder="e.g., Maharashtra">
+                                <small>State where campaign is based</small>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row" style="margin-top: 15px;">
+                            <div class="form-group">
+                                <label for="country">Country *</label>
+                                <input type="text" id="country" name="country" required placeholder="e.g., India">
+                            </div>
+                            <div class="form-group">
+                                <label style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span>GPS Location (Coordinates)</span>
+                                    <button type="button" onclick="detectGPSCoordinates()" class="amount-btn" style="padding: 4px 10px; font-size: 0.75rem; margin: 0; min-width: auto; width: auto;">
+                                        <i class="fas fa-location-crosshairs"></i> Detect GPS
+                                    </button>
+                                </label>
+                                <div style="display: flex; gap: 10px;">
+                                    <input type="number" id="latitude" name="latitude" step="any" placeholder="Latitude" style="flex: 1;">
+                                    <input type="number" id="longitude" name="longitude" step="any" placeholder="Longitude" style="flex: 1;">
+                                </div>
+                                <small>Geotagging enables nearby discovery</small>
+                            </div>
+                        </div>
+
+                        <div class="form-row" style="margin-top: 15px;">
+                            <div class="form-group" style="grid-column: span 2;">
                                 <label for="impactArea">Impact Area</label>
                                 <input type="text" id="impactArea" name="impactArea" placeholder="e.g., 5,000 people, 100 acres, 50 households">
                                 <small>Who or what will benefit from this campaign?</small>
@@ -595,6 +623,25 @@
                 submitBtn.disabled = false;
             }
         });
+
+        function detectGPSCoordinates() {
+            if (!navigator.geolocation) {
+                showNotification("Geolocation is not supported by your browser.", "error");
+                return;
+            }
+            showNotification("Accessing GPS location...", "info");
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    document.getElementById('latitude').value = position.coords.latitude;
+                    document.getElementById('longitude').value = position.coords.longitude;
+                    showNotification("Coordinates detected and set successfully!", "success");
+                },
+                (error) => {
+                    console.error("GPS detection error:", error);
+                    showNotification("Failed to retrieve location coordinates. Please verify permission settings.", "error");
+                }
+            );
+        }
 
         // Mobile menu toggle
         const hamburger = document.querySelector('.hamburger');

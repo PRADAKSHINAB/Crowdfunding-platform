@@ -19,6 +19,7 @@
         })();
     </script>
     <style>
+        /* KYC Submissions Card Styles */
         .kyc-card { border: 1px solid var(--primary-green); border-radius: 12px; padding: 20px; margin-bottom: 20px; background: rgba(255,255,255,0.04); }
         .kyc-card.pending { border-color: #f57c00; }
         .kyc-card.rejected { border-color: #c62828; }
@@ -46,19 +47,66 @@
         #kycDetailsContainer { max-width: 900px; margin: 0 auto; }
         .kyc-card { margin-left: auto; margin-right: auto; }
         .kyc-submissions #kycSubmissions { max-width: 1100px; margin: 0 auto; }
-        /* Center Campaign Review modal title and position close button */
         #campaignReviewModal .modal-content { margin: 24px auto; }
         #campaignReviewModal .modal-header { display: flex; align-items: center; justify-content: center; position: relative; height: auto !important; min-height: 56px; overflow: visible; padding: 12px 20px; }
         #campaignReviewModal .modal-header h2 { margin: 0; text-align: center; }
         #campaignReviewModal .modal-header .modal-close { position: absolute; right: 16px; top: 12px; }
         #campaignReviewModal .modal-body { padding: 20px; }
-        /* Add spacing under hero image */
         #campaignReviewModal #imagePreview { margin-bottom: 12px; }
         #campaignReviewModal .campaign-image h4 { margin: 6px 0 8px; }
+
+        /* Admin Navigation & Tab Bar */
+        .admin-navigation { padding: 20px 0 10px; }
+        .admin-tabs { display: flex; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid rgba(0, 255, 65, 0.2); padding-bottom: 16px; margin-bottom: 20px; }
+        .tab-btn { background: rgba(255,255,255,0.05); color: var(--text-light); border: 1px solid rgba(255,255,255,0.1); padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease; }
+        .tab-btn:hover { background: rgba(0, 255, 65, 0.1); border-color: var(--primary-green); color: var(--primary-green); }
+        .tab-btn.active { background: rgba(0, 255, 65, 0.15); border-color: var(--primary-green); color: var(--primary-green); box-shadow: 0 0 12px rgba(0, 255, 65, 0.2); }
+        
+        /* Analytics section styles */
+        .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+        @media (max-width: 968px) { .analytics-grid { grid-template-columns: 1fr; } }
+        .security-feed-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 24px; }
+        .security-event-item { display: flex; gap: 16px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .security-event-item:last-child { border-bottom: none; }
+        .event-icon-wrapper { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; flex-shrink: 0; }
+        .event-icon-wrapper.critical { background: rgba(255, 51, 51, 0.1); color: #ff3333; border: 1px solid #ff3333; }
+        .event-icon-wrapper.warning { background: rgba(245, 124, 0, 0.1); color: #f57c00; border: 1px solid #f57c00; }
+        .event-icon-wrapper.info { background: rgba(0, 255, 65, 0.1); color: var(--primary-green); border: 1px solid var(--primary-green); }
+        .event-details { flex-grow: 1; }
+        .event-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
+        .event-time { font-size: 0.8rem; color: var(--text-light); }
+        .event-meta { font-size: 0.85rem; color: var(--text-light); margin-top: 4px; display: flex; gap: 12px; }
+        
+        /* Audit Logs table & pagination */
+        .audit-table-container { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; overflow-x: auto; margin-bottom: 20px; }
+        .admin-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .admin-table th, .admin-table td { padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; color: var(--text-white); }
+        .admin-table th { background: rgba(0, 255, 65, 0.05); color: var(--primary-green); font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; }
+        .admin-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+        
+        /* Log Severity/Outcome badges */
+        .severity-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+        .severity-badge.critical { background: rgba(255, 51, 51, 0.15); color: #ff3333; border: 1px solid rgba(255, 51, 51, 0.3); }
+        .severity-badge.warning { background: rgba(245, 124, 0, 0.15); color: #f57c00; border: 1px solid rgba(245, 124, 0, 0.3); }
+        .severity-badge.info { background: rgba(0, 184, 212, 0.15); color: #00b8d4; border: 1px solid rgba(0, 184, 212, 0.3); }
+        
+        .outcome-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+        .outcome-badge.success { background: rgba(0, 255, 65, 0.15); color: var(--primary-green); border: 1px solid rgba(0, 255, 65, 0.3); }
+        .outcome-badge.failure { background: rgba(255, 51, 51, 0.15); color: #ff3333; border: 1px solid rgba(255, 51, 51, 0.3); }
+        
+        /* Pagination Controls */
+        .pagination-container { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
+        .pagination-btn { background: rgba(255,255,255,0.05); color: var(--text-white); border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+        .pagination-btn:hover:not(:disabled) { background: rgba(0, 255, 65, 0.1); border-color: var(--primary-green); color: var(--primary-green); }
+        .pagination-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .pagination-info { font-size: 0.9rem; color: var(--text-light); }
+
+        .btn-action-danger { background: rgba(255, 51, 51, 0.1); color: #ff3333; border: 1px solid #ff3333; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-action-danger:hover { background: #ff3333; color: #fff; }
     </style>
 </head>
 <body>
-        <!-- Navigation -->
+    <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-left">
@@ -76,31 +124,21 @@
             </div>
             
             <div class="nav-right">
-                <div class="nav-auth-links" id="navAuthLinks">
+                <div class="nav-auth-links" id="navAuthLinks" style="display: none;">
                     <a href="login.html" class="nav-login-btn">Login</a>
                     <a href="admin-login.html" class="nav-admin-btn">Admin</a>
                 </div>
 
-                <div class="nav-user-controls" id="navUserControls" style="display: none;">
-                    <div class="kyc-badge-container" id="navKycBadge"></div>
-                    <div class="nav-notification">
-                        <i class="fas fa-bell"></i>
-                        <span class="notification-dot"></span>
-                    </div>
+                <div class="nav-user-controls" id="navUserControls">
                     <div class="profile-dropdown">
                         <div class="profile-logo" onclick="toggleProfileDropdown()">
-                            <img src="https://ui-avatars.com/api/?name=Profile&background=00d4aa&color=fff" alt="User" id="navAvatar">
-                            <span class="nav-user-name" id="navUserName">Profile</span>
+                            <img src="https://ui-avatars.com/api/?name=Admin&background=00ff41&color=000" alt="User" id="navAvatar">
+                            <span class="nav-user-name" id="navUserName">Admin</span>
                             <i class="fas fa-chevron-down"></i>
                         </div>
                         <div class="profile-menu" id="profileMenu">
-                            <a href="my-account.html"><i class="fas fa-user"></i> My Account</a>
-                            <a href="kyc-verification.html"><i class="fas fa-shield-alt"></i> Aadhaar KYC</a>
-                            <a href="my-account.html#campaigns"><i class="fas fa-leaf"></i> My Campaigns</a>
-                            <a href="my-account.html#donations"><i class="fas fa-heart"></i> My Donations</a>
-                            <a href="my-account.html#settings"><i class="fas fa-cog"></i> Settings</a>
+                            <a href="#profile" onclick="switchTab('profile')"><i class="fas fa-user-cog"></i> Profile Settings</a>
                             <div class="menu-divider"></div>
-                            <a href="admin-login.html"><i class="fas fa-lock"></i> Admin Panel</a>
                             <a href="#logout" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
                         </div>
                     </div>
@@ -118,8 +156,24 @@
     <!-- Admin Header -->
     <section class="admin-header">
         <div class="container">
-            <h1>Admin Dashboard</h1>
-            <p>Manage campaigns, review documents, and oversee platform operations</p>
+            <h1>Admin Security Console</h1>
+            <p>System monitoring, compliance verification, and access controls</p>
+        </div>
+    </section>
+
+    <!-- Admin Navigation Tabs -->
+    <section class="admin-navigation">
+        <div class="container">
+            <div class="admin-tabs">
+                <button class="tab-btn active" onclick="switchTab('campaigns')"><i class="fas fa-leaf"></i> Campaigns</button>
+                <button class="tab-btn" onclick="switchTab('verifications')"><i class="fas fa-check-double"></i> Verifications</button>
+                <button class="tab-btn" onclick="switchTab('escrow')"><i class="fas fa-vault"></i> Escrow Holds</button>
+                <button class="tab-btn" onclick="switchTab('kyc')"><i class="fas fa-id-card"></i> KYC Verification</button>
+                <button class="tab-btn" onclick="switchTab('analytics')"><i class="fas fa-chart-line"></i> Analytics & Security</button>
+                <button class="tab-btn" onclick="switchTab('audit')"><i class="fas fa-file-invoice"></i> Audit Logs</button>
+                <button class="tab-btn" onclick="switchTab('sessions')"><i class="fas fa-user-shield"></i> Active Sessions</button>
+                <button class="tab-btn" onclick="switchTab('profile')"><i class="fas fa-user-cog"></i> Profile</button>
+            </div>
         </div>
     </section>
 
@@ -167,157 +221,8 @@
         </div>
     </section>
 
-    <!-- Profile Section -->
-    <section id="profile" class="profile-section hidden">
-        <div class="container">
-            <div class="profile-grid">
-                <!-- Profile Card -->
-                <div class="profile-card">
-                    <div class="profile-header">
-                        <div class="profile-avatar">
-                            <img src="images/avatar-placeholder.png" alt="Admin Avatar" id="adminAvatar">
-                            <div class="avatar-overlay">
-                                <i class="fas fa-camera"></i>
-                                <input type="file" id="avatarInput" accept="image/*" style="display: none;">
-                            </div>
-                        </div>
-                        <div class="profile-info">
-                            <h2 id="adminName">John Admin</h2>
-                            <p class="admin-role">Senior Administrator</p>
-                            <p class="admin-email" id="adminEmail">admin@greenfund.com</p>
-                            <div class="admin-status">
-                                <span class="status-badge active">Active</span>
-                                <span class="last-login">Last login: <span id="lastLogin">2 hours ago</span></span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="profile-stats">
-                        <div class="stat-item">
-                            <h3 id="campaignsReviewed">156</h3>
-                            <p>Campaigns Reviewed</p>
-                        </div>
-                        <div class="stat-item">
-                            <h3 id="approvalsGiven">142</h3>
-                            <p>Approvals Given</p>
-                        </div>
-                        <div class="stat-item">
-                            <h3 id="rejectionsGiven">14</h3>
-                            <p>Rejections Given</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Personal Information -->
-                <div class="info-card">
-                    <div class="card-header">
-                        <h3>Personal Information</h3>
-                        <button type="button" class="btn-edit" onclick="toggleEditMode('personal')">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                    </div>
-                    <div class="card-content">
-                        <form id="personalForm">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Full Name</label>
-                                    <input type="text" id="fullName" value="John Admin" disabled>
-                                </div>
-                                <div class="form-group">
-                                    <label>Email</label>
-                                    <input type="email" id="email" value="admin@greenfund.com" disabled>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Phone</label>
-                                    <input type="tel" id="phone" value="+1 (555) 123-4567" disabled>
-                                </div>
-                                <div class="form-group">
-                                    <label>Department</label>
-                                    <input type="text" id="department" value="Campaign Management" disabled>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Position</label>
-                                    <input type="text" id="position" value="Senior Administrator" disabled>
-                                </div>
-                                <div class="form-group">
-                                    <label>Employee ID</label>
-                                    <input type="text" id="employeeId" value="ADM-001" disabled>
-                                </div>
-                            </div>
-                            <div class="form-actions" id="personalActions" style="display: none;">
-                                <button type="button" class="btn-save" onclick="savePersonalInfo()">Save Changes</button>
-                                <button type="button" class="btn-cancel" onclick="cancelEdit('personal')">Cancel</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Security Information -->
-                <div class="info-card">
-                    <div class="card-header">
-                        <h3>Security Information</h3>
-                        <button type="button" class="btn-edit" onclick="toggleEditMode('security')">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                    </div>
-                    <div class="card-content">
-                        <div class="security-info">
-                            <div class="security-item">
-                                <div class="security-label">
-                                    <i class="fas fa-shield-alt"></i>
-                                    <span>Two-Factor Authentication</span>
-                                </div>
-                                <div class="security-status">
-                                    <span class="status-badge enabled">Enabled</span>
-                                    <button type="button" class="btn-toggle" onclick="toggle2FA()">Disable</button>
-                                </div>
-                            </div>
-                            <div class="security-item">
-                                <div class="security-label">
-                                    <i class="fas fa-clock"></i>
-                                    <span>Session Timeout</span>
-                                </div>
-                                <div class="security-status">
-                                    <span>30 minutes</span>
-                                    <button class="btn-toggle" onclick="changeSessionTimeout()">Change</button>
-                                </div>
-                            </div>
-                            <div class="security-item">
-                                <div class="security-label">
-                                    <i class="fas fa-key"></i>
-                                    <span>Last Password Change</span>
-                                </div>
-                                <div class="security-status">
-                                    <span>15 days ago</span>
-                                    <button class="btn-toggle" onclick="changePassword()">Change</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Recent Activity -->
-                <div class="activity-card">
-                    <div class="card-header">
-                        <h3>Recent Activity</h3>
-                        <a href="#viewAll" class="btn-view-all">View All</a>
-                    </div>
-                    <div class="card-content">
-                        <div class="activity-list" id="activityList">
-                            <!-- Activity items will be loaded here -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Campaign Approval Section -->
-    <section id="campaigns" class="campaign-approval">
+    <!-- TAB 1: Campaigns Section -->
+    <section id="campaigns" class="campaign-approval tab-section">
         <div class="container">
             <div class="section-header">
                 <h2>Campaign Approval Requests</h2>
@@ -328,29 +233,277 @@
                         <option value="approved">Approved</option>
                         <option value="rejected">Rejected</option>
                     </select>
-                    <select id="categoryFilter" onchange="filterCampaigns()">
-                        <option value="all">All Categories</option>
-                        <option value="energy">Renewable Energy</option>
-                        <option value="water">Water Conservation</option>
-                        <option value="waste">Waste Management</option>
-                        <option value="education">Education</option>
-                    </select>
                 </div>
             </div>
-
             <div class="campaign-requests" id="campaignRequests">
-                <!-- Campaign requests will be dynamically loaded -->
+                <!-- Campaign requests loaded dynamically -->
             </div>
         </div>
     </section>
 
-    <!-- KYC Submissions Section -->
-    <section id="kyc" class="kyc-submissions">
+    <!-- TAB: Campaign Verifications Dashboard Section -->
+    <section id="verifications" class="campaign-verification tab-section" style="display:none;">
+        <div class="container">
+            <div class="section-header">
+                <h2>Campaign Verification Requests</h2>
+                <p style="color: rgba(255,255,255,0.6); margin-top: 4px;">Review creator-submitted verification requests, KYC linkages, and assign verified badges.</p>
+            </div>
+            <div class="campaign-requests" id="verificationRequestsContainer">
+                <!-- Loaded dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <!-- TAB: Escrow Holds & Release Section -->
+    <section id="escrow" class="escrow-holds tab-section" style="display:none;">
+        <div class="container">
+            <div class="section-header">
+                <h2>Escrow & Payment Release Ledger</h2>
+                <p style="color: rgba(255,255,255,0.6); margin-top: 4px;">Manage payment state release. Release funds upon goal completion or process platform-wide refunds.</p>
+            </div>
+            <div class="audit-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Campaign</th>
+                            <th>Goal</th>
+                            <th>Raised</th>
+                            <th>Backers</th>
+                            <th>Goal Met?</th>
+                            <th>Verification Status</th>
+                            <th>Escrow Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="escrowCampaignsTableBody">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- TAB 2: KYC Submissions Section -->
+    <section id="kyc" class="kyc-submissions tab-section" style="display:none;">
         <div class="container">
             <div class="section-header">
                 <h2>KYC Submissions</h2>
             </div>
             <div id="kycSubmissions"></div>
+        </div>
+    </section>
+
+    <!-- TAB 2.5: Creator Campaign Verification Section -->
+    <section id="verifications" class="kyc-submissions tab-section" style="display:none;">
+        <div class="container">
+            <div class="section-header">
+                <h2>Campaign Verification Requests</h2>
+            </div>
+            <div id="verificationRequests">
+                <!-- Loaded dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <!-- TAB 2.6: Escrow Hold Management Section -->
+    <section id="escrow" class="audit-section tab-section" style="display:none;">
+        <div class="container">
+            <div class="section-header">
+                <h2>Escrow & Donation Holds</h2>
+                <div class="filter-controls">
+                    <select id="escrowStatusFilter" onchange="loadEscrowTab()">
+                        <option value="held" selected>Held (In Escrow)</option>
+                        <option value="released">Released</option>
+                        <option value="refunded">Refunded</option>
+                    </select>
+                </div>
+            </div>
+            <div class="audit-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Campaign</th>
+                            <th>Donor Name</th>
+                            <th>Amount</th>
+                            <th>Razorpay ID</th>
+                            <th>Fraud Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="escrowTableBody">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- TAB 3: Analytics & Security Section -->
+    <section id="analytics" class="analytics-section tab-section" style="display:none;">
+        <div class="container">
+            <div class="analytics-grid">
+                <!-- Security Overview Cards -->
+                <div class="security-feed-card">
+                    <h3 style="color: var(--primary-green); margin-bottom: 20px;"><i class="fas fa-shield-alt"></i> Security Feed</h3>
+                    <div id="securityEventFeed">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+                <!-- Suspicious Activity Card -->
+                <div class="security-feed-card">
+                    <h3 style="color: #ff3333; margin-bottom: 20px;"><i class="fas fa-exclamation-triangle"></i> Suspicious IP Analysis</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 16px;">IP addresses with 5 or more failed login attempts in the past 24 hours.</p>
+                    <div class="audit-table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>IP Address</th>
+                                    <th>Failed Attempts</th>
+                                    <th>Last Attempt</th>
+                                </tr>
+                            </thead>
+                            <tbody id="suspiciousIpsTable">
+                                <!-- Loaded dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- Platform Statistics -->
+            <div class="security-feed-card" style="margin-top: 24px;">
+                <h3 style="color: var(--primary-green); margin-bottom: 20px;"><i class="fas fa-chart-bar"></i> Platform Operations & Funding Stats</h3>
+                <div class="kyc-grid" id="operationsStatsContainer">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TAB 4: Audit Logs Section -->
+    <section id="audit" class="audit-section tab-section" style="display:none;">
+        <div class="container">
+            <div class="section-header">
+                <h2>System Event Audit Logs</h2>
+                <div class="filter-controls">
+                    <select id="auditSeverityFilter" onchange="loadAuditLogsTab()">
+                        <option value="">All Severities</option>
+                        <option value="info">Info</option>
+                        <option value="warning">Warning</option>
+                        <option value="critical">Critical</option>
+                    </select>
+                    <select id="auditOutcomeFilter" onchange="loadAuditLogsTab()">
+                        <option value="">All Outcomes</option>
+                        <option value="success">Success</option>
+                        <option value="failure">Failure</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="audit-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Event Code</th>
+                            <th>Severity</th>
+                            <th>Actor IP</th>
+                            <th>User ID</th>
+                            <th>Outcome</th>
+                        </tr>
+                    </thead>
+                    <tbody id="auditLogsTableBody">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination-container">
+                <button class="pagination-btn" id="prevAuditPage" onclick="changeAuditPage(-1)" disabled>Previous</button>
+                <span class="pagination-info" id="auditPageInfo">Page 1 of 1</span>
+                <button class="pagination-btn" id="nextAuditPage" onclick="changeAuditPage(1)" disabled>Next</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- TAB 5: Active Sessions Section -->
+    <section id="sessions" class="sessions-section tab-section" style="display:none;">
+        <div class="container">
+            <div class="section-header">
+                <h2>User Active Session Manager</h2>
+                <div class="filter-controls">
+                    <input type="text" id="sessionsUserSearch" placeholder="Enter User ID to inspect..." style="padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid rgba(0,255,65,0.2); color: #fff; border-radius: 6px; width: 250px;">
+                    <button class="btn-approve" onclick="searchUserSessions()"><i class="fas fa-search"></i> Inspect</button>
+                </div>
+            </div>
+            
+            <div class="audit-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>IP Address</th>
+                            <th>Device / User Agent</th>
+                            <th>Login Time</th>
+                            <th>Expires</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sessionsTableBody">
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: var(--text-light);">Enter a User ID above and click Inspect.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- TAB 6: Profile Section -->
+    <section id="profile" class="profile-section tab-section" style="display:none;">
+        <div class="container">
+            <div class="profile-grid">
+                <!-- Profile Card -->
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            <img src="https://ui-avatars.com/api/?name=Admin&background=00ff41&color=000" alt="Admin Avatar" id="adminAvatar">
+                        </div>
+                        <div class="profile-info">
+                            <h2 id="adminName">Senior Administrator</h2>
+                            <p class="admin-role">System Auditor & Security Operator</p>
+                            <p class="admin-email" id="adminEmail">admin@greenfund.com</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Details -->
+                <div class="info-card">
+                    <div class="card-header">
+                        <h3>Security Credentials & Configuration</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="security-info">
+                            <div class="security-item">
+                                <div class="security-label">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <span>Brute-force Account Lockout Status</span>
+                                </div>
+                                <div class="security-status">
+                                    <span class="status-badge enabled">Enabled</span>
+                                </div>
+                            </div>
+                            <div class="security-item">
+                                <div class="security-label">
+                                    <i class="fas fa-clock"></i>
+                                    <span>JWT Authentication Lifespan</span>
+                                </div>
+                                <div class="security-status">
+                                    <span>15 mins (Access) / 7 days (Refresh)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -388,21 +541,10 @@
                                     <span id="reviewGoal"></span>
                                 </div>
                                 <div class="funding-item">
-                                    <label>Campaign Duration:</label>
-                                    <span id="reviewDuration"></span>
-                                </div>
-                                <div class="funding-item">
                                     <label>Location:</label>
                                     <span id="reviewLocation"></span>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <div class="documents-section">
-                        <h4>Submitted Documents</h4>
-                        <div class="documents-grid" id="documentsGrid">
-                            <!-- Documents will be loaded here -->
                         </div>
                     </div>
 
@@ -415,13 +557,10 @@
                             <button class="btn-reject" onclick="rejectCampaign()">
                                 <i class="fas fa-times"></i> Reject Campaign
                             </button>
-                            <button class="btn-request" onclick="requestChanges()">
-                                <i class="fas fa-edit"></i> Request Changes
-                            </button>
                         </div>
-                        <div class="review-notes">
-                            <label for="reviewNotes">Review Notes (Optional):</label>
-                            <textarea id="reviewNotes" placeholder="Add notes about your decision..."></textarea>
+                        <div class="review-notes" style="margin-top: 16px;">
+                            <label for="reviewNotes">Decision Notes (Mandatory for rejection):</label>
+                            <textarea id="reviewNotes" placeholder="Provide reason or comments..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -429,6 +568,7 @@
         </div>
     </div>
 
+    <!-- KYC Details Modal -->
     <div id="kycDetailsModal" class="modal">
         <div class="modal-content large-modal">
             <div class="modal-header">
@@ -441,10 +581,8 @@
         </div>
     </div>
 
-
-
+    <!-- Notification system -->
     <script>
-        // Show notification function
         function showNotification(message, type = 'success') {
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
@@ -460,10 +598,8 @@
             
             document.body.appendChild(notification);
             
-            // Show notification
             setTimeout(() => notification.classList.add('show'), 100);
             
-            // Remove notification after 5 seconds
             setTimeout(() => {
                 notification.classList.remove('show');
                 setTimeout(() => notification.remove(), 300);
@@ -472,12 +608,10 @@
 
         const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:4000/api' : 'https://crowdfunding-platform-backend-ffke.onrender.com/api');
 
-        // ── Admin Session Helpers ──────────────────────────────────────────────────
         function getAdminToken() {
             return sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken') || '';
         }
 
-        /** Centralised fetch that always sends the admin JWT and handles 401 */
         async function adminFetch(url, options = {}) {
             const token = getAdminToken();
             const headers = {
@@ -487,7 +621,6 @@
             };
             const res = await fetch(url, { ...options, headers });
             if (res.status === 401 || res.status === 403) {
-                // Token expired or invalid — force re-login
                 sessionStorage.clear();
                 localStorage.removeItem('adminToken');
                 localStorage.removeItem('isAdmin');
@@ -498,439 +631,52 @@
             return res;
         }
 
-        // Admin Access Control — runs on page load
-        function checkAdminAccess() {
-            const isAdmin = (sessionStorage.getItem('isAdmin') === 'true') || (localStorage.getItem('isAdmin') === 'true');
-            const adminToken = sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken') || '';
-            if (!isAdmin || !adminToken || adminToken.length < 20) {
-                window.location.replace('admin-login.html');
-                return false;
-            }
-            return true;
-        }
-
         let allCampaigns = [];
         let currentReviewCampaign = null;
+        let kycList = [];
 
-        // Initialize dashboard
+        // Tab Switching Engine
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-section').forEach(sec => {
+                sec.style.display = 'none';
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            const targetSection = document.getElementById(tabId);
+            if (targetSection) {
+                targetSection.style.display = 'block';
+            }
+
+            const targetBtn = Array.from(document.querySelectorAll('.tab-btn')).find(btn => btn.getAttribute('onclick').includes(`'${tabId}'`));
+            if (targetBtn) {
+                targetBtn.classList.add('active');
+            }
+
+            if (tabId === 'analytics') {
+                loadAnalyticsTab();
+            } else if (tabId === 'audit') {
+                loadAuditLogsTab();
+            } else if (tabId === 'sessions') {
+                // Keep default empty state or load if a user ID is cached
+            } else if (tabId === 'campaigns') {
+                loadCampaignRequests();
+            } else if (tabId === 'kyc') {
+                loadKycSubmissions();
+            } else if (tabId === 'verifications') {
+                loadVerificationRequests();
+            } else if (tabId === 'escrow') {
+                loadEscrowTab();
+            }
+        }
+
+        // Initialize
         async function initializeDashboard() {
-            await loadCampaignRequests();
             await updateStats();
-            await loadKycSubmissions();
+            await loadCampaignRequests();
         }
 
-        // Load campaign requests from API — uses adminFetch
-        async function loadCampaignRequests() {
-            try {
-                const response = await adminFetch(`${API_BASE}/admin/campaigns`);
-                if (!response.ok) throw new Error('Failed to fetch campaigns');
-                
-                allCampaigns = await response.json();
-                displayCampaignRequests();
-            } catch (error) {
-                if (error.message !== 'Unauthorised') {
-                    console.error('Error loading campaigns:', error);
-                    showNotification('Failed to load campaigns', 'error');
-                }
-            }
-        }
-
-        // Display campaign requests
-        function displayCampaignRequests() {
-            const container = document.getElementById('campaignRequests');
-            const statusFilter = document.getElementById('statusFilter').value;
-            
-            let filteredCampaigns = allCampaigns;
-            if (statusFilter !== 'all') {
-                filteredCampaigns = allCampaigns.filter(campaign => campaign.status === statusFilter);
-            }
-
-            container.innerHTML = filteredCampaigns.map(campaign => `
-                <div class="campaign-request-card ${campaign.status}">
-                    <div class="request-header">
-                        <h3>${campaign.title}</h3>
-                        <span class="status-badge ${campaign.status}">${campaign.status.toUpperCase()}</span>
-                    </div>
-                    <div class="request-details">
-                        <div class="detail-row">
-                            <span><i class="fas fa-tag"></i> ${campaign.category || 'General'}</span>
-                            <span><i class="fas fa-calendar"></i> ${campaign.daysLeft || 30} days</span>
-                        </div>
-                        <div class="detail-row">
-                            <span><i class="fas fa-indian-rupee-sign"></i> ₹${campaign.goal.toLocaleString('en-IN')}</span>
-                            <span><i class="fas fa-clock"></i> Submitted: ${new Date(campaign.createdAt).toLocaleDateString()}</span>
-                        </div>
-                        <div class="detail-row">
-                            <span><i class="fas fa-map-marker-alt"></i> ${campaign.location || 'Not specified'}</span>
-                            <span><i class="fas fa-image"></i> ${campaign.image ? 'Has image' : 'No image'}</span>
-                        </div>
-                    </div>
-                    <div class="request-description">
-                        <p>${campaign.description}</p>
-                    </div>
-                    <div class="request-actions">
-                        <button class="btn-review" data-action="review" data-cid="${campaign.id}">
-                            <i class="fas fa-eye"></i> Review Details
-                        </button>
-                        ${campaign.status === 'pending' ? `
-                            <button class="btn-approve" data-action="approve" data-cid="${campaign.id}">
-                                <i class="fas fa-check"></i> Approve
-                            </button>
-                            <button class="btn-reject" data-action="reject" data-cid="${campaign.id}">
-                                <i class="fas fa-times"></i> Reject
-                            </button>
-                        ` : ''}
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Filter campaigns
-        function filterCampaigns() {
-            displayCampaignRequests();
-        }
-
-        // Open review modal
-        function openReviewModal(campaignId) {
-            const campaign = allCampaigns.find(c => String(c.id) === String(campaignId));
-            if (!campaign) return;
-
-            currentReviewCampaign = campaign;
-
-            // Populate modal content
-            document.getElementById('reviewTitle').textContent = campaign.title;
-            document.getElementById('reviewCreator').textContent = (campaign.creatorName || campaign.creator || campaign.organizerName || '').toString() || 'Unknown';
-            document.getElementById('reviewDate').textContent = new Date(campaign.createdAt).toLocaleDateString();
-            document.getElementById('reviewCategory').textContent = campaign.category || 'General';
-            document.getElementById('reviewDescription').textContent = campaign.description;
-            document.getElementById('reviewGoal').textContent = `₹${campaign.goal.toLocaleString('en-IN')}`;
-            document.getElementById('reviewDuration').textContent = `${campaign.daysLeft || 30} days`;
-            document.getElementById('reviewLocation').textContent = campaign.location || 'Not specified';
-
-            // Show campaign image if available
-            const imagePreview = document.getElementById('imagePreview');
-            if (campaign.image && campaign.image.startsWith('/uploads/')) {
-                imagePreview.innerHTML = `<img src="https://crowdfunding-platform-backend-ffke.onrender.com${campaign.image.startsWith('http') ? campaign.image : API_BASE.replace('/api', '') + campaign.image}" alt="Campaign Image" style="max-width: 100%; height: auto;">`;
-            } else if (campaign.image) {
-                imagePreview.innerHTML = `<img src="${campaign.image.startsWith('http') ? campaign.image : API_BASE.replace('/api', '') + campaign.image}" alt="Campaign Image" style="max-width: 100%; height: auto;">`;
-            } else {
-                imagePreview.innerHTML = '<p>No image provided</p>';
-            }
-
-            document.getElementById('campaignReviewModal').style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        }
-
-        // Close review modal
-        function closeReviewModal() {
-            document.getElementById('campaignReviewModal').style.display = 'none';
-            document.body.style.overflow = 'auto';
-            currentReviewCampaign = null;
-        }
-
-        // ======================
-        // KYC Submissions (Admin)
-        // ======================
-        async function loadKycSubmissions() {
-            const container = document.getElementById('kycSubmissions');
-            if (!container) return;
-            container.innerHTML = '<p style="color: var(--text-light);">Loading KYC submissions...</p>';
-            try {
-                const res = await adminFetch(`${API_BASE}/admin/kyc`);
-                if (!res.ok) throw new Error('Failed to fetch KYC');
-                const list = await res.json();
-                window.kycList = list;
-                const kycHeader = document.querySelector('#kyc .section-header h2');
-                if (kycHeader) {
-                    const count = Array.isArray(list) ? list.length : 0;
-                    kycHeader.textContent = `KYC Submissions (${count})`;
-                }
-                displayKycSubmissions(list);
-            } catch (e) {
-                if (e.message !== 'Unauthorised')
-                    container.innerHTML = '<p style="color: var(--text-light);">Failed to load KYC submissions.</p>';
-            }
-        }
-
-        function displayKycSubmissions(list) {
-            const container = document.getElementById('kycSubmissions');
-            if (!container) return;
-            if (!list || list.length === 0) {
-                container.innerHTML = '<p style="color: var(--text-light);">No KYC submissions found.</p>';
-                return;
-            }
-            const html = list.map(k => {
-                // Use server-side masked value if available, otherwise mask client-side
-                const maskedAadhaar = k.maskedAadhaar || (k.aadhaarNumber ? 'XXXX-XXXX-' + String(k.aadhaarNumber).slice(-4) : 'N/A');
-                const createdAt = k.createdAt ? new Date(k.createdAt).toLocaleString() : '';
-                const files = k.files || {};
-                function fileButton(label, key) {
-                    const filename = files[key];
-                    const url = filename ? (filename.startsWith('http') ? filename : `https://crowdfunding-platform-backend-ffke.onrender.com/uploads/${filename}`) : '';
-                    return `
-                        <div class="doc-card">
-                            <div class="doc-title"><i class="fas fa-file-image"></i> ${label}</div>
-                            ${url ? `<button class="doc-view-btn" onclick="viewDocument('${url}')">View</button>` : '<div class="doc-title" style="opacity:.7;">No file</div>'}
-                        </div>`;
-                }
-                return `
-                    <div class="kyc-card ${k.status}" data-kyc-id="${k.id}">
-                        <div class="kyc-card-header">
-                            <div class="kyc-title">${k.fullName || 'Unknown'}</div>
-                            <span class="status-badge ${k.status}">${(k.status || '').toUpperCase()}</span>
-                        </div>
-                        <div class="kyc-meta">
-                            <span>KYC ID: #${k.id}</span>
-                            <span>Submitted: ${createdAt}</span>
-                        </div>
-                        <div class="kyc-grid">
-                            <div class="kyc-item"><label>Aadhaar Number:</label><span>${maskedAadhaar}</span></div>
-                            <div class="kyc-item"><label>PAN Number:</label><span>${k.panNumber || 'N/A'}</span></div>
-                            <div class="kyc-item"><label>Campaign ID:</label><span>${k.campaignId ?? 'N/A'}</span></div>
-                            <div class="kyc-item"><label>Status:</label><span class="status-badge ${k.status}">${(k.status || '').toUpperCase()}</span></div>
-                        </div>
-                        <div class="documents-grid">
-                            ${fileButton('Aadhaar Front','aadhaarFront')}
-                            ${fileButton('Aadhaar Back','aadhaarBack')}
-                            ${fileButton('Pan Photo','panPhoto')}
-                            ${fileButton('Selfie','selfie')}
-                        </div>
-                        <div class="kyc-actions">
-                            ${k.status === 'pending' ? `
-                                <button class="btn-approve" onclick="approveKyc('${k.id}')"><i class=\"fas fa-check\"></i> Verify</button>
-                                <button class="btn-reject" onclick="rejectKyc('${k.id}')"><i class=\"fas fa-times\"></i> Reject</button>
-                            ` : ''}
-                            <button class="btn-view" onclick="openKycDetails('${k.id}')"><i class="fas fa-eye"></i> View Details</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            container.innerHTML = html;
-        }
-
-        function openKycDetails(id) {
-            const k = (window.kycList || []).find(x => String(x.id) === String(id));
-            if (!k) return;
-            const maskedAadhaar = k.aadhaarNumber ? '••••' + String(k.aadhaarNumber).slice(-4) : 'N/A';
-            const createdAt = k.createdAt ? new Date(k.createdAt).toLocaleString() : '';
-            const files = k.files || {};
-            function docTile(label, key) {
-                const filename = files[key];
-                const url = filename ? (filename.startsWith('http') ? filename : `https://crowdfunding-platform-backend-ffke.onrender.com/uploads/${filename}`) : '';
-                return `
-                    <div class="doc-card">
-                        <div class="doc-title"><i class="fas fa-file-image"></i> ${label}</div>
-                        ${url ? `<button class="doc-view-btn" onclick="viewDocument('${url}')">View</button>` : '<div class="doc-title" style="opacity:.7;">No file</div>'}
-                    </div>`;
-            }
-            const actions = k.status === 'pending' ? `
-                <button class="btn-approve" onclick="approveKyc('${k.id}')"><i class='fas fa-check'></i> Verify</button>
-                <button class="btn-reject" onclick="rejectKyc('${k.id}')"><i class='fas fa-times'></i> Reject</button>
-            ` : '';
-            const content = `
-                <div class="kyc-card ${k.status}">
-                    <div class="kyc-card-header">
-                        <div class="kyc-title">${k.fullName || 'Unknown'}</div>
-                        <span class="status-badge ${k.status}">${(k.status || '').toUpperCase()}</span>
-                    </div>
-                    <div class="kyc-meta">
-                        <span>KYC ID: #${k.id}</span>
-                        <span>Submitted: ${createdAt}</span>
-                    </div>
-                    <div class="kyc-grid">
-                        <div class="kyc-item"><label>Aadhaar Number:</label><span>${maskedAadhaar}</span></div>
-                        <div class="kyc-item"><label>PAN Number:</label><span>${k.panNumber || 'N/A'}</span></div>
-                        <div class="kyc-item"><label>Campaign ID:</label><span>${k.campaignId ?? 'N/A'}</span></div>
-                        <div class="kyc-item"><label>Status:</label><span class="status-badge ${k.status}">${(k.status || '').toUpperCase()}</span></div>
-                    </div>
-                    <div class="documents-grid">
-                        ${docTile('Aadhaar Front','aadhaarFront')}
-                        ${docTile('Aadhaar Back','aadhaarBack')}
-                        ${docTile('Pan Photo','panPhoto')}
-                        ${docTile('Selfie','selfie')}
-                    </div>
-                    <div class="kyc-actions">${actions}
-                        <button class="btn-view" onclick="closeKycDetails()"><i class="fas fa-times"></i> Close</button>
-                    </div>
-                </div>`;
-            const container = document.getElementById('kycDetailsContainer');
-            if (container) container.innerHTML = content;
-            const modal = document.getElementById('kycDetailsModal');
-            if (modal) {
-                modal.style.display = 'block';
-                document.body.style.overflow = 'hidden';
-            }
-        }
-
-        function closeKycDetails() {
-            const modal = document.getElementById('kycDetailsModal');
-            if (modal) {
-                modal.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            }
-        }
-
-        async function approveKyc(id) {
-            try {
-                const res = await adminFetch(`${API_BASE}/admin/kyc/${id}/status`, {
-                    method: 'PUT',
-                    body: JSON.stringify({ status: 'verified' })
-                });
-                if (!res.ok) throw new Error('Failed');
-                const card = document.querySelector(`.kyc-card[data-kyc-id="${id}"]`);
-                if (card) {
-                    card.classList.remove('pending');
-                    card.classList.add('verified');
-                    const badge = card.querySelector('.status-badge');
-                    if (badge) { badge.className = 'status-badge verified'; badge.textContent = 'VERIFIED'; }
-                    const actions = card.querySelector('.kyc-actions');
-                    if (actions) { actions.innerHTML = `<button class="btn-view" onclick="openKycDetails('${id}')"><i class="fas fa-eye"></i> View Details</button>`; }
-                }
-                closeKycDetails();
-                showNotification('KYC verified. Linked campaign updated.', 'success');
-                loadKycSubmissions();
-                loadCampaignRequests();
-                updateStats();
-            } catch (e) {
-                if (e.message !== 'Unauthorised') showNotification('Failed to verify KYC.', 'error');
-            }
-        }
-
-        async function rejectKyc(id) {
-            const reason = prompt('Enter rejection reason (optional):') || '';
-            try {
-                const res = await adminFetch(`${API_BASE}/admin/kyc/${id}/status`, {
-                    method: 'PUT',
-                    body: JSON.stringify({ status: 'rejected', reason })
-                });
-                if (!res.ok) throw new Error('Failed');
-                const card = document.querySelector(`.kyc-card[data-kyc-id="${id}"]`);
-                if (card) {
-                    card.classList.remove('pending');
-                    card.classList.add('rejected');
-                    const badge = card.querySelector('.status-badge');
-                    if (badge) { badge.className = 'status-badge rejected'; badge.textContent = 'REJECTED'; }
-                    const actions = card.querySelector('.kyc-actions');
-                    if (actions) { actions.innerHTML = `<button class="btn-view" onclick="openKycDetails('${id}')"><i class="fas fa-eye"></i> View Details</button>`; }
-                }
-                closeKycDetails();
-                showNotification('KYC rejected. Linked campaign updated.', 'warning');
-                loadKycSubmissions();
-                loadCampaignRequests();
-                updateStats();
-            } catch (e) {
-                if (e.message !== 'Unauthorised') showNotification('Failed to reject KYC.', 'error');
-            }
-        }
-
-        // Approve campaign via API
-        async function approveCampaign() {
-            if (!currentReviewCampaign) return;
-            
-            try {
-                const data = await AdminAPI.updateCampaignStatus(currentReviewCampaign.id, 'approved');
-                
-                // Update local data
-                currentReviewCampaign.status = 'approved';
-                currentReviewCampaign.reviewedAt = new Date().toISOString();
-                
-                // Update UI
-                await updateStats();
-                await loadCampaignRequests();
-                closeReviewModal();
-                
-                showNotification('Campaign approved successfully!', 'success');
-            } catch (error) {
-                console.error('Error approving campaign:', error);
-                showNotification(error.message || 'Failed to approve campaign', 'error');
-            }
-        }
-
-        // Reject campaign via API
-        async function rejectCampaign() {
-            if (!currentReviewCampaign) return;
-            
-            const notes = document.getElementById('reviewNotes').value;
-            if (!notes.trim()) {
-                showNotification('Please provide a reason for rejection.', 'error');
-                return;
-            }
-            
-            try {
-                const data = await AdminAPI.updateCampaignStatus(currentReviewCampaign.id, 'rejected', notes);
-                
-                // Update local data
-                currentReviewCampaign.status = 'rejected';
-                currentReviewCampaign.reviewedAt = new Date().toISOString();
-                currentReviewCampaign.rejectionReason = notes;
-                
-                // Update UI
-                await updateStats();
-                await loadCampaignRequests();
-                closeReviewModal();
-                
-                showNotification('Campaign rejected.', 'warning');
-            } catch (error) {
-                console.error('Error rejecting campaign:', error);
-                showNotification(error.message || 'Failed to reject campaign', 'error');
-            }
-        }
-
-        // Request changes
-        function requestChanges() {
-            if (!currentReviewCampaign) return;
-            
-            const notes = document.getElementById('reviewNotes').value;
-            if (!notes.trim()) {
-                showNotification('Please provide notes about what changes are needed.', 'error');
-                return;
-            }
-            
-            // In a real app, this would send a notification to the campaign creator
-            closeReviewModal();
-            showNotification('Change request sent to campaign creator.', 'info');
-        }
-
-        // Quick approve via API
-        async function quickApprove(campaignId) {
-            try {
-                const data = await AdminAPI.updateCampaignStatus(campaignId, 'approved');
-                
-                // Refresh data
-                await loadCampaignRequests();
-                await updateStats();
-                showNotification('Campaign approved!', 'success');
-            } catch (error) {
-                console.error('Error approving campaign:', error);
-                showNotification(error.message || 'Failed to approve campaign', 'error');
-            }
-        }
-
-        // Quick reject via API
-        async function quickReject(campaignId) {
-            const reason = prompt('Please provide a reason for rejection:');
-            if (!reason) return;
-            
-            try {
-                const data = await AdminAPI.updateCampaignStatus(campaignId, 'rejected', reason);
-                
-                // Refresh data
-                await loadCampaignRequests();
-                await updateStats();
-                showNotification('Campaign rejected.', 'warning');
-            } catch (error) {
-                console.error('Error rejecting campaign:', error);
-                showNotification(error.message || 'Failed to reject campaign', 'error');
-            }
-        }
-
-        // View document
-        function viewDocument(url) {
-            if (!url) return;
-            window.open(url, '_blank', 'noopener,noreferrer');
-        }
-
-        // Update statistics from API
         async function updateStats() {
             try {
                 const [campaignsResponse, pendingCountResponse, usersCountResponse] = await Promise.all([
@@ -953,456 +699,809 @@
                 document.getElementById('pendingCount').textContent = pendingCount;
                 document.getElementById('approvedCount').textContent = approved;
                 document.getElementById('rejectedCount').textContent = rejected;
-                const totalUsersEl = document.getElementById('totalUsers');
-                if (totalUsersEl) totalUsersEl.textContent = totalUsers;
+                document.getElementById('totalUsers').textContent = totalUsers;
             } catch (error) {
-                if (error.message !== 'Unauthorised') console.error('Error updating stats:', error);
+                console.error('Error updating stats:', error);
             }
         }
 
-        // Show notification
-        function showNotification(message, type) {
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.innerHTML = `
-                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
-                <span>${message}</span>
-            `;
+        // CAMPAIGNS TAB
+        async function loadCampaignRequests() {
+            try {
+                const response = await adminFetch(`${API_BASE}/admin/campaigns`);
+                if (!response.ok) throw new Error('Failed to fetch campaigns');
+                allCampaigns = await response.json();
+                displayCampaignRequests();
+            } catch (error) {
+                console.error('Error loading campaigns:', error);
+                showNotification('Failed to load campaigns', 'error');
+            }
+        }
+
+        function displayCampaignRequests() {
+            const container = document.getElementById('campaignRequests');
+            const statusFilter = document.getElementById('statusFilter').value;
             
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
-        }
-
-        // Profile dropdown toggle
-        function toggleProfileDropdown() {
-            const profileDropdown = document.querySelector('.profile-dropdown');
-            profileDropdown.classList.toggle('active');
-        }
-
-        // Close modals when clicking outside
-        window.onclick = function(event) {
-            const campaignModal = document.getElementById('campaignReviewModal');
-            const kycModal = document.getElementById('kycDetailsModal');
-            if (event.target === campaignModal) {
-                closeReviewModal();
+            let filteredCampaigns = allCampaigns;
+            if (statusFilter !== 'all') {
+                filteredCampaigns = allCampaigns.filter(campaign => campaign.status === statusFilter);
             }
-            if (event.target === kycModal) {
-                closeKycDetails();
-            }
-        }
 
-        // Initialize when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            // Check admin access first
-            if (!checkAdminAccess()) {
+            if (filteredCampaigns.length === 0) {
+                container.innerHTML = `<p style="color: var(--text-light); text-align: center; padding: 20px;">No campaigns found matching filter.</p>`;
                 return;
             }
-            
-            initializeDashboard();
-            const container = document.getElementById('campaignRequests');
-            if (container) {
-                container.addEventListener('click', async (e) => {
-                    const btn = e.target.closest('button[data-action]');
-                    if (!btn) return;
-                    const action = btn.getAttribute('data-action');
-                    const cid = btn.getAttribute('data-cid');
-                    if (!cid) return;
-                    try {
-                        if (action === 'review') {
-                            openReviewModal(cid);
-                        } else if (action === 'approve') {
-                            await AdminAPI.updateCampaignStatus(cid, 'approved');
-                            await loadCampaignRequests();
-                            await updateStats();
-                            showNotification('Campaign approved!', 'success');
-                        } else if (action === 'reject') {
-                            const reason = prompt('Please provide a reason for rejection:');
-                            if (!reason) return;
-                            await AdminAPI.updateCampaignStatus(cid, 'rejected', reason);
-                            await loadCampaignRequests();
-                            await updateStats();
-                            showNotification('Campaign rejected.', 'warning');
-                        }
-                    } catch (err) {
-                        showNotification(err.message || 'Action failed', 'error');
-                    }
-                });
-            }
-            
-            // Mobile menu toggle
-            const hamburger = document.querySelector('.hamburger');
-            const navMenu = document.querySelector('.nav-menu');
-            
-            hamburger.addEventListener('click', () => {
-                hamburger.classList.toggle('active');
-                navMenu.classList.toggle('active');
-            });
 
-            // Close mobile menu when clicking a link
-            document.querySelectorAll('.nav-menu a').forEach(link => {
-                link.addEventListener('click', () => {
-                    hamburger.classList.remove('active');
-                    navMenu.classList.remove('active');
-                });
-            });
-        });
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', (e) => {
-            const profileDropdown = document.querySelector('.profile-dropdown');
-            if (!profileDropdown.contains(e.target)) {
-                profileDropdown.classList.remove('active');
-            }
-        });
-
-        // Logout function
-        function logout() {
-            sessionStorage.removeItem('isAdmin');
-            sessionStorage.removeItem('adminToken');
-            sessionStorage.removeItem('adminUsername');
-            localStorage.removeItem('isAdmin');
-            localStorage.removeItem('adminToken');
-            localStorage.removeItem('adminUsername');
-            window.location.href = 'index.html';
-        }
-
-        // Add logout event listener
-        document.addEventListener('DOMContentLoaded', () => {
-            const logoutLink = document.querySelector('a[href="#logout"]');
-            if (logoutLink) {
-                logoutLink.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    logout();
-                });
-            }
-        });
-
-        // Profile Section Functionality
-        function showProfileSection() {
-            // Hide all sections
-            document.querySelectorAll('section[id]').forEach(section => {
-                section.style.display = 'none';
-            });
-            
-            // Show profile section
-            document.getElementById('profile').style.display = 'block';
-            
-            // Update navigation
-            document.querySelectorAll('.nav-menu a').forEach(link => {
-                link.classList.remove('active');
-            });
-            
-            // Load profile data
-            loadProfileData();
-        }
-
-        // Sample activity data
-        const recentActivities = [
-            {
-                id: 1,
-                action: "Approved campaign",
-                description: "Solar Panel Installation for Rural Schools",
-                time: "2 hours ago",
-                type: "approval"
-            },
-            {
-                id: 2,
-                action: "Rejected campaign",
-                description: "Community Water Purification System",
-                time: "4 hours ago",
-                type: "rejection"
-            },
-            {
-                id: 3,
-                action: "Requested changes",
-                description: "Urban Garden Initiative",
-                time: "6 hours ago",
-                type: "request"
-            },
-            {
-                id: 4,
-                action: "Updated profile",
-                description: "Changed email address",
-                time: "1 day ago",
-                type: "profile"
-            },
-            {
-                id: 5,
-                action: "Approved campaign",
-                description: "Smart Home Garden System",
-                time: "2 days ago",
-                type: "approval"
-            }
-        ];
-
-        // Load profile data
-        function loadProfileData() {
-            const adminUsername = sessionStorage.getItem('adminUsername') || 'admin';
-            document.getElementById('adminName').textContent = adminUsername;
-            document.getElementById('adminEmail').textContent = `${adminUsername}@greenfund.com`;
-            loadRecentActivity();
-            setupProfileEventListeners();
-        }
-
-        // Load recent activity
-        function loadRecentActivity() {
-            const activityList = document.getElementById('activityList');
-            activityList.innerHTML = recentActivities.map(activity => `
-                <div class="activity-item ${activity.type}">
-                    <div class="activity-icon">
-                        <i class="fas fa-${getActivityIcon(activity.type)}"></i>
+            container.innerHTML = filteredCampaigns.map(campaign => `
+                <div class="kyc-card ${campaign.status}">
+                    <div class="kyc-card-header">
+                        <h3 class="kyc-title">${campaign.title}</h3>
+                        <span class="status-badge ${campaign.status}">${campaign.status.toUpperCase()}</span>
                     </div>
-                    <div class="activity-content">
-                        <h4>${activity.action}</h4>
-                        <p>${activity.description}</p>
-                        <span class="activity-time">${activity.time}</span>
+                    <div class="kyc-grid">
+                        <div class="kyc-item"><label>Goal Amount:</label><span>₹${campaign.goal.toLocaleString('en-IN')}</span></div>
+                        <div class="kyc-item"><label>Submitted Date:</label><span>${new Date(campaign.createdAt).toLocaleDateString()}</span></div>
+                        <div class="kyc-item"><label>Creator ID:</label><span>${campaign.creator || 'N/A'}</span></div>
+                        <div class="kyc-item"><label>Location:</label><span>${campaign.location || 'N/A'}</span></div>
+                    </div>
+                    <div class="kyc-actions">
+                        <button class="btn-view" onclick="openReviewModal('${campaign.id}')"><i class="fas fa-eye"></i> Inspect Campaign</button>
                     </div>
                 </div>
             `).join('');
         }
 
-        // Get activity icon
-        function getActivityIcon(type) {
-            const icons = {
-                approval: 'check-circle',
-                rejection: 'times-circle',
-                request: 'edit',
-                profile: 'user-edit'
-            };
-            return icons[type] || 'info-circle';
+        function filterCampaigns() {
+            displayCampaignRequests();
         }
 
-        // Toggle edit mode
-        function toggleEditMode(section) {
-            const form = document.getElementById(section === 'personal' ? 'personalForm' : 'securityForm');
-            const actions = document.getElementById(section === 'personal' ? 'personalActions' : 'securityActions');
-            const inputs = form.querySelectorAll('input');
+        function openReviewModal(campaignId) {
+            const campaign = allCampaigns.find(c => String(c.id) === String(campaignId));
+            if (!campaign) return;
+            currentReviewCampaign = campaign;
+
+            document.getElementById('reviewTitle').textContent = campaign.title;
+            document.getElementById('reviewCreator').textContent = campaign.creatorName || campaign.creator || 'N/A';
+            document.getElementById('reviewDate').textContent = new Date(campaign.createdAt).toLocaleDateString();
+            document.getElementById('reviewCategory').textContent = campaign.category || 'General';
+            document.getElementById('reviewDescription').textContent = campaign.description;
+            document.getElementById('reviewGoal').textContent = `₹${campaign.goal.toLocaleString('en-IN')}`;
+            document.getElementById('reviewLocation').textContent = campaign.location || 'Not specified';
+
+            const imagePreview = document.getElementById('imagePreview');
+            if (campaign.image) {
+                const src = campaign.image.startsWith('http') ? campaign.image : API_BASE.replace('/api', '') + campaign.image;
+                imagePreview.innerHTML = `<img src="${src}" alt="Campaign Image" style="max-width: 100%; max-height: 250px; border-radius: 8px;">`;
+            } else {
+                imagePreview.innerHTML = '<p>No image provided</p>';
+            }
+
+            document.getElementById('campaignReviewModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeReviewModal() {
+            document.getElementById('campaignReviewModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            currentReviewCampaign = null;
+        }
+
+        async function approveCampaign() {
+            if (!currentReviewCampaign) return;
+            const notes = document.getElementById('reviewNotes').value;
+            try {
+                await AdminAPI.updateCampaignStatus(currentReviewCampaign.id, 'approved', notes);
+                showNotification('Campaign approved!', 'success');
+                closeReviewModal();
+                await updateStats();
+                await loadCampaignRequests();
+            } catch (err) {
+                showNotification(err.message || 'Error approving campaign', 'error');
+            }
+        }
+
+        async function rejectCampaign() {
+            if (!currentReviewCampaign) return;
+            const notes = document.getElementById('reviewNotes').value;
+            if (!notes.trim()) {
+                showNotification('Decision notes (reason) are mandatory for rejections.', 'error');
+                return;
+            }
+            try {
+                await AdminAPI.updateCampaignStatus(currentReviewCampaign.id, 'rejected', notes);
+                showNotification('Campaign rejected.', 'warning');
+                closeReviewModal();
+                await updateStats();
+                await loadCampaignRequests();
+            } catch (err) {
+                showNotification(err.message || 'Error rejecting campaign', 'error');
+            }
+        }
+
+        // KYC TAB
+        async function loadKycSubmissions() {
+            const container = document.getElementById('kycSubmissions');
+            container.innerHTML = '<p style="color: var(--text-light); text-align: center;">Loading KYC Submissions...</p>';
+            try {
+                kycList = await AdminAPI.getAllKYC();
+                displayKycSubmissions(kycList);
+            } catch (err) {
+                container.innerHTML = '<p style="color: #ff3333; text-align: center;">Failed to load KYC submissions.</p>';
+            }
+        }
+
+        function displayKycSubmissions(list) {
+            const container = document.getElementById('kycSubmissions');
+            if (!list || list.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-light); text-align: center;">No KYC submissions found.</p>';
+                return;
+            }
+            container.innerHTML = list.map(k => {
+                const maskedAadhaar = k.maskedAadhaar || (k.aadhaarNumber ? 'XXXX-XXXX-' + String(k.aadhaarNumber).slice(-4) : 'N/A');
+                return `
+                    <div class="kyc-card ${k.status}">
+                        <div class="kyc-card-header">
+                            <div class="kyc-title">${k.fullName || 'Unknown'}</div>
+                            <span class="status-badge ${k.status}">${k.status.toUpperCase()}</span>
+                        </div>
+                        <div class="kyc-meta">
+                            <span>KYC ID: #${k.id}</span>
+                            <span>Submitted: ${new Date(k.createdAt).toLocaleString()}</span>
+                        </div>
+                        <div class="kyc-grid">
+                            <div class="kyc-item"><label>Aadhaar Number:</label><span>${maskedAadhaar}</span></div>
+                            <div class="kyc-item"><label>PAN Number:</label><span>${k.panNumber || 'N/A'}</span></div>
+                            <div class="kyc-item"><label>Campaign ID:</label><span>${k.campaignId ?? 'N/A'}</span></div>
+                        </div>
+                        <div class="kyc-actions">
+                            <button class="btn-view" onclick="openKycDetails('${k.id}')"><i class="fas fa-eye"></i> View Documents</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openKycDetails(id) {
+            const k = kycList.find(x => String(x.id) === String(id));
+            if (!k) return;
+
+            const files = k.files || {};
+            function fileCard(label, key) {
+                const filename = files[key];
+                const url = filename ? (filename.startsWith('http') ? filename : `${API_BASE.replace('/api', '')}/uploads/${filename}`) : '';
+                return `
+                    <div class="doc-card">
+                        <div class="doc-title">${label}</div>
+                        ${url ? `<button class="doc-view-btn" onclick="window.open('${url}', '_blank')">View Doc</button>` : '<span style="opacity: 0.5;">No document</span>'}
+                    </div>
+                `;
+            }
+
+            const actions = k.status === 'pending' ? `
+                <button class="btn-approve" onclick="approveKyc('${k.id}')"><i class="fas fa-check"></i> Verify Compliance</button>
+                <button class="btn-reject" onclick="rejectKyc('${k.id}')"><i class="fas fa-times"></i> Flag & Reject</button>
+            ` : '';
+
+            const content = `
+                <div class="kyc-card ${k.status}" style="margin: 0;">
+                    <div class="kyc-card-header">
+                        <div class="kyc-title">${k.fullName}</div>
+                        <span class="status-badge ${k.status}">${k.status.toUpperCase()}</span>
+                    </div>
+                    <div class="kyc-grid">
+                        <div class="kyc-item"><label>Aadhaar Number:</label><span>${k.aadhaarNumber || 'N/A'}</span></div>
+                        <div class="kyc-item"><label>PAN Number:</label><span>${k.panNumber || 'N/A'}</span></div>
+                    </div>
+                    <div class="documents-grid" style="margin-bottom: 20px;">
+                        ${fileCard('Aadhaar Front', 'aadhaarFront')}
+                        ${fileCard('Aadhaar Back', 'aadhaarBack')}
+                        ${fileCard('PAN Card', 'panPhoto')}
+                        ${fileCard('Selfie Verification', 'selfie')}
+                    </div>
+                    <div class="kyc-actions">
+                        ${actions}
+                        <button class="btn-view" onclick="closeKycDetails()">Close</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('kycDetailsContainer').innerHTML = content;
+            document.getElementById('kycDetailsModal').style.display = 'block';
+        }
+
+        function closeKycDetails() {
+            document.getElementById('kycDetailsModal').style.display = 'none';
+        }
+
+        async function approveKyc(id) {
+            try {
+                await AdminAPI.updateKYCStatus(id, 'verified');
+                showNotification('KYC verification approved successfully.', 'success');
+                closeKycDetails();
+                await loadKycSubmissions();
+            } catch (err) {
+                showNotification(err.message || 'Failed to approve KYC', 'error');
+            }
+        }
+
+        async function rejectKyc(id) {
+            const reason = prompt('Please enter rejection reason:');
+            if (reason === null) return;
+            if (!reason.trim()) {
+                showNotification('A rejection reason is required.', 'error');
+                return;
+            }
+            try {
+                await AdminAPI.updateKYCStatus(id, 'rejected', reason);
+                showNotification('KYC verification rejected & flagged.', 'warning');
+                closeKycDetails();
+                await loadKycSubmissions();
+            } catch (err) {
+                showNotification(err.message || 'Failed to reject KYC', 'error');
+            }
+        }
+
+        // VERIFICATIONS TAB
+        async function loadVerificationRequests() {
+            const container = document.getElementById('verificationRequests');
+            container.innerHTML = '<p style="color: var(--text-light); text-align: center;">Loading verification requests...</p>';
+            try {
+                const list = await AdminAPI.getPendingVerifications();
+                if (!list || list.length === 0) {
+                    container.innerHTML = '<p style="color: var(--text-light); text-align: center;">No pending verification requests.</p>';
+                    return;
+                }
+                container.innerHTML = list.map(c => `
+                    <div class="kyc-card pending">
+                        <div class="kyc-card-header">
+                            <div class="kyc-title">${c.title}</div>
+                            <span class="status-badge pending">PENDING VERIFICATION</span>
+                        </div>
+                        <div class="kyc-meta">
+                            <span>Campaign ID: #${c.id}</span>
+                            <span>Requested: ${c.verificationRequestedAt ? new Date(c.verificationRequestedAt).toLocaleString() : 'N/A'}</span>
+                        </div>
+                        <div class="kyc-grid">
+                            <div class="kyc-item"><label>Creator Username:</label><span>${c.creatorId?.username || c.creatorName || 'N/A'}</span></div>
+                            <div class="kyc-item"><label>Creator Email:</label><span>${c.creatorId?.email || 'N/A'}</span></div>
+                            <div class="kyc-item"><label>Goal Amount:</label><span>₹${c.goal.toLocaleString('en-IN')}</span></div>
+                            <div class="kyc-item"><label>Raised Amount:</label><span>₹${c.raised.toLocaleString('en-IN')}</span></div>
+                        </div>
+                        <div style="margin-top: 16px;">
+                            <label style="display: block; color: var(--primary-green); font-weight: 600; margin-bottom: 8px;">Decision Notes:</label>
+                            <input type="text" id="verifyNotes_${c.id}" placeholder="Provide notes..." style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(0,255,65,0.2); color: #fff; border-radius: 8px; margin-bottom: 12px;">
+                        </div>
+                        <div class="kyc-actions">
+                            <button class="btn-approve" onclick="approveVerification('${c.id}')"><i class="fas fa-check"></i> Approve & Badge</button>
+                            <button class="btn-reject" onclick="rejectVerification('${c.id}')"><i class="fas fa-times"></i> Reject Request</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = '<p style="color: #ff3333; text-align: center;">Failed to load verification requests.</p>';
+            }
+        }
+
+        async function approveVerification(campaignId) {
+            const notes = document.getElementById(`verifyNotes_${campaignId}`).value;
+            try {
+                await AdminAPI.approveVerification(campaignId, notes);
+                showNotification('Campaign verification approved!', 'success');
+                await loadVerificationRequests();
+            } catch (err) {
+                showNotification(err.message || 'Failed to approve verification', 'error');
+            }
+        }
+
+        async function rejectVerification(campaignId) {
+            const notes = document.getElementById(`verifyNotes_${campaignId}`).value;
+            if (!notes.trim()) {
+                showNotification('Notes are required for verification rejection.', 'error');
+                return;
+            }
+            try {
+                await AdminAPI.rejectVerification(campaignId, notes);
+                showNotification('Campaign verification rejected.', 'warning');
+                await loadVerificationRequests();
+            } catch (err) {
+                showNotification(err.message || 'Failed to reject verification', 'error');
+            }
+        }
+
+        // ESCROW TAB
+        async function loadEscrowTab() {
+            const body = document.getElementById('escrowTableBody');
+            body.innerHTML = '<tr><td colspan="7" style="text-align:center; color: var(--text-light);">Loading held donations...</td></tr>';
             
-            if (section === 'personal') {
-                inputs.forEach(input => {
-                    input.disabled = !input.disabled;
+            const status = document.getElementById('escrowStatusFilter').value;
+            
+            try {
+                const donations = await AdminAPI.getDonations({ status });
+                if (donations.length === 0) {
+                    body.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-light);">No donations in state "${status}".</td></tr>`;
+                    return;
+                }
+                
+                body.innerHTML = donations.map(d => {
+                    const dateStr = d.createdAt ? new Date(d.createdAt).toLocaleDateString() : 'N/A';
+                    const fraudBadge = d.fraudFlagged 
+                        ? `<span class="severity-badge critical" title="${d.fraudCheckResult?.reasons?.join(', ') || 'Fraud flagged'}">FRAUD RISK</span>`
+                        : `<span class="outcome-badge success">CLEAN</span>`;
+                        
+                    let actionBtn = '';
+                    if (d.status === 'held') {
+                        actionBtn = `
+                            <button class="btn-approve" style="padding: 6px 12px; font-size: 0.8rem; margin-right: 6px;" onclick="releaseDonation('${d._id || d.id}')"><i class="fas fa-unlock"></i> Release</button>
+                            <button class="btn-reject" style="padding: 6px 12px; font-size: 0.8rem;" onclick="refundDonation('${d._id || d.id}')"><i class="fas fa-undo"></i> Refund</button>
+                        `;
+                    } else {
+                        actionBtn = `<span style="color: var(--text-light); font-size: 0.85rem;">No action needed</span>`;
+                    }
+                    
+                    return `
+                        <tr>
+                            <td>${dateStr}</td>
+                            <td><strong>${d.campaignId?.title || 'N/A'}</strong></td>
+                            <td>${d.donorName} (${d.donorEmail})</td>
+                            <td>₹${d.amount.toLocaleString('en-IN')}</td>
+                            <td style="font-family: monospace; font-size: 0.8rem;">${d.razorpayPaymentId || 'N/A'}</td>
+                            <td>${fraudBadge}</td>
+                            <td>${actionBtn}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (err) {
+                console.error(err);
+                body.innerHTML = '<tr><td colspan="7" style="text-align:center; color: #ff3333;">Failed to load escrow details.</td></tr>';
+            }
+        }
+
+        async function releaseDonation(donationId) {
+            const note = prompt('Release notes (optional):');
+            if (note === null) return; // user cancelled
+            
+            try {
+                const res = await AdminAPI.releaseDonation(donationId, { note });
+                showNotification('Funds released successfully!', 'success');
+                await loadEscrowTab();
+            } catch (err) {
+                if (err.message && err.message.includes('goal has not been reached')) {
+                    if (confirm(`${err.message}\n\nDo you want to FORCE the release of these funds?`)) {
+                        try {
+                            await AdminAPI.releaseDonation(donationId, { note, force: true });
+                            showNotification('Funds force released successfully!', 'success');
+                            await loadEscrowTab();
+                        } catch (forceErr) {
+                            showNotification('Force release failed: ' + forceErr.message, 'error');
+                        }
+                    }
+                } else {
+                    showNotification('Release failed: ' + err.message, 'error');
+                }
+            }
+        }
+
+        async function refundDonation(donationId) {
+            const note = prompt('Enter refund reason (mandatory):');
+            if (note === null) return;
+            if (!note.trim()) {
+                showNotification('Refund reason is required.', 'error');
+                return;
+            }
+            
+            try {
+                await AdminAPI.refundDonation(donationId, { note });
+                showNotification('Donation successfully refunded!', 'warning');
+                await loadEscrowTab();
+            } catch (err) {
+                showNotification('Refund failed: ' + err.message, 'error');
+            }
+        }
+
+        // ANALYTICS & SECURITY TAB
+        async function loadAnalyticsTab() {
+            const feedContainer = document.getElementById('securityEventFeed');
+            const suspiciousBody = document.getElementById('suspiciousIpsTable');
+            const statsContainer = document.getElementById('operationsStatsContainer');
+
+            feedContainer.innerHTML = '<p style="color: var(--text-light);">Loading security feed...</p>';
+            suspiciousBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: var(--text-light);">Analyzing logs...</td></tr>';
+            statsContainer.innerHTML = '<p style="color: var(--text-light);">Gathering platform stats...</p>';
+
+            try {
+                // Fetch Security Feed
+                const feed = await AdminAPI.getSecurityFeed();
+                if (feed.length === 0) {
+                    feedContainer.innerHTML = '<p style="color: var(--text-light);">No recent security events.</p>';
+                } else {
+                    feedContainer.innerHTML = feed.map(event => {
+                        let sevClass = 'info';
+                        let icon = 'info-circle';
+                        if (event.severity === 'critical') { sevClass = 'critical'; icon = 'exclamation-circle'; }
+                        else if (event.severity === 'warning') { sevClass = 'warning'; icon = 'exclamation-triangle'; }
+                        
+                        return `
+                            <div class="security-event-item">
+                                <div class="event-icon-wrapper ${sevClass}">
+                                    <i class="fas fa-${icon}"></i>
+                                </div>
+                                <div class="event-details">
+                                    <div class="event-header">
+                                        <strong style="color: var(--text-white);">${event.event}</strong>
+                                        <span class="event-time">${new Date(event.timestamp).toLocaleTimeString()}</span>
+                                    </div>
+                                    <p style="font-size: 0.9rem; color: var(--text-light); margin: 4px 0;">${event.metadata?.message || 'Activity occurred'}</p>
+                                    <div class="event-meta">
+                                        <span>IP: ${event.actor?.ip || 'N/A'}</span>
+                                        <span>User: ${event.actor?.userId || 'N/A'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                // Fetch Suspicious IPs
+                const suspicious = await AdminAPI.getSuspiciousIPs();
+                if (suspicious.length === 0) {
+                    suspiciousBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: var(--text-light);">No suspicious activity detected.</td></tr>';
+                } else {
+                    suspiciousBody.innerHTML = suspicious.map(ip => `
+                        <tr>
+                            <td><strong style="color: #ff3333;">${ip.ip}</strong></td>
+                            <td style="text-align: center; color: var(--text-white);">${ip.count}</td>
+                            <td>${new Date(ip.lastSeen).toLocaleString()}</td>
+                        </tr>
+                    `).join('');
+                }
+
+                // Fetch Platform Analytics
+                const analytics = await AdminAPI.getAnalytics();
+                const stats = analytics.stats || {};
+                const cStats = analytics.campaignStats || {};
+
+                statsContainer.innerHTML = `
+                    <div class="kyc-item">
+                        <label>Active MongoDB Users</label>
+                        <span style="font-size: 1.5rem; font-weight: 700; color: var(--text-white);">${stats.totalUsers || 0}</span>
+                    </div>
+                    <div class="kyc-item">
+                        <label>Total Verified KYC</label>
+                        <span style="font-size: 1.5rem; font-weight: 700; color: var(--primary-green);">${stats.verifiedKycUsers || 0}</span>
+                    </div>
+                    <div class="kyc-item">
+                        <label>Pending KYC Backlog</label>
+                        <span style="font-size: 1.5rem; font-weight: 700; color: #f57c00;">${stats.pendingKycBacklog || 0}</span>
+                    </div>
+                    <div class="kyc-item">
+                        <label>Platform Approved Campaigns</label>
+                        <span style="font-size: 1.5rem; font-weight: 700; color: var(--text-white);">${cStats.totalApprovedCampaigns || 0}</span>
+                    </div>
+                    <div class="kyc-item">
+                        <label>Total Funding Raised</label>
+                        <span style="font-size: 1.5rem; font-weight: 700; color: var(--primary-green);">₹${(cStats.totalFundsRaised || 0).toLocaleString('en-IN')}</span>
+                    </div>
+                    <div class="kyc-item">
+                        <label>Average Campaign Funding</label>
+                        <span style="font-size: 1.5rem; font-weight: 700; color: var(--text-white);">₹${(cStats.averageFundingRaised || 0).toLocaleString('en-IN')}</span>
+                    </div>
+                `;
+
+            } catch (err) {
+                console.error(err);
+                feedContainer.innerHTML = '<p style="color: #ff3333;">Service currently unavailable.</p>';
+            }
+        }
+
+        // AUDIT LOGS TAB
+        let currentAuditPage = 1;
+        let auditTotalPages = 1;
+
+        async function loadAuditLogsTab() {
+            const body = document.getElementById('auditLogsTableBody');
+            body.innerHTML = '<tr><td colspan="6" style="text-align:center; color: var(--text-light);">Loading audit trail...</td></tr>';
+
+            const severity = document.getElementById('auditSeverityFilter').value;
+            const outcome = document.getElementById('auditOutcomeFilter').value;
+
+            try {
+                const data = await AdminAPI.getAuditLogs({
+                    page: currentAuditPage,
+                    limit: 15,
+                    severity,
+                    outcome
                 });
-                actions.style.display = actions.style.display === 'none' ? 'flex' : 'none';
+
+                const logs = data.logs || [];
+                auditTotalPages = data.totalPages || 1;
+
+                if (logs.length === 0) {
+                    body.innerHTML = '<tr><td colspan="6" style="text-align:center; color: var(--text-light);">No matching audit events.</td></tr>';
+                } else {
+                    body.innerHTML = logs.map(log => `
+                        <tr>
+                            <td>${new Date(log.timestamp).toLocaleString()}</td>
+                            <td><strong style="color: var(--text-white);">${log.event}</strong></td>
+                            <td><span class="severity-badge ${log.severity}">${log.severity}</span></td>
+                            <td>${log.actor?.ip || 'N/A'}</td>
+                            <td style="font-family: monospace; font-size: 0.8rem;">${log.actor?.userId || 'System'}</td>
+                            <td><span class="outcome-badge ${log.outcome}">${log.outcome}</span></td>
+                        </tr>
+                    `).join('');
+                }
+
+                // Update pagination controls
+                document.getElementById('auditPageInfo').textContent = `Page ${currentAuditPage} of ${auditTotalPages}`;
+                document.getElementById('prevAuditPage').disabled = currentAuditPage <= 1;
+                document.getElementById('nextAuditPage').disabled = currentAuditPage >= auditTotalPages;
+
+            } catch (err) {
+                body.innerHTML = '<tr><td colspan="6" style="text-align:center; color: #ff3333;">Failed to load audit logs.</td></tr>';
             }
         }
 
-        // Save personal information
-        function savePersonalInfo() {
-            showNotification('Personal information updated successfully!', 'success');
-            toggleEditMode('personal');
+        function changeAuditPage(direction) {
+            currentAuditPage += direction;
+            if (currentAuditPage < 1) currentAuditPage = 1;
+            if (currentAuditPage > auditTotalPages) currentAuditPage = auditTotalPages;
+            loadAuditLogsTab();
         }
 
-        // Cancel edit
-        function cancelEdit(section) {
-            toggleEditMode(section);
-        }
+        // SESSIONS TAB
+        async function searchUserSessions() {
+            const userId = document.getElementById('sessionsUserSearch').value.trim();
+            if (!userId) {
+                showNotification('Please enter a User ID.', 'error');
+                return;
+            }
 
-        // Toggle 2FA
-        function toggle2FA() {
-            const button = event.target;
-            const status = button.textContent === 'Disable' ? 'Enable' : 'Disable';
-            button.textContent = status;
-            showNotification(`Two-factor authentication ${status.toLowerCase()}d`, 'info');
-        }
+            const body = document.getElementById('sessionsTableBody');
+            body.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-light);">Retrieving active sessions...</td></tr>';
 
-        // Change session timeout
-        function changeSessionTimeout() {
-            const newTimeout = prompt('Enter new session timeout in minutes (15-120):', '30');
-            if (newTimeout && !isNaN(newTimeout) && newTimeout >= 15 && newTimeout <= 120) {
-                showNotification(`Session timeout updated to ${newTimeout} minutes`, 'success');
+            try {
+                const sessions = await AdminAPI.getUserSessions(userId);
+                if (sessions.length === 0) {
+                    body.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-light);">No active sessions found for this user.</td></tr>';
+                } else {
+                    body.innerHTML = sessions.map(s => `
+                        <tr>
+                            <td><strong>${s.ip}</strong></td>
+                            <td style="font-size: 0.85rem; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${s.userAgent}">${s.userAgent}</td>
+                            <td>${new Date(s.createdAt).toLocaleString()}</td>
+                            <td>${new Date(s.expiresAt).toLocaleString()}</td>
+                            <td>
+                                <button class="btn-action-danger" onclick="revokeSessionFamily('${s.family}')">Revoke Session</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (err) {
+                body.innerHTML = '<tr><td colspan="5" style="text-align:center; color: #ff3333;">Error retrieving sessions.</td></tr>';
             }
         }
 
-        // Change password
-        function changePassword() {
-            const newPassword = prompt('Enter new password:');
-            if (newPassword && newPassword.length >= 8) {
-                showNotification('Password changed successfully!', 'success');
-            } else if (newPassword) {
-                showNotification('Password must be at least 8 characters long!', 'warning');
+        async function revokeSessionFamily(familyId) {
+            if (!confirm('Are you sure you want to terminate this session family? The user will be instantly logged out of this device.')) return;
+            try {
+                await AdminAPI.revokeSession(familyId);
+                showNotification('Session family successfully revoked.', 'success');
+                searchUserSessions();
+            } catch (err) {
+                showNotification('Failed to revoke session: ' + err.message, 'error');
             }
         }
 
-        // Setup profile event listeners
-        function setupProfileEventListeners() {
-            // Avatar upload
-            document.getElementById('avatarInput').addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        document.getElementById('adminAvatar').src = e.target.result;
-                        showNotification('Profile picture updated!', 'success');
-                    };
-                    reader.readAsDataURL(file);
+        // PROFILE TAB
+        function loadProfileData() {
+            const adminUsername = sessionStorage.getItem('adminUsername') || 'admin';
+            document.getElementById('adminName').textContent = adminUsername;
+            document.getElementById('adminEmail').textContent = `${adminUsername}@greenfund.com`;
+        }
+
+        function toggleProfileDropdown() {
+            document.getElementById('profileMenu').classList.toggle('active');
+        }
+
+        async function loadVerificationRequests() {
+            const container = document.getElementById('verificationRequestsContainer');
+            if (!container) return;
+            container.innerHTML = '<p style="color: var(--text-light); text-align: center;">Loading verification requests...</p>';
+            
+            try {
+                const response = await adminFetch(`${API_BASE}/admin/verification-requests`);
+                if (!response.ok) throw new Error('Failed to load verification requests');
+                const campaigns = await response.json();
+                
+                if (campaigns.length === 0) {
+                    container.innerHTML = `<p style="color: var(--text-light); text-align: center; padding: 20px;">No active verification requests found.</p>`;
+                    return;
+                }
+                
+                container.innerHTML = campaigns.map(c => {
+                    const statusClass = c.verificationStatus || 'none';
+                    return `
+                        <div class="kyc-card ${statusClass}" style="margin-bottom: 20px; border-left: 4px solid ${c.isVerified ? 'var(--primary-green)' : '#f57c00'}; text-align: left;">
+                            <div class="kyc-card-header">
+                                <h3 class="kyc-title" style="display: flex; align-items: center; gap: 10px; margin: 0;">
+                                    ${c.title}
+                                    ${c.isVerified ? '<span style="color: var(--primary-green); font-size: 0.9rem;"><i class="fas fa-check-circle"></i> Verified</span>' : ''}
+                                </h3>
+                                <span class="status-badge ${statusClass}">${statusClass.toUpperCase()}</span>
+                            </div>
+                            <div style="margin-bottom: 15px; color: var(--text-light); font-size: 0.9rem;">
+                                <strong>Verification Notes:</strong> ${c.verificationNotes || 'No notes provided by creator.'}
+                            </div>
+                            <div class="kyc-grid" style="margin-bottom: 15px;">
+                                <div class="kyc-item"><label>Goal Amount:</label><span>₹${c.goal.toLocaleString('en-IN')}</span></div>
+                                <div class="kyc-item"><label>Raised Amount:</label><span>₹${c.raised.toLocaleString('en-IN')}</span></div>
+                                <div class="kyc-item"><label>Creator ID:</label><span>${c.creatorId || c.creator || 'N/A'}</span></div>
+                                <div class="kyc-item"><label>Location:</label><span>${c.location || 'N/A'}</span></div>
+                            </div>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <input type="text" id="notes_${c.id}" placeholder="Enter audit review notes..." style="flex: 1; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white;">
+                                <button class="btn-approve" onclick="verifyApproveCampaign('${c.id}')"><i class="fas fa-check"></i> Approve & Badge</button>
+                                <button class="btn-reject" onclick="verifyRejectCampaign('${c.id}')"><i class="fas fa-times"></i> Reject Request</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error(error);
+                container.innerHTML = '<p style="color: #ff3333; text-align: center;">Failed to load verification requests.</p>';
+            }
+        }
+        
+        async function verifyApproveCampaign(id) {
+            const notes = document.getElementById(`notes_${id}`).value.trim();
+            try {
+                const response = await adminFetch(`${API_BASE}/admin/campaigns/${id}/verify-approve`, {
+                    method: 'POST',
+                    body: JSON.stringify({ notes })
+                });
+                if (!response.ok) throw new Error('Approval failed');
+                showNotification('Campaign verified successfully!', 'success');
+                loadVerificationRequests();
+                updateStats();
+            } catch (error) {
+                console.error(error);
+                showNotification('Failed to verify campaign', 'error');
+            }
+        }
+        
+        async function verifyRejectCampaign(id) {
+            const notes = document.getElementById(`notes_${id}`).value.trim();
+            if (!notes) {
+                showNotification('Review notes are required for rejection.', 'error');
+                return;
+            }
+            try {
+                const response = await adminFetch(`${API_BASE}/admin/campaigns/${id}/verify-reject`, {
+                    method: 'POST',
+                    body: JSON.stringify({ notes })
+                });
+                if (!response.ok) throw new Error('Rejection failed');
+                showNotification('Verification request rejected.', 'info');
+                loadVerificationRequests();
+                updateStats();
+            } catch (error) {
+                console.error(error);
+                showNotification('Failed to reject verification request', 'error');
+            }
+        }
+
+        async function loadEscrowTab() {
+            const body = document.getElementById('escrowCampaignsTableBody');
+            if (!body) return;
+            body.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-light);">Loading campaigns...</td></tr>';
+            
+            try {
+                const response = await adminFetch(`${API_BASE}/admin/campaigns`);
+                if (!response.ok) throw new Error('Failed to fetch campaigns');
+                const campaigns = await response.json();
+                
+                if (campaigns.length === 0) {
+                    body.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-light);">No campaigns found.</td></tr>';
+                    return;
+                }
+                
+                body.innerHTML = campaigns.map(c => {
+                    const isGoalMet = c.raised >= c.goal;
+                    const statusText = c.isVerified ? 'Verified' : (c.verificationStatus || 'none');
+                    const badgeClass = c.isVerified ? 'success' : 'failure';
+                    
+                    return `
+                        <tr>
+                            <td><strong>${c.title}</strong></td>
+                            <td>₹${c.goal.toLocaleString('en-IN')}</td>
+                            <td style="color: var(--primary-green); font-weight: bold;">₹${c.raised.toLocaleString('en-IN')}</td>
+                            <td>${c.backers || 0}</td>
+                            <td>
+                                <span class="outcome-badge ${isGoalMet ? 'success' : 'failure'}">${isGoalMet ? 'YES' : 'NO'}</span>
+                            </td>
+                            <td>
+                                <span class="severity-badge ${badgeClass}">${statusText.toUpperCase()}</span>
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="btn-approve" onclick="releaseEscrowFunds('${c.id}')" ${!isGoalMet ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}><i class="fas fa-lock-open"></i> Release</button>
+                                    <button class="btn-action-danger" onclick="refundEscrowFunds('${c.id}')"><i class="fas fa-arrow-rotate-left"></i> Refund</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error(error);
+                body.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #ff3333;">Failed to load escrow list.</td></tr>';
+            }
+        }
+        
+        async function releaseEscrowFunds(id) {
+            if (!confirm('Are you sure you want to release held funds for this campaign to the creator? This action is irreversible.')) return;
+            try {
+                const response = await adminFetch(`${API_BASE}/admin/campaigns/${id}/release-funds`, {
+                    method: 'POST'
+                });
+                const resData = await response.json();
+                if (!response.ok) throw new Error(resData.message || 'Release failed');
+                showNotification(resData.message || 'Funds successfully released!', 'success');
+                loadEscrowTab();
+            } catch (error) {
+                console.error(error);
+                showNotification(error.message || 'Failed to release funds', 'error');
+            }
+        }
+        
+        async function refundEscrowFunds(id) {
+            if (!confirm('Are you sure you want to mark all donations for this campaign as refunded? This will update the escrow state.')) return;
+            try {
+                const response = await adminFetch(`${API_BASE}/admin/campaigns/${id}/refund-funds`, {
+                    method: 'POST'
+                });
+                const resData = await response.json();
+                if (!response.ok) throw new Error(resData.message || 'Refund failed');
+                showNotification(resData.message || 'Funds successfully refunded!', 'info');
+                loadEscrowTab();
+            } catch (error) {
+                console.error(error);
+                showNotification(error.message || 'Failed to process refunds', 'error');
+            }
+        }
+
+        function logout() {
+            sessionStorage.clear();
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        // Listeners & Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeDashboard();
+
+            // Setup profile drop down closer
+            document.addEventListener('click', (e) => {
+                const dropdown = document.querySelector('.profile-dropdown');
+                if (dropdown && !dropdown.contains(e.target)) {
+                    document.getElementById('profileMenu').classList.remove('active');
                 }
             });
 
-            // Avatar click
-            document.querySelector('.avatar-overlay').addEventListener('click', function() {
-                document.getElementById('avatarInput').click();
-            });
-        }
-
-        // Navigation functionality
-        document.addEventListener('DOMContentLoaded', () => {
-            // Profile link click handler
-            const profileLink = document.querySelector('a[href="#profile"]');
-            if (profileLink) {
-                profileLink.addEventListener('click', function(e) {
+            // Handle logout links
+            document.querySelectorAll('.logout-link').forEach(link => {
+                link.addEventListener('click', (e) => {
                     e.preventDefault();
-                    showProfileSection();
+                    logout();
                 });
-            }
+            });
 
-            // Check if URL has profile hash
-            if (window.location.hash === '#profile') {
-                showProfileSection();
-            }
-        });
-    </script>
-    <script>
-        async function loadCampaigns() {
-            try {
-                const campaigns = await AdminAPI.getAllCampaigns();
-                const campaignsTable = document.querySelector('.campaigns-table tbody');
-                
-                if (!campaignsTable) return;
-                
-                // Clear existing rows
-                campaignsTable.innerHTML = '';
-                
-                // Add campaign rows
-                campaigns.forEach(campaign => {
-                    const row = document.createElement('tr');
-                    
-                    // Format date
-                    const createdDate = new Date(campaign.createdAt);
-                    const formattedDate = createdDate.toLocaleDateString();
-                    
-                    // Set status class
-                    let statusClass = '';
-                    if (campaign.status === 'pending') statusClass = 'status-pending';
-                    else if (campaign.status === 'approved') statusClass = 'status-approved';
-                    else if (campaign.status === 'rejected') statusClass = 'status-rejected';
-                    
-                    row.innerHTML = `
-                        <td>${campaign.id}</td>
-                        <td>${campaign.title}</td>
-                        <td>${campaign.creatorName}</td>
-                        <td>${formattedDate}</td>
-                        <td><span class="status-badge ${statusClass}">${campaign.status}</span></td>
-                        <td>
-                            <button class="btn-view" onclick="viewCampaign('${campaign.id}')">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </td>
-                    `;
-                    
-                    campaignsTable.appendChild(row);
+            // Handle mobile menu toggling
+            const hamburger = document.querySelector('.hamburger');
+            const navMenu = document.querySelector('.nav-menu');
+            if (hamburger && navMenu) {
+                hamburger.addEventListener('click', () => {
+                    hamburger.classList.toggle('active');
+                    navMenu.classList.toggle('active');
                 });
-                
-            } catch (error) {
-                console.error('Error loading campaigns:', error);
-            }
-        }
-        
-        function viewCampaign(campaignId) {
-            // Show campaign review modal
-            document.getElementById('campaignReviewModal').classList.remove('hidden');
-            
-            // Load campaign details
-            loadCampaignDetails(campaignId);
-        }
-        
-        async function loadCampaignDetails(campaignId) {
-            try {
-                // Get campaign details
-                const campaign = await CampaignAPI.getCampaign(campaignId);
-                
-                // Update review modal with campaign details
-                document.getElementById('reviewTitle').textContent = campaign.title;
-                document.getElementById('reviewCreator').textContent = campaign.creatorName;
-                document.getElementById('reviewDate').textContent = new Date(campaign.createdAt).toLocaleDateString();
-                document.getElementById('reviewCategory').textContent = campaign.category;
-                document.getElementById('reviewDescription').textContent = campaign.description;
-                document.getElementById('reviewGoal').textContent = '$' + campaign.goalAmount.toLocaleString();
-                document.getElementById('reviewDuration').textContent = campaign.duration + ' days';
-                document.getElementById('reviewLocation').textContent = campaign.location || 'Not specified';
-                
-                // Set campaign image
-                const imagePreview = document.getElementById('imagePreview');
-                imagePreview.innerHTML = `<img src="${campaign.imageUrl}" alt="${campaign.title}">`;
-                
-                // Store campaign ID for approval/rejection
-                document.getElementById('campaignReviewModal').dataset.campaignId = campaignId;
-                
-            } catch (error) {
-                console.error('Error loading campaign details:', error);
-            }
-        }
-        
-        async function approveCampaign() {
-            const campaignId = document.getElementById('campaignReviewModal').dataset.campaignId;
-            const notes = document.getElementById('reviewNotes').value;
-            
-            try {
-                await AdminAPI.updateCampaignStatus(campaignId, 'approved', notes);
-                alert('Campaign approved successfully!');
-                document.getElementById('campaignReviewModal').classList.add('hidden');
-                loadDashboardStats();
-                loadCampaigns();
-            } catch (error) {
-                alert('Error approving campaign: ' + error.message);
-            }
-        }
-        
-        async function rejectCampaign() {
-            const campaignId = document.getElementById('campaignReviewModal').dataset.campaignId;
-            const notes = document.getElementById('reviewNotes').value;
-            
-            if (!notes) {
-                alert('Please provide a reason for rejection in the notes field.');
-                return;
-            }
-            
-            try {
-                await AdminAPI.updateCampaignStatus(campaignId, 'rejected', notes);
-                alert('Campaign rejected successfully!');
-                document.getElementById('campaignReviewModal').classList.add('hidden');
-                loadDashboardStats();
-                loadCampaigns();
-            } catch (error) {
-                alert('Error rejecting campaign: ' + error.message);
-            }
-        }
-        
-        function requestChanges() {
-            const campaignId = document.getElementById('campaignReviewModal').dataset.campaignId;
-            const notes = document.getElementById('reviewNotes').value;
-            
-            if (!notes) {
-                alert('Please specify the requested changes in the notes field.');
-                return;
-            }
-            
-            try {
-                // This would typically send an email or notification to the campaign creator
-                alert('Change request sent to campaign creator!');
-                document.getElementById('campaignReviewModal').classList.add('hidden');
-            } catch (error) {
-                alert('Error requesting changes: ' + error.message);
-            }
-        }
-        
-        // Close modal when clicking outside
-        document.addEventListener('click', function(event) {
-            const modal = document.getElementById('campaignReviewModal');
-            if (event.target === modal) {
-                modal.classList.add('hidden');
             }
         });
     </script>

@@ -7,6 +7,7 @@ const User = require('../models/User');
 const Campaign = require('../models/Campaign');
 const KYC = require('../models/KYC');
 const Admin = require('../models/Admin');
+const Donation = require('../models/Donation');
 
 // Data directories
 const DATA_DIR = path.join(__dirname, '..', 'data');
@@ -137,6 +138,28 @@ const mongoDb = {
     if (!Array.isArray(ids) || ids.length === 0) return { deletedCount: 0 };
     const res = await KYC.deleteMany({ _id: { $in: ids } });
     return { deletedCount: res.deletedCount || 0 };
+  },
+
+  // Donation operations
+  getDonations: async () => {
+    return await Donation.find();
+  },
+  
+  getDonationById: async (id) => {
+    return await Donation.findById(id);
+  },
+
+  getDonationsByCampaignId: async (campaignId) => {
+    return await Donation.find({ campaignId });
+  },
+
+  createDonation: async (donationData) => {
+    const donation = new Donation(donationData);
+    return await donation.save();
+  },
+
+  updateDonation: async (id, donationData) => {
+    return await Donation.findByIdAndUpdate(id, donationData, { new: true });
   },
   
   // Admin operations

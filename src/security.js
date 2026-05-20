@@ -9,6 +9,9 @@ const { body, param, query, validationResult } = require('express-validator');
 const crypto = require('crypto');
 const path = require('path');
 
+const tokenService = require('./services/tokenService');
+const auditService = require('./services/auditService');
+
 // ─────────────────────────────────────────────
 // 1. RATE LIMITERS
 // ─────────────────────────────────────────────
@@ -229,34 +232,48 @@ function maskAadhaar(aadhaar) {
 }
 
 // ─────────────────────────────────────────────
-// 6. ADMIN JWT MIDDLEWARE
+// 6. JWT MIDDLEWARE & AUTHORIZATION
 // ─────────────────────────────────────────────
 
 const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
 function getAdminJwtSecret() {
-    const secret = process.env.ADMIN_JWT_SECRET || process.env.JWT_SECRET;
-    if (!secret || secret === 'dev_jwt_secret_change_me') {
-        console.error('[SECURITY] WARNING: Using weak or default JWT secret!');
-    }
-    return secret;
+    return process.env.ADMIN_JWT_SECRET || process.env.JWT_SECRET || 'dev_secret_change_me';
 }
 
 /**
- * Signs a proper admin JWT (not the old timestamp token).
+ * Signs a proper admin JWT.
  */
 function signAdminToken(payload) {
-    return jwt.sign(
-        { ...payload, role: 'admin' },
-        getAdminJwtSecret(),
-        { expiresIn: process.env.ADMIN_JWT_EXPIRES_IN || '4h' }
-    );
+    const { token } = tokenService.signAdminToken(payload);
+    return token;
+}
+
+/**
+ * Middleware: verifies that the request carries a valid user JWT.
+ */
+async function requireAuth(req, res, next) {
+    try {
+        const auth = req.headers['authorization'] || '';
+        const parts = auth.split(' ');
+        if (parts.length !== 2 || parts[0] !== 'Bearer') {
+            return res.status(401).json({ message: 'Authorization header missing or invalid' });
+        }
+        const token = parts[1];
+        const decoded = await tokenService.verifyAccessToken(token);
+        
+        req.user = decoded;
+        next();
+    } catch (err) {
+        return res.status(401).json({ message: err.message || 'Invalid or expired token' });
+    }
 }
 
 /**
  * Middleware: verifies that the request carries a valid admin JWT.
  */
-function requireAdminAuth(req, res, next) {
+async function requireAdminAuth(req, res, next) {
     try {
         const auth = req.headers['authorization'] || '';
         const parts = auth.split(' ');
@@ -264,14 +281,58 @@ function requireAdminAuth(req, res, next) {
             return res.status(401).json({ message: 'Admin authorisation required' });
         }
         const token = parts[1];
-        const decoded = jwt.verify(token, getAdminJwtSecret());
-        if (decoded.role !== 'admin') {
-            return res.status(403).json({ message: 'Access denied: not an admin' });
-        }
+        const decoded = await tokenService.verifyAdminToken(token);
+        
         req.admin = decoded;
         next();
     } catch (err) {
-        return res.status(401).json({ message: 'Invalid or expired admin token' });
+        return res.status(401).json({ message: err.message || 'Invalid or expired admin token' });
+    }
+}
+
+/**
+ * Middleware: Checks if user has a specific role.
+ */
+function checkRole(roles = []) {
+    return (req, res, next) => {
+        const role = req.user?.role || req.admin?.role || 'user';
+        if (!roles.includes(role)) {
+            return res.status(403).json({ message: 'Forbidden: Insufficient privileges' });
+        }
+        next();
+    };
+}
+
+/**
+ * Middleware: Checks if account is locked or suspended in DB.
+ */
+async function checkAccountStatus(req, res, next) {
+    if (!req.user || !req.user.id) return next();
+    try {
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        if (user.status === 'suspended') {
+            return res.status(403).json({ message: 'Account is suspended. Please contact support.' });
+        }
+        if (user.status === 'locked') {
+            if (user.lockUntil && user.lockUntil > new Date()) {
+                return res.status(403).json({ 
+                    message: `Account is temporarily locked. Try again after ${user.lockUntil.toLocaleTimeString()}` 
+                });
+            } else {
+                // Lock expired, reset attempts
+                user.status = 'active';
+                user.loginAttempts = 0;
+                user.lockUntil = undefined;
+                await user.save();
+            }
+        }
+        next();
+    } catch (err) {
+        console.error('Account status check error:', err);
+        res.status(500).json({ message: 'Internal security validation failed' });
     }
 }
 
@@ -335,6 +396,9 @@ module.exports = {
     // Admin auth
     signAdminToken,
     requireAdminAuth,
+    requireAuth,
+    checkRole,
+    checkAccountStatus,
 
     // Sanitisation
     sanitiseString,

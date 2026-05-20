@@ -2,6 +2,8 @@ const path = require('path');
 const fs = require('fs');
 const express = require('express');
 const cors = require('cors');
+const http = require('http');
+const socketIo = require('socket.io');
 const morgan = require('morgan');
 const multer = require('multer');
 const formidable = require('formidable');
@@ -11,15 +13,31 @@ const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const helmet = require('helmet');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
 // Security middleware & helpers
 const security = require('./security');
 
+// Import services
+const tokenService = require('./services/tokenService');
+const auditService = require('./services/auditService');
+const analyticsService = require('./services/analyticsService');
+const emailService = require('./services/emailService');
+
+// Import Models
+const User = require('../models/User');
+const Campaign = require('../models/Campaign');
+const KYC = require('../models/KYC');
+const Session = require('../models/Session');
+const RefreshToken = require('../models/RefreshToken');
+const AuditLog = require('../models/AuditLog');
+
 // Import MongoDB connection and utilities
 const { connectMongoDB, mongoDb, migrateData } = require('./mongodb');
 
 const app = express();
+app.use(cookieParser());
 
 // Connect to MongoDB
 let useMongoDb = false;
@@ -219,21 +237,7 @@ function signToken(payload) {
     return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 }
 
-function requireAuth(req, res, next) {
-    try {
-        const auth = req.headers['authorization'] || '';
-        const parts = auth.split(' ');
-        if (parts.length !== 2 || parts[0] !== 'Bearer') {
-            return res.status(401).json({ message: 'Authorization header missing or invalid' });
-        }
-        const token = parts[1];
-        const decoded = jwt.verify(token, JWT_SECRET);
-        req.user = decoded;
-        next();
-    } catch (err) {
-        return res.status(401).json({ message: 'Invalid or expired token' });
-    }
-}
+const requireAuth = [security.requireAuth, security.checkAccountStatus];
 
 // Storage paths
 const DATA_DIR = path.join(__dirname, '..', 'data');
@@ -350,18 +354,115 @@ app.get('/api/health', (req, res) => {
 });
 
 // Campaigns
-app.get('/api/campaigns', (req, res) => {
-    const campaigns = readJson('campaigns.json', []);
-    const { status } = req.query;
+// Campaigns - upgraded with geospatial near, city/state/country filters, and sorting verified campaigns higher
+app.get('/api/campaigns', async (req, res) => {
+    const { status, lat, lng, distance, city, state, country, category, search } = req.query;
+    const targetStatus = status || 'approved'; // defaults to approved for public
     
-    if (status) {
-        const filtered = campaigns.filter(c => c.status === status);
-        res.json(filtered);
-    } else {
-        // Only return approved campaigns for public view
-        const publicCampaigns = campaigns.filter(c => c.status === 'approved');
-        res.json(publicCampaigns);
+    try {
+        if (useMongoDb) {
+            // Geospatial MongoDB query
+            if (lat && lng) {
+                const latitude = parseFloat(lat);
+                const longitude = parseFloat(lng);
+                
+                if (isNaN(latitude) || isNaN(longitude) || latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+                    return res.status(400).json({ message: 'Invalid latitude or longitude coordinates' });
+                }
+                
+                // Aggregation pipeline to use $geoNear and also sort by verified status
+                const matchQuery = { status: targetStatus };
+                if (city) matchQuery.city = new RegExp(city, 'i');
+                if (state) matchQuery.state = new RegExp(state, 'i');
+                if (country) matchQuery.country = new RegExp(country, 'i');
+                if (category) matchQuery.category = category;
+                if (search) {
+                    matchQuery.$or = [
+                        { title: new RegExp(search, 'i') },
+                        { description: new RegExp(search, 'i') }
+                    ];
+                }
+                
+                const pipeline = [
+                    {
+                        $geoNear: {
+                            near: { type: 'Point', coordinates: [longitude, latitude] },
+                            distanceField: 'distance',
+                            maxDistance: parseInt(distance, 10) || 1000000, // default max 1000km
+                            query: matchQuery,
+                            spherical: true
+                        }
+                    },
+                    {
+                        $sort: { isVerified: -1, distance: 1 } // verified first, then closest
+                    }
+                ];
+                
+                const list = await Campaign.aggregate(pipeline);
+                
+                // Map _id to id for client compatibility
+                const results = list.map(item => ({
+                    ...item,
+                    id: item._id.toString()
+                }));
+                
+                return res.json(results);
+            } else {
+                // Non-geospatial MongoDB query
+                const query = { status: targetStatus };
+                if (city) query.city = new RegExp(city, 'i');
+                if (state) query.state = new RegExp(state, 'i');
+                if (country) query.country = new RegExp(country, 'i');
+                if (category) query.category = category;
+                if (search) {
+                    query.$or = [
+                        { title: new RegExp(search, 'i') },
+                        { description: new RegExp(search, 'i') }
+                    ];
+                }
+                
+                // Sort verified campaigns higher, then newest
+                const list = await Campaign.find(query).sort({ isVerified: -1, createdAt: -1 });
+                const results = list.map(item => {
+                    const obj = item.toObject();
+                    obj.id = obj._id.toString();
+                    return obj;
+                });
+                return res.json(results);
+            }
+        }
+    } catch (e) {
+        console.error('Geo campaign search error:', e.message);
     }
+    
+    // File fallback
+    const campaigns = readJson('campaigns.json', []);
+    let filtered = campaigns;
+    
+    // Always filter by status
+    filtered = filtered.filter(c => c.status === targetStatus);
+    
+    if (city) filtered = filtered.filter(c => String(c.city || '').toLowerCase().includes(city.toLowerCase()));
+    if (state) filtered = filtered.filter(c => String(c.state || '').toLowerCase().includes(state.toLowerCase()));
+    if (country) filtered = filtered.filter(c => String(c.country || '').toLowerCase().includes(country.toLowerCase()));
+    if (category) filtered = filtered.filter(c => c.category === category);
+    if (search) {
+        const queryStr = search.toLowerCase();
+        filtered = filtered.filter(c => 
+            (c.title || '').toLowerCase().includes(queryStr) || 
+            (c.description || '').toLowerCase().includes(queryStr)
+        );
+    }
+    
+    // Sort verified first, then by date (file fallback has no geoNear sorting)
+    filtered.sort((a, b) => {
+        const vA = a.isVerified ? 1 : 0;
+        const vB = b.isVerified ? 1 : 0;
+        if (vB !== vA) return vB - vA;
+        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+    });
+    
+    res.json(filtered);
 });
 
 // Public: Get KYC status for a user
@@ -474,6 +575,170 @@ app.get('/api/admin/users-count', security.requireAdminAuth, async (req, res) =>
     return res.json({ totalUsers: (usersFile || []).length });
 });
 
+// Admin: Get platform analytics
+app.get('/api/admin/analytics', security.requireAdminAuth, async (req, res) => {
+    try {
+        if (!useMongoDb) {
+            return res.status(503).json({ message: 'Analytics requires MongoDB' });
+        }
+        const stats = await analyticsService.getPlatformStats();
+        const campaignStats = await analyticsService.getCampaignAnalytics();
+        const userGrowth = await analyticsService.getUserGrowth(30);
+        const loginActivity = await analyticsService.getLoginActivity(7);
+        
+        res.json({
+            stats,
+            campaignStats,
+            userGrowth,
+            loginActivity
+        });
+    } catch (error) {
+        console.error('Analytics fetch error:', error);
+        res.status(500).json({ message: 'Failed to fetch analytics' });
+    }
+});
+
+// Admin: Get event audit logs
+app.get('/api/admin/audit-logs', security.requireAdminAuth, async (req, res) => {
+    try {
+        if (!useMongoDb) {
+            return res.status(503).json({ message: 'Audit logs require MongoDB' });
+        }
+        const { page, limit, event, severity, userId, outcome } = req.query;
+        const logsData = await analyticsService.getAuditLogs({
+            page: parseInt(page, 10) || 1,
+            limit: parseInt(limit, 10) || 50,
+            event,
+            severity,
+            userId,
+            outcome
+        });
+        res.json(logsData);
+    } catch (error) {
+        console.error('Audit logs fetch error:', error);
+        res.status(500).json({ message: 'Failed to fetch audit logs' });
+    }
+});
+
+// Admin: Get security event feed
+app.get('/api/admin/security/feed', security.requireAdminAuth, async (req, res) => {
+    try {
+        if (!useMongoDb) {
+            return res.status(503).json({ message: 'Security feed requires MongoDB' });
+        }
+        const feed = await analyticsService.getSecurityFeed(50);
+        res.json(feed);
+    } catch (error) {
+        console.error('Security feed fetch error:', error);
+        res.status(500).json({ message: 'Failed to fetch security feed' });
+    }
+});
+
+// Admin: Get suspicious IPs (failed logins)
+app.get('/api/admin/security/suspicious', security.requireAdminAuth, async (req, res) => {
+    try {
+        if (!useMongoDb) {
+            return res.status(503).json({ message: 'Suspicious activity analysis requires MongoDB' });
+        }
+        const ips = await analyticsService.getSuspiciousIPs(24, 5); // threshold 5 attempts
+        res.json(ips);
+    } catch (error) {
+        console.error('Suspicious IPs fetch error:', error);
+        res.status(500).json({ message: 'Failed to analyze login activity' });
+    }
+});
+
+// Admin: Update user status (active/locked/suspended)
+app.post('/api/admin/users/:id/status', security.requireAdminAuth, async (req, res) => {
+    const { status, reason } = req.body || {};
+    if (!['active', 'locked', 'suspended'].includes(status)) {
+        return res.status(400).json({ message: 'Invalid status. Must be active, locked, or suspended' });
+    }
+
+    try {
+        if (useMongoDb) {
+            const user = await User.findById(req.params.id);
+            if (!user) return res.status(404).json({ message: 'User not found' });
+
+            user.status = status;
+            if (status === 'locked') {
+                user.lockUntil = new Date(Date.now() + 24 * 60 * 60 * 1000); // lock 24h
+            } else {
+                user.lockUntil = undefined;
+                user.loginAttempts = 0;
+            }
+            await user.save();
+
+            // If locking/suspending, revoke all user's sessions immediately
+            if (status !== 'active') {
+                await tokenService.revokeAllUserTokens(user._id.toString(), 'admin');
+            }
+
+            auditService.raw({
+                event: 'admin.settings_change',
+                actor: { ...auditService.actorFromReq(req), role: 'admin' },
+                resource: { type: 'user', id: user._id.toString() },
+                metadata: { status, reason },
+                severity: 'warning'
+            });
+
+            return res.json({ success: true, message: `User status updated to ${status}` });
+        }
+        
+        // File-based fallback
+        const users = readJson('users.json', []);
+        const user = users.find(u => String(u.id) === String(req.params.id));
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        user.status = status;
+        writeJson('users.json', users);
+        return res.json({ success: true, message: `User status updated to ${status}` });
+    } catch (error) {
+        console.error('Update user status error:', error);
+        res.status(500).json({ message: 'Failed to update user status' });
+    }
+});
+
+// Admin: Get active sessions for a user
+app.get('/api/admin/sessions/:userId', security.requireAdminAuth, async (req, res) => {
+    try {
+        if (!useMongoDb) {
+            return res.status(503).json({ message: 'Sessions require MongoDB' });
+        }
+        const sessions = await tokenService.getActiveUserSessions(req.params.userId);
+        res.json(sessions);
+    } catch (error) {
+        console.error('Get active sessions error:', error);
+        res.status(500).json({ message: 'Failed to retrieve user sessions' });
+    }
+});
+
+// Admin: Revoke specific session family
+app.post('/api/admin/sessions/revoke', security.requireAdminAuth, async (req, res) => {
+    const { family } = req.body || {};
+    if (!family) return res.status(400).json({ message: 'Family identifier is required' });
+
+    try {
+        if (useMongoDb) {
+            await tokenService.revokeFamilyTokens(family, 'admin');
+            
+            auditService.raw({
+                event: 'admin.settings_change',
+                actor: { ...auditService.actorFromReq(req), role: 'admin' },
+                resource: { type: 'session', id: family },
+                metadata: { action: 'revoke_session' },
+                severity: 'warning'
+            });
+
+            return res.json({ success: true, message: 'Session successfully revoked' });
+        }
+        return res.status(503).json({ message: 'MongoDB required for session revocation' });
+    } catch (error) {
+        console.error('Revoke session error:', error);
+        res.status(500).json({ message: 'Failed to revoke session' });
+    }
+});
+
 app.get('/api/campaigns/:id', (req, res) => {
     const campaigns = readJson('campaigns.json', []);
     const campaign = campaigns.find(c => String(c.id) === String(req.params.id));
@@ -549,6 +814,45 @@ app.post('/api/campaigns/:id/create-order', requireAuth, security.paymentLimiter
     }
 });
 
+// Fraud detection helper
+async function runFraudCheck(donationData) {
+    const result = { score: 0, reasons: [] };
+    
+    // Check 1: High single amount (> 50,000 INR)
+    if (donationData.amount > 50000) {
+        result.score += 30;
+        result.reasons.push('High donation amount (> 50,000 INR)');
+    }
+    
+    // Check 2: High frequency (more than 3 donations from same email in 1 hour)
+    if (useMongoDb && donationData.donorEmail) {
+        const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+        try {
+            const count = await Donation.countDocuments({
+                donorEmail: donationData.donorEmail,
+                createdAt: { $gte: oneHourAgo }
+            });
+            if (count >= 3) {
+                result.score += 40;
+                result.reasons.push('High frequency donation (>= 3 attempts in 1 hour)');
+            }
+        } catch (_) {}
+    }
+    
+    // Check 3: Check for suspicious/disposable email domains
+    const suspiciousDomains = ['tempmail.com', 'throwaway.com', 'mailinator.com', 'yopmail.com'];
+    const emailDomain = (donationData.donorEmail || '').split('@')[1];
+    if (emailDomain && suspiciousDomains.includes(emailDomain.toLowerCase())) {
+        result.score += 50;
+        result.reasons.push('Suspicious disposable email domain');
+    }
+    
+    return {
+        flagged: result.score >= 40,
+        result
+    };
+}
+
 // Verify Payment and Save Donation (Step 2: After payment success)
 app.post('/api/campaigns/:id/verify-payment', requireAuth, security.paymentLimiter, async (req, res) => {
     try {
@@ -579,8 +883,6 @@ app.post('/api/campaigns/:id/verify-payment', requireAuth, security.paymentLimit
         // Determine amount in rupees and status
         const paidPaise = paymentInfo?.amount || Number(amount) || 0; // prefer gateway value
         const paidRupees = Math.round(paidPaise / 100);
-        const paymentStatus = (paymentInfo?.status || '').toLowerCase();
-        const normalizedStatus = paymentStatus === 'captured' || paymentStatus === 'authorized' ? 'completed' : (paymentStatus || 'completed');
 
         // Payment is verified - now save the donation
         const campaigns = readJson('campaigns.json', []);
@@ -589,42 +891,105 @@ app.post('/api/campaigns/:id/verify-payment', requireAuth, security.paymentLimit
             return res.status(404).json({ message: 'Campaign not found' });
         }
 
-        const donations = readJson('donations.json', []);
-        const donation = {
-            id: donations.length ? Math.max(...donations.map(d => Number(d.id) || 0)) + 1 : 1,
-            campaignId: campaign.id,
-            amount: paidRupees,
-            donorName: donorName || 'Anonymous',
-            donorEmail: donorEmail || '',
-            razorpayOrderId: razorpay_order_id,
-            razorpayPaymentId: razorpay_payment_id,
-            createdAt: new Date().toISOString(),
-            status: normalizedStatus || 'completed'
-        };
-        donations.push(donation);
-        writeJson('donations.json', donations);
-
-        // Update campaign totals (file store)
-        if (donation.status === 'completed') {
-            campaign.raised += donation.amount;
-            campaign.backers += 1;
-        }
-        writeJson('campaigns.json', campaigns);
-
-        // Update campaign totals in MongoDB if available
+        let donation;
         if (useMongoDb) {
-            try {
-                if (donation.status === 'completed') {
-                    await mongoDb.incrementCampaignStats(campaign.id, donation.amount);
+            // Run fraud detection check
+            const fraudCheck = await runFraudCheck({ amount: paidRupees, donorEmail: donorEmail || '' });
+            
+            donation = new Donation({
+                campaignId: campaign._id || campaign.id,
+                amount: paidRupees,
+                donorName: donorName || 'Anonymous',
+                donorEmail: donorEmail || '',
+                donorId: req.user?.id,
+                razorpayOrderId: razorpay_order_id,
+                razorpayPaymentId: razorpay_payment_id,
+                razorpaySignature: razorpay_signature,
+                status: 'held', // Marked as held in escrow!
+                fraudFlagged: fraudCheck.flagged,
+                fraudCheckResult: fraudCheck.result
+            });
+            
+            donation.statusTimeline.push({
+                status: 'held',
+                updatedBy: 'system',
+                note: fraudCheck.flagged ? `Held in escrow. Fraud flagged: ${fraudCheck.result.reasons.join(', ')}` : 'Captured and held in escrow.'
+            });
+            
+            await donation.save();
+            
+            // Increment campaign stats (both escrow/raised)
+            const mongoCampaign = await Campaign.findById(campaign._id || campaign.id);
+            if (mongoCampaign) {
+                mongoCampaign.raised += paidRupees;
+                mongoCampaign.backers += 1;
+                await mongoCampaign.save();
+                
+                // Mirror the updated stats to campaigns.json so everything is in sync
+                const campaignsFile = readJson('campaigns.json', []);
+                const match = campaignsFile.find(c => String(c.id) === String(campaign.id));
+                if (match) {
+                    match.raised = mongoCampaign.raised;
+                    match.backers = mongoCampaign.backers;
+                    writeJson('campaigns.json', campaignsFile);
                 }
-            } catch (e) {
-                console.log('Mongo incrementCampaignStats failed:', e.message);
+                
+                // Trigger real-time notifications via socket!
+                const io = req.app.get('io');
+                if (io) {
+                    // Update campaign room stats
+                    io.to(`campaign_${campaign.id}`).emit('campaign_update', {
+                        raised: mongoCampaign.raised,
+                        backers: mongoCampaign.backers
+                    });
+                    
+                    // Notify campaign creator
+                    io.to(mongoCampaign.creatorId.toString()).emit('notification', {
+                        type: 'donation_received',
+                        message: `New donation of ₹${paidRupees} received for your campaign "${mongoCampaign.title}".`,
+                        campaignId: campaign.id
+                    });
+                    
+                    // Check if campaign goal achieved
+                    if (mongoCampaign.raised >= mongoCampaign.goal) {
+                        io.to(mongoCampaign.creatorId.toString()).emit('notification', {
+                            type: 'goal_achieved',
+                            message: `Congratulations! Your campaign "${mongoCampaign.title}" has achieved its funding goal of ₹${mongoCampaign.goal}!`,
+                            campaignId: campaign.id
+                        });
+                    }
+                }
+            }
+        } else {
+            // File fallback - save to donations.json with status 'held'
+            const donationsFile = readJson('donations.json', []);
+            donation = {
+                id: donationsFile.length ? Math.max(...donationsFile.map(d => Number(d.id) || 0)) + 1 : 1,
+                campaignId: campaign.id,
+                amount: paidRupees,
+                donorName: donorName || 'Anonymous',
+                donorEmail: donorEmail || '',
+                razorpayOrderId: razorpay_order_id,
+                razorpayPaymentId: razorpay_payment_id,
+                status: 'held',
+                createdAt: new Date().toISOString()
+            };
+            donationsFile.push(donation);
+            writeJson('donations.json', donationsFile);
+            
+            // Increment file campaign stats
+            const campaignsFile = readJson('campaigns.json', []);
+            const match = campaignsFile.find(c => String(c.id) === String(campaign.id));
+            if (match) {
+                match.raised += paidRupees;
+                match.backers += 1;
+                writeJson('campaigns.json', campaignsFile);
             }
         }
 
         res.json({ 
             success: true, 
-            message: 'Payment verified and donation recorded',
+            message: 'Payment verified and donation recorded in escrow hold',
             donation, 
             campaign 
         });
@@ -642,44 +1007,56 @@ app.post('/api/campaigns/:id/donations', (req, res) => {
     });
 });
 
-// Auth
+// Auth: User Registration
 app.post('/api/auth/register', security.authLimiter, security.validateRegister, security.handleValidationErrors, async (req, res) => {
     const { firstName, lastName, email, phone, password } = req.body || {};
     if (!email || !password) return res.status(400).json({ message: 'Email and password required' });
     
     try {
+        const origin = req.headers.origin || `${req.protocol}://${req.get('host')}`;
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
         if (useMongoDb) {
-            // Check if email already exists in MongoDB
-            try {
-                const existingUser = await mongoDb.getUserByEmail(email);
-                if (existingUser) {
-                    return res.status(409).json({ message: 'Email already registered' });
-                }
-            } catch (error) {
-                console.log('Error checking existing user:', error);
-                // Continue with registration even if check fails
+            const existingUser = await mongoDb.getUserByEmail(email);
+            if (existingUser) {
+                return res.status(409).json({ message: 'Email already registered' });
             }
             
-            // Create new user in MongoDB (password hashed via pre-save)
-            try {
-                const user = await mongoDb.createUser({
-                    username: email.split('@')[0], // Generate username from email
-                    firstName: firstName || '',
-                    lastName: lastName || '',
-                    email,
-                    phone: phone || '',
-                    password,
-                    fullName: `${firstName || ''} ${lastName || ''}`.trim(),
-                    createdAt: new Date()
-                });
-                
-                const token = signToken({ id: user._id.toString(), email: user.email });
-                res.status(201).json({ id: user._id, email: user.email, token });
-                return;
-            } catch (error) {
-                console.error('Error creating user:', error);
-                return res.status(500).json({ message: 'Registration failed. Please try again.' });
-            }
+            const user = await mongoDb.createUser({
+                username: email.split('@')[0],
+                firstName: firstName || '',
+                lastName: lastName || '',
+                email,
+                phone: phone || '',
+                password,
+                fullName: `${firstName || ''} ${lastName || ''}`.trim(),
+                role: 'user',
+                status: 'active',
+                isEmailVerified: false,
+                emailVerificationToken: verificationToken,
+                emailVerificationExpires: verificationExpires,
+                createdAt: new Date()
+            });
+            
+            // Send verification email (non-blocking)
+            emailService.sendVerificationEmail(user.email, verificationToken, origin)
+                .catch(err => console.error('[EMAIL ERROR] Failed to send verification email:', err.message));
+
+            const { token, jti } = tokenService.signAccessToken({ id: user._id.toString(), email: user.email, role: user.role });
+            const refreshInfo = await tokenService.createRefreshToken(user._id.toString(), req);
+            
+            res.cookie('refreshToken', refreshInfo.token, tokenService.refreshCookieOptions(refreshInfo.expiresAt));
+            
+            auditService.userRegister(req, user);
+            
+            return res.status(201).json({ 
+                id: user._id, 
+                email: user.email, 
+                token, 
+                isEmailVerified: user.isEmailVerified,
+                message: 'Registration successful. Verification email has been sent.'
+            });
         } else {
             // Fallback to file system
             const users = readJson('users.json', []);
@@ -692,12 +1069,14 @@ app.post('/api/auth/register', security.authLimiter, security.validateRegister, 
                 email,
                 phone: phone || '',
                 password: hashed,
+                isEmailVerified: true, // Auto-verify on local file storage
                 createdAt: new Date().toISOString()
             };
             users.push(user);
             writeJson('users.json', users);
-            const token = signToken({ id: user.id, email: user.email });
-            res.status(201).json({ id: user.id, email: user.email, token });
+            
+            const { token } = tokenService.signAccessToken({ id: user.id, email: user.email, role: 'user' });
+            return res.status(201).json({ id: user.id, email: user.email, token });
         }
     } catch (error) {
         console.error('Registration error:', error);
@@ -705,7 +1084,125 @@ app.post('/api/auth/register', security.authLimiter, security.validateRegister, 
     }
 });
 
-// Login
+// Auth: Email Verification Triggered via Link
+app.post('/api/auth/verify-email', async (req, res) => {
+    const { token } = req.body || {};
+    if (!token) return res.status(400).json({ message: 'Verification token is required' });
+
+    try {
+        if (useMongoDb) {
+            const user = await User.findOne({
+                emailVerificationToken: token,
+                emailVerificationExpires: { $gt: new Date() }
+            });
+
+            if (!user) {
+                return res.status(400).json({ message: 'Verification token is invalid or has expired' });
+            }
+
+            user.isEmailVerified = true;
+            user.emailVerificationToken = undefined;
+            user.emailVerificationExpires = undefined;
+            await user.save();
+
+            // Log event
+            auditService.raw({
+                event: 'user.email_verify',
+                actor: { userId: user._id.toString(), username: user.email, role: 'user' },
+                resource: { type: 'user', id: user._id.toString() },
+                outcome: 'success'
+            });
+
+            return res.json({ success: true, message: 'Account successfully verified!' });
+        }
+        return res.status(400).json({ message: 'MongoDB not enabled for email verification' });
+    } catch (error) {
+        console.error('Email verification error:', error);
+        res.status(500).json({ message: 'Internal server error during verification' });
+    }
+});
+
+// Auth: Forgot Password (Request Link)
+app.post('/api/auth/forgot-password', security.authLimiter, async (req, res) => {
+    const { email } = req.body || {};
+    if (!email) return res.status(400).json({ message: 'Email is required' });
+
+    try {
+        if (useMongoDb) {
+            const user = await User.findOne({ email });
+            if (!user) {
+                // To prevent email enumeration, return 200 OK anyway
+                return res.json({ message: 'If that email exists in our system, a password reset link has been sent.' });
+            }
+
+            const resetToken = crypto.randomBytes(32).toString('hex');
+            user.passwordResetToken = resetToken;
+            user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+            await user.save();
+
+            const origin = req.headers.origin || `${req.protocol}://${req.get('host')}`;
+            emailService.sendPasswordResetEmail(user.email, resetToken, origin)
+                .catch(err => console.error('[EMAIL ERROR] Failed to send password reset email:', err.message));
+
+            auditService.passwordResetRequest(req, email);
+
+            return res.json({ message: 'If that email exists in our system, a password reset link has been sent.' });
+        }
+        return res.status(400).json({ message: 'MongoDB not enabled for password reset' });
+    } catch (error) {
+        console.error('Forgot password error:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Auth: Reset Password (Apply)
+app.post('/api/auth/reset-password', security.authLimiter, async (req, res) => {
+    const { token, password } = req.body || {};
+    if (!token || !password) return res.status(400).json({ message: 'Token and new password are required' });
+
+    try {
+        if (useMongoDb) {
+            const user = await User.findOne({
+                passwordResetToken: token,
+                passwordResetExpires: { $gt: new Date() }
+            });
+
+            if (!user) {
+                return res.status(400).json({ message: 'Password reset token is invalid or has expired' });
+            }
+
+            // Password length/pattern check manually (same as validator)
+            if (password.length < 8 || password.length > 128 || !/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
+                return res.status(400).json({ 
+                    message: 'Password must be 8-128 characters and contain at least one uppercase letter, one lowercase letter, and one number' 
+                });
+            }
+
+            // Setting new password triggers the User pre-save hook to hash
+            user.password = password;
+            user.passwordResetToken = undefined;
+            user.passwordResetExpires = undefined;
+            // Clear lockout just in case
+            user.loginAttempts = 0;
+            user.lockUntil = undefined;
+            user.status = 'active';
+            await user.save();
+
+            // Revoke all existing sessions/refresh tokens for this user
+            await tokenService.revokeAllUserTokens(user._id.toString(), 'password_change');
+
+            auditService.passwordReset(req, user._id.toString());
+
+            return res.json({ success: true, message: 'Password reset successful. Please log in with your new password.' });
+        }
+        return res.status(400).json({ message: 'MongoDB not enabled for password reset' });
+    } catch (error) {
+        console.error('Reset password error:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Auth: User Login
 app.post('/api/auth/login', security.authLimiter, security.validateLogin, security.handleValidationErrors, async (req, res) => {
     const { email, password } = req.body || {};
     if (!email || !password) return res.status(400).json({ message: 'Email and password required' });
@@ -713,17 +1210,71 @@ app.post('/api/auth/login', security.authLimiter, security.validateLogin, securi
     try {
         if (useMongoDb) {
             const user = await mongoDb.getUserByEmail(email);
-            if (!user) return res.status(401).json({ message: 'Invalid credentials' });
-            // If comparePassword exists use it; else fallback
+            if (!user) {
+                auditService.userLoginFailed(req, email);
+                return res.status(401).json({ message: 'Invalid credentials' });
+            }
+
+            // Check if account is locked
+            if (user.status === 'locked' && user.lockUntil && user.lockUntil > new Date()) {
+                return res.status(403).json({ 
+                    message: `Account temporarily locked due to too many failed attempts. Try again after ${user.lockUntil.toLocaleTimeString()}`
+                });
+            }
+
             let ok = false;
             if (typeof user.comparePassword === 'function') {
                 ok = await user.comparePassword(password);
             } else {
                 ok = password === user.password;
             }
-            if (!ok) return res.status(401).json({ message: 'Invalid credentials' });
-            const token = signToken({ id: user._id.toString(), email: user.email });
-            return res.json({ id: user._id, email: user.email, token });
+
+            if (!ok) {
+                // Increment login attempts
+                user.loginAttempts += 1;
+                if (user.loginAttempts >= 5) {
+                    user.status = 'locked';
+                    user.lockUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 mins lock
+                    await user.save();
+                    
+                    auditService.raw({
+                        event: 'user.account_locked',
+                        actor: { userId: user._id.toString(), username: user.email, role: 'user' },
+                        resource: { type: 'user', id: user._id.toString() },
+                        outcome: 'blocked',
+                        severity: 'critical',
+                        metadata: { message: 'Brute force lockout triggered' }
+                    });
+
+                    return res.status(403).json({ 
+                        message: 'Account locked due to 5 failed attempts. Please wait 15 minutes.' 
+                    });
+                }
+                await user.save();
+                auditService.userLoginFailed(req, email);
+                return res.status(401).json({ message: 'Invalid credentials' });
+            }
+
+            // Reset login attempts on success
+            user.loginAttempts = 0;
+            user.lockUntil = undefined;
+            if (user.status === 'locked') user.status = 'active';
+            await user.save();
+
+            const { token, jti } = tokenService.signAccessToken({ id: user._id.toString(), email: user.email, role: user.role });
+            const refreshInfo = await tokenService.createRefreshToken(user._id.toString(), req);
+
+            res.cookie('refreshToken', refreshInfo.token, tokenService.refreshCookieOptions(refreshInfo.expiresAt));
+
+            auditService.userLogin(req, user);
+
+            return res.json({ 
+                id: user._id, 
+                email: user.email, 
+                token,
+                isEmailVerified: user.isEmailVerified,
+                fullName: user.fullName || ''
+            });
         }
 
         // File-based fallback
@@ -737,7 +1288,8 @@ app.post('/api/auth/login', security.authLimiter, security.validateLogin, securi
             ok = password === user.password;
         }
         if (!ok) return res.status(401).json({ message: 'Invalid credentials' });
-        const token = signToken({ id: user.id, email: user.email });
+        
+        const { token } = tokenService.signAccessToken({ id: user.id, email: user.email, role: 'user' });
         return res.json({ id: user.id, email: user.email, token });
     } catch (error) {
         console.error('Login error:', error);
@@ -745,24 +1297,97 @@ app.post('/api/auth/login', security.authLimiter, security.validateLogin, securi
     }
 });
 
-// Admin login — now issues a signed JWT, uses bcrypt for password comparison
+// Auth: Token Refresh Rotation
+app.post('/api/auth/refresh', async (req, res) => {
+    const rawRefreshToken = req.cookies?.refreshToken;
+    if (!rawRefreshToken) return res.status(401).json({ message: 'Refresh token is missing' });
+
+    try {
+        const record = await tokenService.consumeRefreshToken(rawRefreshToken);
+        
+        // Find user to verify they are still active
+        const user = await User.findById(record.userId);
+        if (!user || user.status === 'suspended') {
+            return res.status(403).json({ message: 'User is suspended or deleted' });
+        }
+
+        const { token, jti } = tokenService.signAccessToken({ id: user._id.toString(), email: user.email, role: user.role });
+        const refreshInfo = await tokenService.createRefreshToken(user._id.toString(), req, record.family);
+
+        res.cookie('refreshToken', refreshInfo.token, tokenService.refreshCookieOptions(refreshInfo.expiresAt));
+        
+        auditService.tokenRefresh(req, user._id.toString());
+
+        res.json({ token });
+    } catch (error) {
+        console.warn('[REFRESH ERROR]', error.message);
+        if (error.message.includes('reuse detected')) {
+            auditService.tokenReuse(req, null);
+        }
+        tokenService.clearRefreshCookie(res);
+        res.status(401).json({ message: 'Session expired. Please log in again.' });
+    }
+});
+
+// Auth: Logout
+app.post('/api/auth/logout', async (req, res) => {
+    const rawRefreshToken = req.cookies?.refreshToken;
+    
+    // Attempt best-effort access token blacklist
+    try {
+        const auth = req.headers['authorization'] || '';
+        const parts = auth.split(' ');
+        if (parts.length === 2 && parts[0] === 'Bearer') {
+            const decoded = jwt.decode(parts[1]);
+            if (decoded && decoded.jti) {
+                await tokenService.blacklistAccessToken(decoded.jti, decoded.id, decoded.exp, 'logout');
+            }
+        }
+    } catch (_) {}
+
+    try {
+        if (rawRefreshToken) {
+            // Revoke the refresh token family (logout this device/session)
+            const record = await RefreshToken.findOne({ token: rawRefreshToken });
+            if (record) {
+                await tokenService.revokeFamilyTokens(record.family, 'logout');
+                auditService.userLogout(req, { id: record.userId });
+            }
+        }
+    } catch (e) {
+        console.error('Logout revocation error:', e.message);
+    }
+
+    tokenService.clearRefreshCookie(res);
+    res.json({ success: true, message: 'Logged out successfully' });
+});
+
+// Admin login — now issues a signed JWT, uses bcrypt for password comparison, and logs attempts
 app.post('/api/admin/login', security.authLimiter, security.validateAdminLogin, security.handleValidationErrors, async (req, res) => {
     const admins = readJson('admins.json', []);
     const { username, password, code } = req.body || {};
     const admin = admins.find(a => a.username === username && a.code === code);
-    if (!admin) return res.status(401).json({ message: 'Invalid credentials' });
+    
+    if (!admin) {
+        auditService.adminLoginFailed(req, username);
+        return res.status(401).json({ message: 'Invalid credentials' });
+    }
 
-    // Compare password (bcrypt if hash present, fallback for legacy plain-text)
     let passwordOk = false;
     if (admin.password && admin.password.startsWith('$2')) {
         passwordOk = await bcrypt.compare(password, admin.password);
     } else {
-        // Legacy plain-text (only during first boot before migration)
         passwordOk = (admin.password === password);
     }
-    if (!passwordOk) return res.status(401).json({ message: 'Invalid credentials' });
+    
+    if (!passwordOk) {
+        auditService.adminLoginFailed(req, username);
+        return res.status(401).json({ message: 'Invalid credentials' });
+    }
 
-    const token = security.signAdminToken({ username: admin.username, role: 'admin' });
+    const { token } = tokenService.signAdminToken({ username: admin.username, role: 'admin' });
+    auditService.adminLogin(req, admin);
+    
     res.json({ token });
 });
 
@@ -800,6 +1425,20 @@ app.post('/api/campaigns', requireAuth, async (req, res) => {
                 }
             }
 
+            const city = getFirst(fields.city) || '';
+            const state = getFirst(fields.state) || '';
+            const country = getFirst(fields.country) || '';
+            const latitude = parseFloat(getFirst(fields.latitude));
+            const longitude = parseFloat(getFirst(fields.longitude));
+
+            let locationGeo = undefined;
+            if (!isNaN(latitude) && !isNaN(longitude)) {
+                locationGeo = {
+                    type: 'Point',
+                    coordinates: [longitude, latitude]
+                };
+            }
+
             const campaignData = {
                 title,
                 description,
@@ -812,7 +1451,10 @@ app.post('/api/campaigns', requireAuth, async (req, res) => {
                 status: 'pending',
                 createdAt: new Date(),
                 location,
-                category,
+                city,
+                state,
+                country,
+                locationGeo,
                 creatorId: userId,
                 creatorName: organizerName
             };
@@ -841,7 +1483,11 @@ app.post('/api/campaigns', requireAuth, async (req, res) => {
                     status: campaign.status || 'pending',
                     createdAt: new Date().toISOString(),
                     location: campaign.location || '',
-                    category: campaign.category || 'General',
+                    city,
+                    state,
+                    country,
+                    latitude: !isNaN(latitude) ? latitude : undefined,
+                    longitude: !isNaN(longitude) ? longitude : undefined,
                     creatorName: campaign.creatorName || '',
                     creatorId: campaign.creatorId || ''
                 };
@@ -1241,6 +1887,468 @@ app.post('/api/contact', security.generalLimiter, security.validateContactForm, 
     res.status(201).json({ success: true });
 });
 
+// ─── Campaign Verification Workflow & Escrow Admin APIs ───────────────────
+
+// Public: Request campaign verification
+app.post('/api/campaigns/:id/verify-request', requireAuth, async (req, res) => {
+    const campaignId = req.params.id;
+    try {
+        if (useMongoDb) {
+            const campaign = await Campaign.findById(campaignId);
+            if (!campaign) return res.status(404).json({ message: 'Campaign not found' });
+            
+            // Ensure requester is owner
+            if (campaign.creatorId.toString() !== req.user.id) {
+                return res.status(403).json({ message: 'You are not authorized to verify this campaign' });
+            }
+            
+            campaign.verificationStatus = 'pending';
+            campaign.verificationRequestedAt = new Date();
+            await campaign.save();
+            
+            // Mirror to file store
+            const campaignsFile = readJson('campaigns.json', []);
+            const match = campaignsFile.find(c => String(c.id) === String(campaignId));
+            if (match) {
+                match.verificationStatus = 'pending';
+                match.verificationRequestedAt = new Date().toISOString();
+                writeJson('campaigns.json', campaignsFile);
+            }
+            
+            // Log audit
+            auditService.raw({
+                event: 'campaign.verification_requested',
+                actor: { ...auditService.actorFromReq(req) },
+                resource: { type: 'campaign', id: campaignId },
+                severity: 'info',
+                outcome: 'success'
+            });
+            
+            // Notify admins
+            const io = req.app.get('io');
+            if (io) {
+                io.emit('admin_notification', {
+                    type: 'verification_requested',
+                    message: `Verification requested for campaign "${campaign.title}"`,
+                    campaignId
+                });
+            }
+            
+            return res.json({ success: true, message: 'Verification request submitted.', campaign });
+        }
+        
+        // File fallback
+        const campaignsFile = readJson('campaigns.json', []);
+        const campaign = campaignsFile.find(c => String(c.id) === String(campaignId));
+        if (!campaign) return res.status(404).json({ message: 'Campaign not found' });
+        
+        campaign.verificationStatus = 'pending';
+        campaign.verificationRequestedAt = new Date().toISOString();
+        writeJson('campaigns.json', campaignsFile);
+        
+        res.json({ success: true, message: 'Verification request submitted.', campaign });
+    } catch (error) {
+        console.error('Request verification error:', error);
+        res.status(500).json({ message: 'Failed to request verification' });
+    }
+});
+
+// Admin: Get all pending campaign verification requests
+app.get('/api/admin/campaigns/verification-pending', security.requireAdminAuth, async (req, res) => {
+    try {
+        if (useMongoDb) {
+            const list = await Campaign.find({ verificationStatus: 'pending' }).populate('creatorId', 'username email');
+            const results = list.map(item => {
+                const obj = item.toObject();
+                obj.id = obj._id.toString();
+                return obj;
+            });
+            return res.json(results);
+        }
+        
+        const campaigns = readJson('campaigns.json', []);
+        const filtered = campaigns.filter(c => c.verificationStatus === 'pending');
+        res.json(filtered);
+    } catch (error) {
+        console.error('Fetch pending verifications error:', error);
+        res.status(500).json({ message: 'Failed to fetch verification requests' });
+    }
+});
+
+// Admin: Approve campaign verification
+app.post('/api/admin/campaigns/:id/verify-approve', security.requireAdminAuth, async (req, res) => {
+    const campaignId = req.params.id;
+    const { notes } = req.body || {};
+    
+    try {
+        if (useMongoDb) {
+            const campaign = await Campaign.findById(campaignId);
+            if (!campaign) return res.status(404).json({ message: 'Campaign not found' });
+            
+            campaign.isVerified = true;
+            campaign.verificationStatus = 'approved';
+            campaign.verifiedAt = new Date();
+            campaign.verificationNotes = notes || 'Compliance verified.';
+            await campaign.save();
+            
+            // Mirror
+            const campaignsFile = readJson('campaigns.json', []);
+            const match = campaignsFile.find(c => String(c.id) === String(campaignId));
+            if (match) {
+                match.isVerified = true;
+                match.verificationStatus = 'approved';
+                match.verifiedAt = new Date().toISOString();
+                match.verificationNotes = campaign.verificationNotes;
+                writeJson('campaigns.json', campaignsFile);
+            }
+            
+            // Audit Log
+            auditService.raw({
+                event: 'campaign.verified',
+                actor: { ...auditService.actorFromReq(req), role: 'admin' },
+                resource: { type: 'campaign', id: campaignId },
+                metadata: { notes },
+                severity: 'info',
+                outcome: 'success'
+            });
+            
+            // Notify campaign owner via socket
+            const io = req.app.get('io');
+            if (io) {
+                io.to(campaign.creatorId.toString()).emit('notification', {
+                    type: 'verification_approved',
+                    message: `Congratulations! Your campaign "${campaign.title}" has been verified.`,
+                    campaignId
+                });
+            }
+            
+            return res.json({ success: true, message: 'Campaign successfully verified', campaign });
+        }
+        
+        // File fallback
+        const campaignsFile = readJson('campaigns.json', []);
+        const campaign = campaignsFile.find(c => String(c.id) === String(campaignId));
+        if (!campaign) return res.status(404).json({ message: 'Campaign not found' });
+        
+        campaign.isVerified = true;
+        campaign.verificationStatus = 'approved';
+        campaign.verifiedAt = new Date().toISOString();
+        campaign.verificationNotes = notes || 'Compliance verified.';
+        writeJson('campaigns.json', campaignsFile);
+        
+        res.json({ success: true, message: 'Campaign successfully verified', campaign });
+    } catch (error) {
+        console.error('Approve verification error:', error);
+        res.status(500).json({ message: 'Failed to verify campaign' });
+    }
+});
+
+// Admin: Reject campaign verification
+app.post('/api/admin/campaigns/:id/verify-reject', security.requireAdminAuth, async (req, res) => {
+    const campaignId = req.params.id;
+    const { notes } = req.body || {};
+    
+    if (!notes || !notes.trim()) {
+        return res.status(400).json({ message: 'Rejection notes are required' });
+    }
+    
+    try {
+        if (useMongoDb) {
+            const campaign = await Campaign.findById(campaignId);
+            if (!campaign) return res.status(404).json({ message: 'Campaign not found' });
+            
+            campaign.isVerified = false;
+            campaign.verificationStatus = 'rejected';
+            campaign.verificationNotes = notes;
+            await campaign.save();
+            
+            // Mirror
+            const campaignsFile = readJson('campaigns.json', []);
+            const match = campaignsFile.find(c => String(c.id) === String(campaignId));
+            if (match) {
+                match.isVerified = false;
+                match.verificationStatus = 'rejected';
+                match.verificationNotes = notes;
+                writeJson('campaigns.json', campaignsFile);
+            }
+            
+            // Audit Log
+            auditService.raw({
+                event: 'campaign.verification_rejected',
+                actor: { ...auditService.actorFromReq(req), role: 'admin' },
+                resource: { type: 'campaign', id: campaignId },
+                metadata: { notes },
+                severity: 'warning',
+                outcome: 'success'
+            });
+            
+            // Notify campaign owner via socket
+            const io = req.app.get('io');
+            if (io) {
+                io.to(campaign.creatorId.toString()).emit('notification', {
+                    type: 'verification_rejected',
+                    message: `Verification for your campaign "${campaign.title}" was declined. Reason: ${notes}`,
+                    campaignId
+                });
+            }
+            
+            return res.json({ success: true, message: 'Campaign verification declined', campaign });
+        }
+        
+        // File fallback
+        const campaignsFile = readJson('campaigns.json', []);
+        const campaign = campaignsFile.find(c => String(c.id) === String(campaignId));
+        if (!campaign) return res.status(404).json({ message: 'Campaign not found' });
+        
+        campaign.isVerified = false;
+        campaign.verificationStatus = 'rejected';
+        campaign.verificationNotes = notes;
+        writeJson('campaigns.json', campaignsFile);
+        
+        res.json({ success: true, message: 'Campaign verification declined', campaign });
+    } catch (error) {
+        console.error('Reject verification error:', error);
+        res.status(500).json({ message: 'Failed to reject verification request' });
+    }
+});
+
+// Admin: List all donations
+app.get('/api/admin/donations', security.requireAdminAuth, async (req, res) => {
+    try {
+        const { status, campaignId } = req.query;
+        if (useMongoDb) {
+            const query = {};
+            if (status) query.status = status;
+            if (campaignId) query.campaignId = campaignId;
+            const list = await Donation.find(query).populate('campaignId', 'title goal raised').sort({ createdAt: -1 });
+            return res.json(list);
+        }
+        
+        const list = readJson('donations.json', []);
+        let filtered = list;
+        if (status) filtered = filtered.filter(d => d.status === status);
+        if (campaignId) filtered = filtered.filter(d => String(d.campaignId) === String(campaignId));
+        return res.json(filtered.reverse());
+    } catch (error) {
+        console.error('Fetch donations error:', error);
+        res.status(500).json({ message: 'Failed to retrieve donations' });
+    }
+});
+
+// Admin: Get campaign escrow status
+app.get('/api/admin/campaigns/:id/escrow', security.requireAdminAuth, async (req, res) => {
+    const campaignId = req.params.id;
+    try {
+        if (useMongoDb) {
+            const campaign = await Campaign.findById(campaignId);
+            if (!campaign) return res.status(404).json({ message: 'Campaign not found' });
+            
+            const donations = await Donation.find({ campaignId });
+            const totalHeld = donations.filter(d => d.status === 'held').reduce((sum, d) => sum + d.amount, 0);
+            const totalReleased = donations.filter(d => d.status === 'released').reduce((sum, d) => sum + d.amount, 0);
+            const totalRefunded = donations.filter(d => d.status === 'refunded').reduce((sum, d) => sum + d.amount, 0);
+            
+            return res.json({
+                campaignId,
+                title: campaign.title,
+                goal: campaign.goal,
+                totalRaised: campaign.raised,
+                totalHeld,
+                totalReleased,
+                totalRefunded,
+                goalAchieved: campaign.raised >= campaign.goal
+            });
+        }
+        
+        // File fallback
+        const campaignsFile = readJson('campaigns.json', []);
+        const campaign = campaignsFile.find(c => String(c.id) === String(campaignId));
+        if (!campaign) return res.status(404).json({ message: 'Campaign not found' });
+        
+        const donationsFile = readJson('donations.json', []);
+        const list = donationsFile.filter(d => String(d.campaignId) === String(campaignId));
+        const totalHeld = list.filter(d => d.status === 'held').reduce((sum, d) => sum + d.amount, 0);
+        const totalReleased = list.filter(d => d.status === 'released').reduce((sum, d) => sum + d.amount, 0);
+        const totalRefunded = list.filter(d => d.status === 'refunded').reduce((sum, d) => sum + d.amount, 0);
+        
+        return res.json({
+            campaignId,
+            title: campaign.title,
+            goal: campaign.goal,
+            totalRaised: campaign.raised,
+            totalHeld,
+            totalReleased,
+            totalRefunded,
+            goalAchieved: campaign.raised >= campaign.goal
+        });
+    } catch (error) {
+        console.error('Fetch escrow error:', error);
+        res.status(500).json({ message: 'Failed to fetch escrow details' });
+    }
+});
+
+// Admin: Release a held donation
+app.post('/api/admin/donations/:id/release', security.requireAdminAuth, async (req, res) => {
+    try {
+        const donationId = req.params.id;
+        let donation;
+        let campaignId;
+        
+        if (useMongoDb) {
+            donation = await Donation.findById(donationId).populate('campaignId');
+            if (!donation) return res.status(404).json({ message: 'Donation not found' });
+            if (donation.status !== 'held') {
+                return res.status(400).json({ message: `Donation cannot be released (current status: ${donation.status})` });
+            }
+            
+            // Check if goal achieved (Required unless overridden)
+            const campaign = donation.campaignId;
+            if (campaign.raised < campaign.goal && !req.body.force) {
+                return res.status(400).json({ 
+                    message: `Campaign goal has not been reached yet (Goal: ₹${campaign.goal}, Raised: ₹${campaign.raised}). Release blocked.` 
+                });
+            }
+            
+            donation.status = 'released';
+            donation.releaseApprovedBy = req.user?.username || 'admin';
+            donation.releaseApprovedAt = new Date();
+            donation.statusTimeline.push({
+                status: 'released',
+                updatedBy: req.user?.username || 'admin',
+                note: req.body.note || 'Manually approved for release by Admin.'
+            });
+            await donation.save();
+            campaignId = campaign._id.toString();
+            
+            // Audit Log
+            auditService.raw({
+                event: 'payment.release',
+                actor: { ...auditService.actorFromReq(req), role: 'admin' },
+                resource: { type: 'donation', id: donation._id.toString() },
+                metadata: { campaignId, amount: donation.amount },
+                severity: 'info',
+                outcome: 'success'
+            });
+            
+            // Notify via socket
+            const io = req.app.get('io');
+            if (io) {
+                io.to(campaign.creatorId.toString()).emit('notification', {
+                    type: 'funds_released',
+                    message: `Funds of ₹${donation.amount} from donor ${donation.donorName} have been released to your account.`,
+                    campaignId: campaignId
+                });
+            }
+        } else {
+            // File fallback
+            const donationsFile = readJson('donations.json', []);
+            donation = donationsFile.find(d => String(d.id) === String(donationId));
+            if (!donation) return res.status(404).json({ message: 'Donation not found' });
+            if (donation.status !== 'held') {
+                return res.status(400).json({ message: `Donation cannot be released (status: ${donation.status})` });
+            }
+            
+            const campaignsFile = readJson('campaigns.json', []);
+            const campaign = campaignsFile.find(c => String(c.id) === String(donation.campaignId));
+            if (campaign && campaign.raised < campaign.goal && !req.body.force) {
+                return res.status(400).json({ message: 'Campaign goal not reached yet. Release blocked.' });
+            }
+            
+            donation.status = 'released';
+            donation.releasedAt = new Date().toISOString();
+            writeJson('donations.json', donationsFile);
+            campaignId = donation.campaignId;
+        }
+        
+        res.json({ success: true, message: 'Donation released successfully', donation });
+    } catch (error) {
+        console.error('Release donation error:', error);
+        res.status(500).json({ message: 'Failed to release donation' });
+    }
+});
+
+// Admin: Refund a donation
+app.post('/api/admin/donations/:id/refund', security.requireAdminAuth, async (req, res) => {
+    try {
+        const donationId = req.params.id;
+        let donation;
+        let campaignId;
+        let amount;
+        
+        if (useMongoDb) {
+            donation = await Donation.findById(donationId);
+            if (!donation) return res.status(404).json({ message: 'Donation not found' });
+            if (['pending', 'refunded'].includes(donation.status)) {
+                return res.status(400).json({ message: `Donation cannot be refunded (current status: ${donation.status})` });
+            }
+            
+            donation.status = 'refunded';
+            donation.statusTimeline.push({
+                status: 'refunded',
+                updatedBy: req.user?.username || 'admin',
+                note: req.body.note || 'Refund processed by administrator.'
+            });
+            await donation.save();
+            campaignId = donation.campaignId.toString();
+            amount = donation.amount;
+            
+            // Deduct from campaign totals
+            const campaign = await Campaign.findById(campaignId);
+            if (campaign) {
+                campaign.raised = Math.max(0, campaign.raised - amount);
+                campaign.backers = Math.max(0, campaign.backers - 1);
+                await campaign.save();
+                
+                // Sync file store
+                const campaignsFile = readJson('campaigns.json', []);
+                const match = campaignsFile.find(c => String(c.id) === String(campaignId));
+                if (match) {
+                    match.raised = campaign.raised;
+                    match.backers = campaign.backers;
+                    writeJson('campaigns.json', campaignsFile);
+                }
+            }
+            
+            // Audit Log
+            auditService.raw({
+                event: 'payment.refund',
+                actor: { ...auditService.actorFromReq(req), role: 'admin' },
+                resource: { type: 'donation', id: donation._id.toString() },
+                metadata: { campaignId, amount },
+                severity: 'warning',
+                outcome: 'success'
+            });
+        } else {
+            // File fallback
+            const donationsFile = readJson('donations.json', []);
+            donation = donationsFile.find(d => String(d.id) === String(donationId));
+            if (!donation) return res.status(404).json({ message: 'Donation not found' });
+            if (['pending', 'refunded'].includes(donation.status)) {
+                return res.status(400).json({ message: `Donation cannot be refunded (status: ${donation.status})` });
+            }
+            
+            donation.status = 'refunded';
+            writeJson('donations.json', donationsFile);
+            campaignId = donation.campaignId;
+            amount = donation.amount;
+            
+            // Deduct campaign totals in files
+            const campaignsFile = readJson('campaigns.json', []);
+            const campaign = campaignsFile.find(c => String(c.id) === String(campaignId));
+            if (campaign) {
+                campaign.raised = Math.max(0, campaign.raised - amount);
+                campaign.backers = Math.max(0, campaign.backers - 1);
+                writeJson('campaigns.json', campaignsFile);
+            }
+        }
+        
+        res.json({ success: true, message: 'Donation refunded successfully', donation });
+    } catch (error) {
+        console.error('Refund donation error:', error);
+        res.status(500).json({ message: 'Failed to process refund' });
+    }
+});
+
 // Serve static files from uploads directory
 app.use('/uploads', express.static(UPLOADS_DIR));
 
@@ -1271,9 +2379,37 @@ app.use((err, req, res, next) => {
     res.status(500).json({ message: 'An internal server error occurred.' });
 });
 
-// Start server
-app.listen(PORT, () => {
+// Create HTTP server for Socket.IO
+const server = http.createServer(app);
+const io = socketIo(server, {
+    cors: {
+        origin: '*', // Allow connections from any origin
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        credentials: true
+    }
+});
+
+// Attach io instance to the app
+app.set('io', io);
+
+// Socket.IO event handler
+io.on('connection', (socket) => {
+    console.log(`[SOCKET.IO] Client connected: ${socket.id}`);
+    
+    socket.on('join', (room) => {
+        socket.join(room);
+        console.log(`[SOCKET.IO] Client ${socket.id} joined room: ${room}`);
+    });
+    
+    socket.on('disconnect', () => {
+        console.log(`[SOCKET.IO] Client disconnected: ${socket.id}`);
+    });
+});
+
+// Start server using the HTTP/Socket.IO server instance
+server.listen(PORT, () => {
     console.log(`API listening on http://localhost:${PORT}`);
+    console.log(`[SOCKET.IO] Server is bound and active.`);
     if (process.env.NODE_ENV === 'production') {
         console.log('[SECURITY] Running in PRODUCTION mode — debug output suppressed.');
     }
