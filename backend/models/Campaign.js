@@ -23,7 +23,24 @@ const CampaignSchema = new mongoose.Schema({
     default: 0
   },
   duration: Number,
-  location: String,
+  location: String, // Full text address or name
+  
+  // Geolocation fields
+  city: String,
+  state: String,
+  country: String,
+  locationGeo: {
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point'
+    },
+    coordinates: {
+      type: [Number], // [longitude, latitude]
+      index: '2dsphere' // Geospatial 2dsphere index
+    }
+  },
+
   creatorId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -37,11 +54,8 @@ const CampaignSchema = new mongoose.Schema({
     enum: ['pending', 'approved', 'rejected'],
     default: 'pending'
   },
-  city: String,
-  state: String,
-  country: String,
-  latitude: Number,
-  longitude: Number,
+  
+  // Campaign Verification Workflow fields
   isVerified: {
     type: Boolean,
     default: false
@@ -51,11 +65,24 @@ const CampaignSchema = new mongoose.Schema({
     enum: ['none', 'pending', 'approved', 'rejected'],
     default: 'none'
   },
-  verificationNotes: String,
+  verificationNotes: {
+    type: String,
+    default: ''
+  },
+  verificationRequestedAt: {
+    type: Date
+  },
+  verifiedAt: {
+    type: Date
+  },
+
   createdAt: {
     type: Date,
     default: Date.now
   }
 });
+
+// Compound indexes for optimal queries and ranking
+CampaignSchema.index({ isVerified: -1, createdAt: -1 });
 
 module.exports = mongoose.model('Campaign', CampaignSchema);
