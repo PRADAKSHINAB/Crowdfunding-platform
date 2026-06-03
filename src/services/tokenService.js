@@ -6,12 +6,13 @@
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
+const mongoose = require('mongoose');
 
 // Lazy-load models to avoid circular dependency issues
 let RefreshToken, BlacklistToken;
 function getModels() {
-  if (!RefreshToken) RefreshToken = require('../models/RefreshToken');
-  if (!BlacklistToken) BlacklistToken = require('../models/BlacklistToken');
+  if (!RefreshToken) RefreshToken = require('../../models/RefreshToken');
+  if (!BlacklistToken) BlacklistToken = require('../../models/BlacklistToken');
 }
 
 // ─── Config ───────────────────────────────────────────────────────────────────
@@ -77,13 +78,15 @@ async function verifyAccessToken(token) {
   if (decoded.type !== 'access') throw new Error('Invalid token type');
 
   // Check blacklist (best-effort — skip if DB unavailable)
-  try {
-    getModels();
-    const blacklisted = await BlacklistToken.exists({ jti: decoded.jti });
-    if (blacklisted) throw new Error('Token has been revoked');
-  } catch (err) {
-    if (err.message === 'Token has been revoked') throw err;
-    // DB unavailable — allow (graceful degradation)
+  if (mongoose.connection.readyState === 1) {
+    try {
+      getModels();
+      const blacklisted = await BlacklistToken.exists({ jti: decoded.jti });
+      if (blacklisted) throw new Error('Token has been revoked');
+    } catch (err) {
+      if (err.message === 'Token has been revoked') throw err;
+      // DB unavailable — allow (graceful degradation)
+    }
   }
   return decoded;
 }
@@ -92,6 +95,7 @@ async function verifyAccessToken(token) {
  * Blacklist an access token by its jti.
  */
 async function blacklistAccessToken(jti, userId, exp, reason = 'logout') {
+  if (mongoose.connection.readyState !== 1) return;
   try {
     getModels();
     const expiresAt = exp ? new Date(exp * 1000) : new Date(Date.now() + parseMs(ACCESS_TOKEN_EXPIRES));
@@ -213,12 +217,14 @@ async function verifyAdminToken(token) {
   if (decoded.role !== 'admin') throw new Error('Not an admin token');
 
   // Check blacklist
-  try {
-    getModels();
-    const blacklisted = await BlacklistToken.exists({ jti: decoded.jti });
-    if (blacklisted) throw new Error('Token has been revoked');
-  } catch (err) {
-    if (err.message === 'Token has been revoked') throw err;
+  if (mongoose.connection.readyState === 1) {
+    try {
+      getModels();
+      const blacklisted = await BlacklistToken.exists({ jti: decoded.jti });
+      if (blacklisted) throw new Error('Token has been revoked');
+    } catch (err) {
+      if (err.message === 'Token has been revoked') throw err;
+    }
   }
   return decoded;
 }

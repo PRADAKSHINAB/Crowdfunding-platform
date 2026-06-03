@@ -8,11 +8,11 @@ const mongoose = require('mongoose');
 // Lazy-load models
 let AuditLog, User, Campaign, Session, RefreshToken;
 function getModels() {
-  if (!AuditLog) AuditLog = require('../models/AuditLog');
-  if (!User) User = require('../models/User');
-  if (!Campaign) Campaign = require('../models/Campaign');
-  if (!Session) Session = require('../models/Session');
-  if (!RefreshToken) RefreshToken = require('../models/RefreshToken');
+  if (!AuditLog) AuditLog = require('../../models/AuditLog');
+  if (!User) User = require('../../models/User');
+  if (!Campaign) Campaign = require('../../models/Campaign');
+  if (!Session) Session = require('../../models/Session');
+  if (!RefreshToken) RefreshToken = require('../../models/RefreshToken');
 }
 
 /** Returns basic platform stats for the admin dashboard overview */

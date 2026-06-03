@@ -6,7 +6,7 @@
 
 let AuditLog;
 function getModel() {
-  if (!AuditLog) AuditLog = require('../models/AuditLog');
+  if (!AuditLog) AuditLog = require('../../models/AuditLog');
   return AuditLog;
 }
 
